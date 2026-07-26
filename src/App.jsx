@@ -23,13 +23,11 @@ const useScrollProgress = (ref, stickyOffset = 80) => {
     const handleScroll = () => {
       if (!ref.current) return
       const rect = ref.current.getBoundingClientRect()
-      const elementTop = rect.top + window.scrollY
-      const totalScrollable = rect.height - window.innerHeight
-      if (totalScrollable <= 0) return
+      const maxScroll = rect.height - window.innerHeight
+      if (maxScroll <= 0) return
 
-      const startScroll = elementTop - stickyOffset
-      const currentScroll = window.scrollY - startScroll
-      const calculated = Math.max(0, Math.min(0.9999, currentScroll / totalScrollable))
+      const scrolled = stickyOffset - rect.top
+      const calculated = Math.max(0, Math.min(0.999, scrolled / maxScroll))
       setProgress(calculated)
     }
 
@@ -269,15 +267,13 @@ const SeeItInActionSection = () => {
   const handleTabClick = (idx) => {
     if (!containerRef.current) return
     const rect = containerRef.current.getBoundingClientRect()
-    const elementTop = rect.top + window.scrollY
-    const totalScrollable = rect.height - window.innerHeight
-    const startScroll = elementTop - 80
-    const targetScroll = startScroll + (totalScrollable * (idx / (tabs.length - 1))) + 10
+    const maxScroll = rect.height - window.innerHeight
+    const targetScroll = window.scrollY + rect.top - 80 + (maxScroll * (idx / (tabs.length - 1))) + 5
     window.scrollTo({ top: targetScroll, behavior: 'smooth' })
   }
 
   return (
-    <section ref={containerRef} className="relative h-[380vh] bg-[#090A0F] text-white border-b border-slate-800 bg-grid-dark">
+    <section ref={containerRef} className="relative h-[280vh] bg-[#090A0F] text-white border-b border-slate-800 bg-grid-dark">
       
       {/* STICKY CONTAINER PINNED BELOW FLOATING NAVBAR */}
       <div className="sticky top-20 min-h-[calc(100vh-5rem)] flex flex-col justify-center py-4 overflow-hidden">
