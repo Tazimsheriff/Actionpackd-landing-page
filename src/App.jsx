@@ -417,11 +417,16 @@ export default function App() {
           <p className="text-xs font-mono uppercase tracking-widest text-slate-400 mb-8 font-semibold">
             Seamlessly Integrated with 200+ Enterprise Tools
           </p>
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-6 items-center justify-items-center">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 items-center justify-items-center">
             {integrations.map((int, i) => (
-              <div key={i} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#14161C] border border-slate-800 shadow-sm hover:border-[#FF003C] transition-all w-full justify-center">
-                <img src={int.logo} alt={int.name} className="w-5 h-5 object-contain" style={{ filter: int.name === 'Notion' ? 'invert(1)' : 'none' }} />
-                <span className="text-xs font-mono font-bold text-slate-200">{int.name}</span>
+              <div key={i} className="flex items-center gap-2.5 px-4 py-3 rounded-xl bg-[#14161C] border border-slate-700/80 shadow-md hover:border-[#FF003C] hover:bg-[#1C1F28] transition-all w-full justify-center group">
+                <img
+                  src={int.logo}
+                  alt={int.name}
+                  className="w-5 h-5 object-contain transition-transform group-hover:scale-110"
+                  style={{ filter: int.name === '+200 More' ? 'none' : 'brightness(0) invert(1)' }}
+                />
+                <span className="text-xs font-mono font-bold text-white tracking-wide">{int.name}</span>
               </div>
             ))}
           </div>
