@@ -17,23 +17,30 @@ const useInView = (options = {}) => {
   return [ref, inView]
 }
 
-const useScrollProgress = (ref) => {
+const useScrollProgress = (ref, stickyOffset = 80) => {
   const [progress, setProgress] = useState(0)
   useEffect(() => {
     const handleScroll = () => {
       if (!ref.current) return
       const rect = ref.current.getBoundingClientRect()
+      const elementTop = rect.top + window.scrollY
       const totalScrollable = rect.height - window.innerHeight
       if (totalScrollable <= 0) return
-      const currentScroll = -rect.top
+
+      const startScroll = elementTop - stickyOffset
+      const currentScroll = window.scrollY - startScroll
       const calculated = Math.max(0, Math.min(1, currentScroll / totalScrollable))
       setProgress(calculated)
     }
 
     window.addEventListener('scroll', handleScroll, { passive: true })
+    window.addEventListener('resize', handleScroll, { passive: true })
     handleScroll()
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [ref])
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+      window.removeEventListener('resize', handleScroll)
+    }
+  }, [ref, stickyOffset])
 
   return progress
 }
@@ -262,9 +269,10 @@ const SeeItInActionSection = () => {
   const handleTabClick = (idx) => {
     if (!containerRef.current) return
     const rect = containerRef.current.getBoundingClientRect()
-    const scrollTop = window.scrollY + rect.top
+    const elementTop = rect.top + window.scrollY
     const totalScrollable = rect.height - window.innerHeight
-    const targetScroll = scrollTop + (totalScrollable * (idx / (tabs.length - 1)))
+    const startScroll = elementTop - 80
+    const targetScroll = startScroll + (totalScrollable * (idx / (tabs.length - 1))) + 10
     window.scrollTo({ top: targetScroll, behavior: 'smooth' })
   }
 
