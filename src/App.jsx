@@ -1,4 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react'
+import { Player } from '@remotion/player'
+import { ActionpackdPromoVideo } from './ActionpackdPromoVideo'
+import { HeroConsoleVideo } from './HeroConsoleVideo'
+
+
 
 // ===================== SCROLL ANIMATION HOOK =====================
 const useInView = (options = {}) => {
@@ -7,14 +12,12 @@ const useInView = (options = {}) => {
   useEffect(() => {
     const observer = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting) setInView(true)
-    }, { threshold: 0.15, ...options })
+    }, { threshold: 0.12, ...options })
     if (ref.current) observer.observe(ref.current)
     return () => observer.disconnect()
   }, [])
   return [ref, inView]
 }
-
-// ===================== ANIMATED COMPONENTS =====================
 
 const AnimatedSection = ({ children, delay = 0, className = '' }) => {
   const [ref, inView] = useInView()
@@ -24,8 +27,8 @@ const AnimatedSection = ({ children, delay = 0, className = '' }) => {
       className={className}
       style={{
         opacity: inView ? 1 : 0,
-        transform: inView ? 'translateY(0)' : 'translateY(40px)',
-        transition: `opacity 0.6s ease ${delay}s, transform 0.6s cubic-bezier(0.16,1,0.3,1) ${delay}s`
+        transform: inView ? 'translateY(0)' : 'translateY(30px)',
+        transition: `opacity 0.6s cubic-bezier(0.16,1,0.3,1) ${delay}s, transform 0.6s cubic-bezier(0.16,1,0.3,1) ${delay}s`
       }}
     >
       {children}
@@ -33,28 +36,26 @@ const AnimatedSection = ({ children, delay = 0, className = '' }) => {
   )
 }
 
-const CounterUp = ({ target, suffix = '', duration = 2000 }) => {
+const CounterUp = ({ target, suffix = '', duration = 1800 }) => {
   const [ref, inView] = useInView()
   const [value, setValue] = useState(0)
   useEffect(() => {
     if (!inView) return
     let start = 0
-    const step = target / (duration / 16)
+    const step = Math.max(1, Math.floor(target / (duration / 16)))
     const timer = setInterval(() => {
       start += step
       if (start >= target) {
         setValue(target)
         clearInterval(timer)
       } else {
-        setValue(Math.floor(start))
+        setValue(start)
       }
     }, 16)
     return () => clearInterval(timer)
   }, [inView, target, duration])
   return <span ref={ref}>{value.toLocaleString()}{suffix}</span>
 }
-
-// ===================== MAIN APP =====================
 
 export default function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -65,61 +66,79 @@ export default function App() {
   const [channel, setChannel] = useState('whatsapp')
   const [heroInput, setHeroInput] = useState('')
   const [heroResponse, setHeroResponse] = useState('"Hi! Your order #4821 is out for delivery. I can schedule a delivery window for tomorrow between 10 AM – 12 PM. Shall I confirm?"')
+  
+  // Interactive Calculator State
+  const [monthlyVolume, setMonthlyVolume] = useState(25000)
+
+  // FAQ Accordion State
+  const [openFaq, setOpenFaq] = useState(0)
 
   const openModal = (title, body) => setModal({ open: true, title, body })
   const closeModal = () => setModal({ open: false, title: '', body: '' })
 
   const botTemplates = {
     'lead-gen': {
-      name: 'Lead Qualification Bot', avatar: '🎯',
-      welcome: "Hi! 👋 I'm your AI lead qualification assistant. What's your name and what are you looking for today?",
+      id: 'lead-gen',
+      name: 'Lead Qualification Bot',
+      avatar: '🎯',
+      welcome: "Hi! 👋 I'm your AI lead qualification assistant. What's your name and what service are you looking for today?",
       responses: {
-        default: "Great! Based on what you've shared, I can qualify this lead and sync it to your CRM instantly. Would you like me to schedule a follow-up call?",
-        budget: "Thanks! What's your approximate budget range? (Under $1k / $1k-$10k / $10k+)",
-        timeline: "Perfect. What's your timeline for getting started? (ASAP / 1-3 months / Just exploring)"
+        default: "Great! I can qualify this inquiry and sync it to your HubSpot/Salesforce CRM instantly. Would you like me to book a demo call with our sales director?",
+        budget: "Understood. What is your approximate monthly budget range? ($1k-$5k / $5k-$20k / $20k+)",
+        timeline: "Perfect. When are you looking to launch your AI agents? (ASAP / This month / Next quarter)"
       }
     },
     'support': {
-      name: 'Customer Support Bot', avatar: '🎧',
-      welcome: "Hello! 👋 I'm here to help. What issue can I assist you with today?",
+      id: 'support',
+      name: 'Customer Support Bot',
+      avatar: '🎧',
+      welcome: "Hello! 👋 Welcome to Support. What issue can I resolve for you right now?",
       responses: {
-        default: "I understand. Let me look into that for you... I found a solution! Would you like me to walk you through the steps?",
-        refund: "I can help with refunds. Could you share your order number? I'll process it immediately.",
-        tracking: "I can track your order! Please share your order number and I'll get the latest status."
+        default: "I've checked our knowledge base and found a solution! I can walk you through step-by-step or issue an instant resolution.",
+        refund: "I can process returns directly via WhatsApp. Could you share your order ID?",
+        tracking: "Order tracking active! Please enter your tracking or order number."
       }
     },
     'booking': {
-      name: 'Appointment Booking Bot', avatar: '📅',
-      welcome: "Hi! 👋 I can help you book an appointment. What date works best for you?",
+      id: 'booking',
+      name: 'Appointment Booking Bot',
+      avatar: '📅',
+      welcome: "Hi! 👋 I can schedule your consultation or appointment. What day works best?",
       responses: {
-        default: "Great! I have these available slots: 10:00 AM, 12:00 PM, 2:00 PM, or 4:00 PM. Which one works for you?",
-        confirm: "Perfect! Your appointment is confirmed. I've sent a calendar invite and a WhatsApp reminder for the day before."
+        default: "I have available slots tomorrow at 10:00 AM, 2:00 PM, and 4:30 PM. Which one would you prefer?",
+        confirm: "Confirmed! Calendar invite sent with a WhatsApp reminder 1 hour prior to the meeting."
       }
     },
     'ecommerce': {
-      name: 'E-Commerce Bot', avatar: '🛒',
-      welcome: "Welcome to our store! 👋 I can help you find products, track orders, or process returns. What do you need?",
+      id: 'ecommerce',
+      name: 'E-Commerce Bot',
+      avatar: '🛒',
+      welcome: "Welcome to our store! 👋 Looking for product recommendations or order assistance?",
       responses: {
-        default: "I found some great options for you! Would you like to see product recommendations based on your preferences?",
-        track: "I can track your order! Just share your order number and I'll give you real-time updates.",
-        cart: "I noticed you left items in your cart. I can apply a 10% discount if you complete your purchase now! 🎉"
+        default: "Here are top-rated items matching your query! I can also offer a 10% instant WhatsApp checkout code.",
+        track: "Your package is in transit! Estimated delivery: Tomorrow by 2:00 PM.",
+        cart: "I see items remaining in your cart. Would you like me to generate a 1-click WhatsApp checkout link?"
       }
     },
     'faq': {
-      name: 'FAQ Bot', avatar: '❓',
-      welcome: "Hi! 👋 Ask me anything about our product, pricing, or policies. I'm here to help!",
+      id: 'faq',
+      name: 'Knowledge Base FAQ Bot',
+      avatar: '❓',
+      welcome: "Hi! 👋 Ask me anything about our API, Meta verification, pricing, or SLAs.",
       responses: {
-        default: "Great question! Based on our knowledge base, here's the answer: Yes, we support WhatsApp Business API with Meta verification. Anything else?",
-        pricing: "Our pricing starts at $0 (Free Sandbox), $99/mo (Pro), and Custom (Enterprise). Would you like to start free?",
-        integrations: "We integrate with 200+ tools including Stripe, HubSpot, Salesforce, Shopify, and Twilio. Want me to set one up?"
+        default: "Actionpackd connects directly to Meta's Cloud API with official WhatsApp green badge support, 0.38s average response latency, and SOC2 compliance.",
+        pricing: "Plans start at $0 for Sandbox, $99/mo for Pro, and custom Enterprise SLAs with dedicated GPU nodes.",
+        integrations: "We support 200+ tools including Stripe, HubSpot, Salesforce, Twilio, Shopify, and Webhooks."
       }
     },
     'feedback': {
-      name: 'Feedback & Survey Bot', avatar: '⭐',
-      welcome: "Hi! 👋 We'd love your feedback. On a scale of 1-10, how likely are you to recommend us?",
+      id: 'feedback',
+      name: 'NPS & Survey Bot',
+      avatar: '⭐',
+      welcome: "Hi! 👋 On a scale of 1-10, how likely are you to recommend Actionpackd to a colleague?",
       responses: {
-        default: "Thank you! What's the main reason for your score? (Product quality / Support / Price / Other)",
-        followup: "Thanks for sharing! Your feedback helps us improve. Would you like to leave a review on our website?"
+        default: "Thank you for the rating! What was the main reason for your score?",
+        followup: "We appreciate your feedback! A representative will reach out shortly."
       }
     }
   }
@@ -146,410 +165,532 @@ export default function App() {
       const lower = userMsg.toLowerCase()
       const r = botModal.template.responses
       let response = r.default
-      if (lower.includes('budget') || lower.includes('price') || lower.includes('cost')) response = r.budget || r.pricing || r.default
-      else if (lower.includes('time') || lower.includes('when') || lower.includes('timeline')) response = r.timeline || r.default
+      if (lower.includes('budget') || lower.includes('cost') || lower.includes('price')) response = r.budget || r.pricing || r.default
+      else if (lower.includes('time') || lower.includes('when') || lower.includes('schedule')) response = r.timeline || r.confirm || r.default
       else if (lower.includes('refund') || lower.includes('return')) response = r.refund || r.default
       else if (lower.includes('track') || lower.includes('order') || lower.includes('where')) response = r.tracking || r.track || r.default
-      else if (lower.includes('cart') || lower.includes('buy') || lower.includes('purchase')) response = r.cart || r.default
-      else if (lower.includes('integrat') || lower.includes('connect') || lower.includes('api')) response = r.integrations || r.default
-      else if (lower.includes('yes') || lower.includes('confirm') || lower.includes('sure')) response = r.confirm || r.followup || r.default
+      else if (lower.includes('cart') || lower.includes('buy') || lower.includes('discount')) response = r.cart || r.default
+      else if (lower.includes('integrat') || lower.includes('api') || lower.includes('connect')) response = r.integrations || r.default
       setBotMessages(prev => [...prev, { type: 'bot', text: response }])
-    }, 600)
+    }, 550)
   }
 
   const channelResponses = {
     whatsapp: '"Hi! Your order #4821 is out for delivery. I can schedule a delivery window for tomorrow between 10 AM – 12 PM. Shall I confirm?"',
-    web: '"Welcome! I\'m your AI assistant. How can I help you today? I can answer questions about products, track orders, or connect you with support."',
-    voice: '"Voice dispatch active. Connecting you to an AI agent. Please say your account number or describe your issue after the beep."',
-    email: '"Email automation running. Your ticket #4821 has been received. An AI agent will respond within 0.38 seconds with a resolution."'
+    web: '"Welcome to Actionpackd! I\'m your AI agent. How can I assist you today? I can answer questions, resolve tickets, or route you to sales."',
+    voice: '"[Voice Agent Connected]: Please state your inquiry or account number. I can transfer you or handle your booking in real time."',
+    email: '"[Email Automation Active]: Re: Ticket #4821 — Resolution details have been auto-generated with 99.4% confidence score."'
   }
 
-  const switchChannel = (ch) => { setChannel(ch); setHeroResponse(channelResponses[ch]) }
+  const switchChannel = (ch) => {
+    setChannel(ch)
+    setHeroResponse(channelResponses[ch])
+  }
+
   const sendHeroMessage = () => {
     if (!heroInput.trim()) return
-    setHeroResponse(`"${heroInput.trim()}" — Got it! I'm processing your request with 99.2% confidence. An AI agent will handle this instantly across all connected channels.`)
+    setHeroResponse(`"${heroInput.trim()}" — Request logged. Executing workflow across ${channel.toUpperCase()} with 0.38s latency.`)
     setHeroInput('')
   }
 
   useEffect(() => {
-    const handleEsc = (e) => { if (e.key === 'Escape') { closeModal(); closeBotModal() } }
+    const handleEsc = (e) => {
+      if (e.key === 'Escape') {
+        closeModal()
+        closeBotModal()
+      }
+    }
     document.addEventListener('keydown', handleEsc)
     return () => document.removeEventListener('keydown', handleEsc)
-  }, [botModal])
-
-  const features = [
-    { img: '/assets/hermes_cockpit_hud.png', title: 'Omni-Channel', desc: 'Every channel, one platform — WhatsApp, web chat, Twilio voice, and email webhooks unified in a single inbox.', tag: 'Connect', tagColor: '#3B82F6', metric: [{ label: 'WhatsApp API', value: 'Active', color: '#25D366' }, { label: 'Web Live Chat', value: 'Active', color: '#3B82F6' }, { label: 'Twilio Voice', value: 'Active', color: '#FF003C' }] },
-    { img: '/assets/hermes_telemetry_matrix.png', title: 'No-Code Bot Builder', desc: 'Drag-and-drop visual flow builder. Connect knowledge bases, PDFs, and APIs with zero code.', tag: 'Build', tagColor: '#FFB703', metric: [{ label: 'Knowledge Base Sync', value: '100%', color: '#FF003C' }, { label: '18,400 Vectors', value: 'Ready', color: '#25D366' }] },
-    { img: '/assets/f1_hud_panel.png', title: 'Broadcast Campaigns', desc: 'Send mass personalized messages, trigger automated follow-ups, and recover abandoned carts.', tag: 'Automate', tagColor: '#3B82F6', metric: [{ label: '⚡ Trigger: Cart Abandoned', value: '', color: '#FF003C' }, { label: '↪ Action: WhatsApp Follow-up', value: '', color: '#3B82F6' }, { label: '✔ 89.4% Recovery Rate', value: '', color: '#25D366' }] },
-    { img: '/assets/hermes_cockpit_hud.png', title: 'Shared Team Inbox', desc: 'Assign conversations, leave internal notes, and let AI handle the rest. One inbox for your whole team.', tag: 'Collaborate', tagColor: '#FFB703', metric: [{ label: 'Active Conversations', value: '1,240', color: '#3B82F6' }, { label: 'AI Handled', value: '94.2%', color: '#25D366' }, { label: 'Avg Response', value: '0.38s', color: '#FF003C' }] },
-    { img: '/assets/hermes_telemetry_matrix.png', title: 'Real-Time Analytics', desc: 'Granular insights on response times, sentiment, conversion rates, and agent performance.', tag: 'Analyze', tagColor: '#3B82F6', metric: [{ label: 'Sentiment Index', value: '+98.2%', color: '#25D366' }, { label: 'Conversion Rate', value: '34.6%', color: '#FFB703' }, { label: 'Avg Latency', value: '0.38s', color: '#3B82F6' }] },
-    { img: '/assets/f1_hud_panel.png', title: 'API Mesh', desc: 'Plug into Stripe, HubSpot, Salesforce, Shopify, and custom database webhooks in minutes.', tag: 'Integrate', tagColor: '#FFB703', metric: [{ label: 'Stripe', value: '', color: '#635BFF' }, { label: 'HubSpot', value: '', color: '#FF7A59' }, { label: 'Salesforce', value: '', color: '#00A1E0' }] },
-  ]
-
-  const solutions = [
-    { img: '/assets/hermes_exotic_car.png', title: 'E-Commerce', desc: 'Order tracking, product recommendations, 24/7 cart recovery automations on WhatsApp.' },
-    { img: '/assets/f1_speed_car.png', title: 'Real Estate', desc: 'Property inquiries, tour scheduling, instant buyer pre-qualification via WhatsApp.' },
-    { img: '/assets/hermes_cockpit_hud.png', title: 'Education', desc: 'Student onboarding, 24/7 course Q&A, automated assignment alerts and reminders.' },
-    { img: '/assets/hermes_telemetry_matrix.png', title: 'Healthcare', desc: 'Appointment booking, patient intake triage, automated follow-up reminders.' },
-    { img: '/assets/f1_speed_cockpit.png', title: 'Events & Tickets', desc: 'VIP ticket assistance, schedule updates, real-time venue guidance.' },
-    { img: '/assets/f1_hud_panel.png', title: 'Custom Enterprise', desc: 'Finance, Logistics, SaaS, Hospitality, Professional Legal Services.' },
-  ]
-
-  const integrations = [
-    { name: 'WhatsApp', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/whatsapp.svg', color: '#25D366' },
-    { name: 'Stripe', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/stripe.svg', color: '#635BFF' },
-    { name: 'HubSpot', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/hubspot.svg', color: '#FF7A59' },
-    { name: 'Salesforce', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/salesforce.svg', color: '#00A1E0' },
-    { name: 'Twilio', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/twilio.svg', color: '#F22F46' },
-    { name: 'Shopify', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/shopify.svg', color: '#7AB55C' },
-    { name: 'Google Analytics', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/googleanalytics.svg', color: '#E37400' },
-    { name: 'Notion', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/notion.svg', color: '#000000' },
-    { name: 'Mailchimp', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/mailchimp.svg', color: '#FFE01B' },
-    { name: 'Calendly', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/calendly.svg', color: '#006BFF' },
-    { name: 'Airtable', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/airtable.svg', color: '#FCB400' },
-    { name: '+200 more', logo: '/assets/logo.png', color: '#FF003C' },
-  ]
-
-  const templates = [
-    { id: 'lead-gen', img: '/assets/hermes_cockpit_hud.png', title: 'Lead Qualification Bot', desc: 'Automatically qualify inbound leads, score them, and sync to your CRM. 24/7 lead capture on WhatsApp.', gradient: 'from-[#FF003C] to-[#3B82F6]' },
-    { id: 'support', img: '/assets/hermes_telemetry_matrix.png', title: 'Customer Support Bot', desc: 'Answer FAQs, resolve tickets, and escalate complex issues to human agents automatically.', gradient: 'from-[#3B82F6] to-[#25D366]' },
-    { id: 'booking', img: '/assets/f1_hud_panel.png', title: 'Appointment Booking Bot', desc: 'Let customers book, reschedule, and cancel appointments via WhatsApp with calendar sync.', gradient: 'from-[#FFB703] to-[#FF003C]' },
-    { id: 'ecommerce', img: '/assets/hermes_exotic_car.png', title: 'E-Commerce Bot', desc: 'Product recommendations, order tracking, cart recovery, and payment links — all on WhatsApp.', gradient: 'from-[#FF003C] to-[#FFB703]' },
-    { id: 'faq', img: '/assets/f1_speed_car.png', title: 'FAQ Bot', desc: 'Upload your knowledge base and let AI answer customer questions instantly with 99% accuracy.', gradient: 'from-[#3B82F6] to-[#FF003C]' },
-    { id: 'feedback', img: '/assets/f1_speed_cockpit.png', title: 'Feedback & Survey Bot', desc: 'Collect NPS scores, customer feedback, and reviews through interactive WhatsApp surveys.', gradient: 'from-[#25D366] to-[#3B82F6]' },
-  ]
-
-  const testimonials = [
-    { text: "We replaced 3 legacy chatbot tools and cut response latency from 14 minutes to 0.38 seconds. Actionpackd's AI agents are fundamentally built different.", name: 'Alex Mercer', role: 'VP of Operations at ScaleDrive', color: '#FF003C' },
-    { text: "Actionpackd feels like having an entire support team that never sleeps. Deployment took 5 minutes without writing a single line of code.", name: 'Elena Rostova', role: 'Head of Growth at KineticLabs', color: '#3B82F6' },
-    { text: "The WhatsApp Business API integration was seamless. We scaled from 1,000 to 80,000 conversations a day with zero system degradation.", name: 'Marcus Vance', role: 'CTO at HyperStream', color: '#25D366' },
-  ]
-
-  const navDropdowns = {
-    features: [
-      { icon: '📡', title: 'Omni-Channel', desc: 'WhatsApp, Web, Voice, Email' },
-      { icon: '🤖', title: 'Bot Builder', desc: 'No-code visual flow builder' },
-      { icon: '📢', title: 'Broadcast', desc: 'Mass campaign messaging' },
-      { icon: '📥', title: 'Shared Inbox', desc: 'Team collaboration inbox' },
-      { icon: '📊', title: 'Analytics', desc: 'Real-time insights & reports' },
-      { icon: '🔌', title: 'API Mesh', desc: 'Stripe, HubSpot, Salesforce' },
-    ],
-    solutions: [
-      { icon: '🛒', title: 'E-Commerce' }, { icon: '🏠', title: 'Real Estate' }, { icon: '🎓', title: 'Education' },
-      { icon: '🏥', title: 'Healthcare' }, { icon: '🎫', title: 'Events' }, { icon: '🏢', title: 'Enterprise' },
-    ],
-    integrations: [
-      { icon: '💬', title: 'WhatsApp Business' }, { icon: '💳', title: 'Stripe' }, { icon: '🟠', title: 'HubSpot' },
-      { icon: '☁️', title: 'Salesforce' }, { icon: '📞', title: 'Twilio Voice' }, { icon: '🔗', title: '+200 more' },
-    ],
-    resources: [
-      { icon: '🤖', title: 'Bot Templates', badge: 'TRY NOW', desc: 'Pre-built WhatsApp bots' },
-      { icon: '📚', title: 'Documentation', desc: '' }, { icon: '⚙️', title: 'API Reference', desc: '' },
-      { icon: '✍️', title: 'Blog', desc: '' }, { icon: '❓', title: 'Help Center', desc: '' }, { icon: '🟢', title: 'System Status', desc: '' },
-    ],
-    partners: [
-      { icon: '🤝', title: 'Partner Program', desc: 'Join the network' },
-      { icon: '💰', title: '30% Lifetime Commission', desc: 'Recurring payouts' },
-      { icon: '🏢', title: 'Agency Portal', desc: 'Manage client accounts' },
-    ],
-  }
+  }, [])
 
   const CheckIcon = ({ color = '#25D366', size = 16 }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill={color}><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill={color} className="shrink-0">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+    </svg>
   )
 
   const ChevronDown = () => (
-    <svg className="w-3.5 h-3.5 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"/></svg>
+    <svg className="w-3.5 h-3.5 opacity-60 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"/>
+    </svg>
   )
 
-  return (
-    <div className="min-h-screen bg-white text-slate-900 bg-grid">
-      <div className="fixed top-0 left-1/4 w-[600px] h-[600px] bg-[#FF003C]/5 blur-[160px] rounded-full pointer-events-none z-0"></div>
-      <div className="fixed bottom-10 right-10 w-[500px] h-[500px] bg-[#1D4ED8]/5 blur-[150px] rounded-full pointer-events-none z-0"></div>
+  const integrations = [
+    { name: 'WhatsApp', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/whatsapp.svg' },
+    { name: 'Stripe', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/stripe.svg' },
+    { name: 'HubSpot', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/hubspot.svg' },
+    { name: 'Salesforce', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/salesforce.svg' },
+    { name: 'Twilio', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/twilio.svg' },
+    { name: 'Shopify', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/shopify.svg' },
+    { name: 'Notion', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/notion.svg' },
+    { name: 'Calendly', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/calendly.svg' },
+    { name: 'Airtable', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/airtable.svg' },
+    { name: 'Google', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/googleanalytics.svg' },
+    { name: 'Mailchimp', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/mailchimp.svg' },
+    { name: '+200 More', logo: '/assets/logo.png' }
+  ]
 
-      {/* NAV */}
-      <header className="sticky top-0 z-40 w-full bg-white/90 backdrop-blur-xl border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+  const faqs = [
+    {
+      q: "What is the approval process for Meta WhatsApp Business API?",
+      a: "Actionpackd is an official Meta Business Partner. We provide instantaneous sandbox provisioning and guided 1-click Meta verification for your business profile, phone number, and message templates."
+    },
+    {
+      q: "Can I connect my existing knowledge bases and CRMs?",
+      a: "Yes! Actionpackd offers 200+ native integrations (HubSpot, Salesforce, Stripe, Shopify, Zendesk, Notion) plus direct vector synchronization for PDFs, website URLs, and custom API webhooks."
+    },
+    {
+      q: "How does human agent handoff work?",
+      a: "When an AI agent detects complex customer queries or low confidence scores, it automatically transfers the chat to your shared team inbox with full conversation history and internal AI notes."
+    },
+    {
+      q: "Do I need coding knowledge to build AI agents?",
+      a: "Zero coding is required. You can choose from pre-built bot templates or construct custom agent workflows using our drag-and-drop visual builder."
+    },
+    {
+      q: "Is customer data secure and SOC2 compliant?",
+      a: "Yes, we adhere to strict enterprise security standards including SOC2 Type II compliance, TLS 1.3 encryption in transit, AES-256 at rest, and zero data-retention privacy options."
+    }
+  ]
+
+  return (
+    <div className="min-h-screen bg-white text-slate-900 bg-grid relative overflow-x-hidden">
+      
+      {/* AMBIENT BACKGROUND GLOW BLOBS */}
+      <div className="fixed top-12 left-1/2 -translate-x-1/2 w-[900px] h-[500px] blob-glow-1 rounded-full pointer-events-none z-0 animate-blob"></div>
+      <div className="fixed bottom-20 right-10 w-[600px] h-[600px] blob-glow-2 rounded-full pointer-events-none z-0 animate-blob" style={{ animationDelay: '4s' }}></div>
+      <div className="fixed top-1/3 left-10 w-[550px] h-[550px] blob-glow-3 rounded-full pointer-events-none z-0 animate-blob" style={{ animationDelay: '8s' }}></div>
+
+      {/* FLOATING PILL NAVBAR */}
+      <header className="fixed top-4 left-4 right-4 max-w-6xl mx-auto z-50">
+        <div className="floating-nav rounded-full px-4 sm:px-6 py-3 flex items-center justify-between">
           <a href="#" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-full bg-white border-2 border-[#FF003C] p-0.5 overflow-hidden shadow-md flex items-center justify-center group-hover:scale-110 transition-transform">
-              <img src="/assets/logo.png" alt="Actionpackd Logo" className="w-full h-full object-cover rounded-full" />
-            </div>
-            <div className="flex flex-col">
-              <span className="font-outfit font-extrabold text-xl tracking-tight text-slate-900 uppercase">ACTION<span className="gradient-text">PACKD</span></span>
-              <span className="text-[9px] font-mono text-slate-400 tracking-widest uppercase -mt-1">AI AGENT PLATFORM</span>
-            </div>
+            <img src="/assets/logo_horizontal.png" alt="Actionpackd Logo" className="h-8 sm:h-9 w-auto object-contain group-hover:scale-105 transition-transform" />
           </a>
 
-          <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-[#F0FDF4] border border-[#25D366]/40 rounded-full ml-2">
-            <CheckIcon color="#25D366" size={16} />
-            <span className="text-[11px] font-mono text-[#25D366] font-bold uppercase tracking-wider">Meta Approved</span>
-          </div>
-
-          <nav className="hidden lg:flex items-center gap-1 text-sm font-medium text-slate-600">
-            {Object.entries(navDropdowns).map(([key, items]) => (
-              <div key={key} className="nav-dropdown">
-                <button className="px-3 py-2 rounded-lg hover:text-slate-900 hover:bg-slate-50 transition-colors flex items-center gap-1 capitalize">{key}<ChevronDown /></button>
-                <div className="dropdown-panel" style={{ width: key === 'partners' ? 360 : key === 'features' ? 480 : 420 }}>
-                  <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-2xl shadow-slate-300/50 grid grid-cols-2 gap-2">
-                    {items.map((item, i) => (
-                      <a key={i} href={key === 'resources' && item.title === 'Bot Templates' ? '#bot-templates' : key === 'features' ? '#features' : key === 'solutions' ? '#solutions' : key === 'integrations' ? '#integrations' : key === 'partners' ? '#partners' : '#'} onClick={key === 'resources' && item.title !== 'Bot Templates' ? (e) => { e.preventDefault(); openModal(item.title, `${item.title} content goes here.`) } : undefined} className={`flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors ${item.title === 'Bot Templates' ? 'border border-[#25D366]/20' : ''}`}>
-                        <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center shrink-0 text-lg">{item.icon}</div>
-                        <div>
-                          <div className="text-slate-900 text-sm font-semibold flex items-center gap-1.5">{item.title}{item.badge && <span className="text-[9px] bg-[#25D366] text-white px-1.5 py-0.5 rounded-full font-bold">{item.badge}</span>}</div>
-                          {item.desc && <div className="text-slate-400 text-xs">{item.desc}</div>}
-                        </div>
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            ))}
+          {/* NAV LINKS */}
+          <nav className="hidden lg:flex items-center gap-1 text-xs font-semibold text-slate-600">
+            <a href="#features" className="px-3 py-1.5 rounded-full hover:text-slate-900 hover:bg-slate-100/80 transition-colors">Features</a>
+            <a href="#bot-templates" className="px-3 py-1.5 rounded-full hover:text-slate-900 hover:bg-slate-100/80 transition-colors flex items-center gap-1.5">
+              <span>Bot Templates</span>
+              <span className="bg-[#25D366] text-white text-[9px] px-1.5 py-0.2 rounded-full font-bold">LIVE</span>
+            </a>
+            <a href="#solutions" className="px-3 py-1.5 rounded-full hover:text-slate-900 hover:bg-slate-100/80 transition-colors">Solutions</a>
+            <a href="#pricing" className="px-3 py-1.5 rounded-full hover:text-slate-900 hover:bg-slate-100/80 transition-colors">Pricing</a>
+            <a href="#faq" className="px-3 py-1.5 rounded-full hover:text-slate-900 hover:bg-slate-100/80 transition-colors">FAQ</a>
           </nav>
 
+          {/* META VERIFIED & CTA BUTTONS */}
           <div className="flex items-center gap-3">
-            <a href="#login" onClick={(e) => { e.preventDefault(); openModal('Login', 'Access your Actionpackd dashboard.') }} className="hidden sm:block text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors">Login</a>
-            <button onClick={() => openModal('Start Free', 'Get instant access to Actionpackd. No credit card required.')} className="btn-primary px-5 py-2.5 rounded-lg bg-[#FF003C] text-white font-outfit font-bold text-xs uppercase tracking-wider flex items-center gap-2 border border-[#FF003C]">
+            <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-[#F0FDF4] border border-[#25D366]/40 rounded-full">
+              <CheckIcon color="#25D366" size={14} />
+              <span className="text-[10px] font-mono text-[#25D366] font-bold uppercase tracking-wider">Meta Approved</span>
+            </div>
+            <button
+              onClick={() => openModal('Start Free Sandbox', 'Get instant access to Actionpackd AI Agent Builder. No credit card required.')}
+              className="btn-primary px-5 py-2 rounded-full bg-[#FF003C] text-white font-outfit font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 border border-[#FF003C]"
+            >
               <span>Start Free</span>
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
             </button>
-            <button className="lg:hidden p-2 text-slate-600" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+            <button className="lg:hidden p-1.5 text-slate-600" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
             </button>
           </div>
         </div>
 
+        {/* MOBILE MENU DROPDOWN */}
         {mobileMenuOpen && (
-          <div className="lg:hidden border-t border-slate-200 bg-white/95 backdrop-blur-xl">
-            <div className="px-4 py-4 space-y-2 text-sm">
-              <a href="#features" className="block py-2 text-slate-600 hover:text-slate-900">Features</a>
-              <a href="#solutions" className="block py-2 text-slate-600 hover:text-slate-900">Solutions</a>
-              <a href="#integrations" className="block py-2 text-slate-600 hover:text-slate-900">Integrations</a>
-              <a href="#bot-templates" className="block py-2 text-slate-600 hover:text-slate-900">Bot Templates</a>
-              <a href="#partners" className="block py-2 text-slate-600 hover:text-slate-900">Partners</a>
-              <a href="#pricing" className="block py-2 text-slate-600 hover:text-slate-900">Pricing</a>
-              <div className="flex items-center gap-2 py-2"><CheckIcon color="#25D366" size={14} /><span className="text-[#25D366] text-xs font-mono">Meta Approved</span></div>
-            </div>
+          <div className="mt-2 rounded-2xl bg-white/95 backdrop-blur-xl border border-slate-200 p-4 shadow-xl lg:hidden text-xs font-semibold space-y-2 animate-slide-up">
+            <a href="#features" onClick={() => setMobileMenuOpen(false)} className="block p-2 text-slate-700 hover:bg-slate-50 rounded-lg">Features</a>
+            <a href="#bot-templates" onClick={() => setMobileMenuOpen(false)} className="block p-2 text-slate-700 hover:bg-slate-50 rounded-lg">Bot Templates</a>
+            <a href="#solutions" onClick={() => setMobileMenuOpen(false)} className="block p-2 text-slate-700 hover:bg-slate-50 rounded-lg">Solutions</a>
+            <a href="#pricing" onClick={() => setMobileMenuOpen(false)} className="block p-2 text-slate-700 hover:bg-slate-50 rounded-lg">Pricing</a>
+            <a href="#faq" onClick={() => setMobileMenuOpen(false)} className="block p-2 text-slate-700 hover:bg-slate-50 rounded-lg">FAQ</a>
           </div>
         )}
       </header>
 
-      {/* Announcement */}
-      <div className="w-full bg-gradient-to-r from-[#1D4ED8] via-[#FF003C] to-[#1D4ED8] text-white py-1.5 px-4 text-center font-mono text-[11px] font-semibold tracking-wider uppercase flex items-center justify-center gap-2">
-        <span className="px-1.5 py-0.5 bg-black/20 rounded text-[#25D366] font-bold flex items-center gap-1"><CheckIcon color="#25D366" size={12} /> META APPROVED</span>
-        <span>WhatsApp Business API Now Live — Deploy AI Agents in Minutes</span>
-        <a href="#bot-templates" className="underline hover:text-[#FFB703] ml-2 hidden sm:inline">Try a Bot Template →</a>
+      {/* TOP ANNOUNCEMENT BANNER */}
+      <div className="pt-24 pb-2 bg-gradient-to-r from-slate-100 via-emerald-50 to-blue-50 border-b border-slate-200 text-center text-xs font-mono text-slate-600 flex items-center justify-center gap-2">
+        <span className="px-2 py-0.5 bg-[#25D366] text-white rounded-full font-bold text-[10px] uppercase flex items-center gap-1">
+          <CheckIcon color="#FFFFFF" size={12} /> META PARTNER
+        </span>
+        <span>WhatsApp Business API Cloud v20.0 Released</span>
+        <a href="#bot-templates" className="text-[#FF003C] font-bold underline hover:text-[#B00028] ml-1">Explore Templates →</a>
       </div>
 
-      {/* HERO */}
-      <section className="relative pt-16 pb-20 md:pt-24 md:pb-32 overflow-hidden border-b border-slate-200 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-10 items-center">
-            <div className="lg:col-span-6 flex flex-col items-start">
-              <AnimatedSection delay={0}>
-                <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-[#F0FDF4] border border-[#25D366]/40 text-xs font-mono text-slate-600 mb-8">
-                  <CheckIcon color="#25D366" size={16} />
-                  <span className="text-slate-400 uppercase tracking-wider text-[11px]">WhatsApp Business API:</span>
-                  <span className="text-[#25D366] font-bold text-[11px]">META APPROVED</span>
-                </div>
-              </AnimatedSection>
-              <AnimatedSection delay={0.1}>
-                <h1 className="text-5xl sm:text-6xl md:text-7xl font-outfit font-extrabold tracking-tight text-slate-900 leading-[1.05] mb-6">
-                  Build AI agents<br />that actually <span className="gradient-text">convert.</span>
-                </h1>
-              </AnimatedSection>
-              <AnimatedSection delay={0.2}>
-                <p className="text-lg sm:text-xl text-slate-500 max-w-xl font-sans leading-relaxed mb-8">
-                  Actionpackd lets you build, deploy, and scale AI agents across WhatsApp, web chat, voice, and email — live in minutes. No code required. Meta-approved for WhatsApp Business API.
-                </p>
-              </AnimatedSection>
-              <AnimatedSection delay={0.3}>
-                <div className="w-full max-w-xl bg-slate-50 border border-slate-200 rounded-xl p-4 mb-8 font-mono text-xs text-slate-600 grid grid-cols-3 gap-3 divide-x divide-slate-200 text-center">
-                  <div className="px-2"><div className="text-[10px] text-slate-400 uppercase tracking-widest">Deploy Time</div><div className="text-[#3B82F6] font-extrabold text-base sm:text-lg mt-1">5 min</div></div>
-                  <div className="px-2"><div className="text-[10px] text-slate-400 uppercase tracking-widest">Uptime</div><div className="text-[#FFB703] font-extrabold text-base sm:text-lg mt-1">99.99%</div></div>
-                  <div className="px-2"><div className="text-[10px] text-slate-400 uppercase tracking-widest">Agents Live</div><div className="text-[#FF003C] font-extrabold text-base sm:text-lg mt-1">18,400+</div></div>
-                </div>
-              </AnimatedSection>
-              <AnimatedSection delay={0.4}>
-                <div className="flex flex-wrap items-center gap-4 w-full sm:w-auto">
-                  <button onClick={() => openModal('Start Free', 'Get instant access to Actionpackd. No credit card required.')} className="btn-primary px-8 py-4 rounded-xl bg-[#FF003C] text-white font-outfit font-bold text-base uppercase tracking-wider flex items-center justify-center gap-3 border border-[#FF003C] shadow-lg shadow-[#FF003C]/20 w-full sm:w-auto">
-                    <span>Start Free</span>
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                  </button>
-                  <a href="#bot-templates" className="btn-outline px-8 py-4 rounded-xl bg-transparent text-slate-700 font-outfit font-bold text-base uppercase tracking-wider flex items-center justify-center gap-2 border border-slate-200 hover:text-slate-900 w-full sm:w-auto">
-                    <svg className="w-5 h-5 text-[#25D366]" fill="currentColor" viewBox="0 0 24 24"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38c1.45.79 3.08 1.21 4.79 1.21 5.46 0 9.91-4.45 9.91-9.91C22 6.45 17.5 2 12.04 2z"/></svg>
-                    <span>Try a Bot Template</span>
-                  </a>
-                </div>
-              </AnimatedSection>
+      {/* HERO SECTION */}
+      <section className="relative pt-12 pb-20 md:pt-20 md:pb-28 border-b border-slate-200/80 overflow-hidden z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+          
+          {/* EYEBROW BADGE */}
+          <AnimatedSection delay={0}>
+            <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-[#F0FDF4] border border-[#25D366]/40 text-xs font-mono text-slate-700 mb-8 shadow-sm">
+              <CheckIcon color="#25D366" size={16} />
+              <span className="text-slate-500 uppercase tracking-wider text-[11px]">WhatsApp Business API:</span>
+              <span className="text-[#25D366] font-extrabold text-[11px] uppercase">META APPROVED & VERIFIED</span>
+            </div>
+          </AnimatedSection>
+
+          {/* MAIN HERO HEADLINE */}
+          <AnimatedSection delay={0.1}>
+            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-outfit font-extrabold tracking-tight text-slate-900 leading-[1.08] max-w-4xl mx-auto mb-6">
+              Build AI agents that<br className="hidden sm:inline" /> actually <span className="gradient-text">convert customers.</span>
+            </h1>
+          </AnimatedSection>
+
+          {/* SUB-HEAD */}
+          <AnimatedSection delay={0.2}>
+            <p className="text-base sm:text-xl text-slate-600 max-w-2xl mx-auto font-sans leading-relaxed mb-8">
+              Actionpackd lets you build, deploy, and scale intelligent AI agents across WhatsApp, Web Chat, Voice, and Email in minutes. No code required.
+            </p>
+          </AnimatedSection>
+
+          {/* HERO CTA BUTTONS */}
+          <AnimatedSection delay={0.3}>
+            <div className="flex flex-wrap items-center justify-center gap-4 mb-12">
+              <button
+                onClick={() => openModal('Start Free Sandbox', 'Deploy your first AI agent on WhatsApp in under 5 minutes.')}
+                className="btn-primary px-8 py-4 rounded-full bg-[#FF003C] text-white font-outfit font-bold text-base uppercase tracking-wider flex items-center justify-center gap-3 border border-[#FF003C] shadow-lg shadow-[#FF003C]/20"
+              >
+                <span>Start Building Free</span>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+              </button>
+              <a
+                href="#bot-templates"
+                className="btn-outline px-8 py-4 rounded-full bg-white text-slate-800 font-outfit font-bold text-base uppercase tracking-wider flex items-center justify-center gap-2 border border-slate-200 shadow-sm hover:text-[#25D366]"
+              >
+                <svg className="w-5 h-5 text-[#25D366]" fill="currentColor" viewBox="0 0 24 24"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38c1.45.79 3.08 1.21 4.79 1.21 5.46 0 9.91-4.45 9.91-9.91C22 6.45 17.5 2 12.04 2z"/></svg>
+                <span>Try Bot Templates</span>
+              </a>
+            </div>
+          </AnimatedSection>
+
+          {/* HERO METRICS STRIP */}
+          <AnimatedSection delay={0.4}>
+            <div className="max-w-3xl mx-auto bg-slate-50/80 border border-slate-200/80 backdrop-blur-md rounded-2xl p-4 mb-12 font-mono text-xs text-slate-600 grid grid-cols-3 gap-4 divide-x divide-slate-200 text-center shadow-sm">
+              <div>
+                <div className="text-[10px] text-slate-400 uppercase tracking-widest">Deploy Time</div>
+                <div className="text-[#3B82F6] font-extrabold text-base sm:text-xl mt-1">5 Minutes</div>
+              </div>
+              <div>
+                <div className="text-[10px] text-slate-400 uppercase tracking-widest">Global Uptime</div>
+                <div className="text-[#FFB703] font-extrabold text-base sm:text-xl mt-1">99.99%</div>
+              </div>
+              <div>
+                <div className="text-[10px] text-slate-400 uppercase tracking-widest">Live AI Agents</div>
+                <div className="text-[#FF003C] font-extrabold text-base sm:text-xl mt-1">18,400+</div>
+              </div>
+            </div>
+          </AnimatedSection>
+
+          {/* INTERACTIVE HERO AI MOCKUP WINDOW WITH REMOTION */}
+          <AnimatedSection delay={0.5}>
+            <div className="max-w-4xl mx-auto rounded-3xl border-2 border-slate-200 bg-white shadow-2xl shadow-slate-200/80 overflow-hidden relative text-left aspect-[16/10] sm:aspect-[16/9]">
+              <Player
+                component={HeroConsoleVideo}
+                durationInFrames={300}
+                compositionWidth={1280}
+                compositionHeight={760}
+                fps={30}
+                controls
+                autoPlay
+                loop
+                style={{
+                  width: '100%',
+                  height: '100%'
+                }}
+              />
+            </div>
+          </AnimatedSection>
+
+          {/* REMOTION VIDEO DEMO SHOWCASE */}
+          <AnimatedSection delay={0.6} className="mt-16">
+            <div className="max-w-4xl mx-auto text-center mb-6">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-50 border border-rose-200 text-[#FF003C] font-mono text-xs font-bold uppercase tracking-widest mb-3">
+                🎬 REMOTION DYNAMIC MOTION SHOWCASE
+              </div>
+              <h3 className="text-2xl sm:text-3xl font-outfit font-extrabold text-slate-900 tracking-tight">
+                Watch Actionpackd in Motion.
+              </h3>
+              <p className="text-slate-600 text-xs sm:text-sm font-sans max-w-lg mx-auto mt-2">
+                Powered by Remotion with programmatic frame animations, dynamic physics, and brand color system.
+              </p>
             </div>
 
-            <div className="lg:col-span-6">
-              <AnimatedSection delay={0.3}>
-                <div className="relative rounded-2xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/50 overflow-hidden">
-                  <div className="flex items-center justify-between pb-4 border-b border-slate-200 mb-4 font-mono text-xs">
-                    <div className="flex items-center gap-2">
-                      <span className="w-3 h-3 rounded-full bg-[#FF003C]"></span>
-                      <span className="w-3 h-3 rounded-full bg-[#FFB703]"></span>
-                      <span className="w-3 h-3 rounded-full bg-[#25D366]"></span>
-                      <span className="ml-2 text-slate-600 font-bold">actionpackd_dashboard</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-[11px] text-[#25D366]"><span className="w-2 h-2 rounded-full bg-[#25D366] animate-pulse"></span>LIVE</div>
-                  </div>
-                  <div className="flex items-center gap-2 mb-4 overflow-x-auto pb-1.5 text-[11px] font-mono">
-                    {['whatsapp', 'web', 'voice', 'email'].map(ch => (
-                      <button key={ch} onClick={() => switchChannel(ch)} className={`px-3 py-1.5 rounded-lg border whitespace-nowrap flex items-center gap-1.5 transition-all ${channel === ch ? 'bg-slate-50 text-slate-900 border-[#25D366]/40' : 'bg-slate-50 text-slate-500 border-slate-200 hover:border-[#3B82F6]'}`}>
-                        <span>{ch === 'whatsapp' ? '💬' : ch === 'web' ? '🌐' : ch === 'voice' ? '🎙️' : '✉️'}</span> {ch === 'whatsapp' ? 'WhatsApp' : ch === 'web' ? 'Web Chat' : ch === 'voice' ? 'Voice' : 'Email'}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="space-y-3 font-sans text-xs min-h-[270px] flex flex-col justify-end">
-                    <div className="flex items-start gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center text-[10px] font-mono font-bold text-slate-400 shrink-0">USR</div>
-                      <div className="bg-slate-100 border border-slate-200 text-slate-700 rounded-xl p-3.5 max-w-[85%] font-mono text-[11px]">"I want to track my order #4821 and schedule a delivery."</div>
-                    </div>
-                    <div className="flex items-start gap-3 flex-row-reverse">
-                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#FF003C] to-[#1D4ED8] flex items-center justify-center text-[10px] font-mono font-bold text-white shrink-0">AI</div>
-                      <div className="bg-white border border-[#FF003C]/30 text-slate-700 rounded-xl p-4 max-w-[90%] shadow-sm">
-                        <div className="flex items-center justify-between text-[10px] font-mono text-[#3B82F6] mb-2 border-b border-slate-100 pb-1.5">
-                          <span>AI AGENT · ORDER BOT</span>
-                          <span className="bg-[#25D366] text-white px-2 py-0.5 rounded-full text-[9px] font-bold">META VERIFIED</span>
-                        </div>
-                        <p className="text-slate-700 leading-relaxed text-xs">{heroResponse}</p>
-                        <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] font-mono text-slate-400">
-                          <span>⚡ Response: 0.38s</span><span>Confidence: 99.2%</span><span className="text-[#25D366] font-bold">● WhatsApp Active</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="mt-4 pt-3 border-t border-slate-200 flex items-center gap-2">
-                    <span className="text-[#FF003C] font-mono font-bold text-sm">{'>'}</span>
-                    <input value={heroInput} onChange={(e) => setHeroInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && sendHeroMessage()} type="text" placeholder="Type a message to test the AI agent..." className="bg-transparent border-none text-xs text-slate-900 placeholder-slate-400 focus:outline-none w-full font-mono" />
-                    <button onClick={sendHeroMessage} className="px-4 py-1.5 bg-[#FF003C] text-white text-[11px] font-bold rounded-lg hover:bg-[#E60036] transition-colors uppercase font-mono">Send</button>
-                  </div>
-                </div>
-              </AnimatedSection>
+            <div className="relative rounded-3xl overflow-hidden border-2 border-[#FF003C]/40 shadow-2xl shadow-rose-500/20 bg-[#0A0B0F] aspect-video max-w-4xl mx-auto group">
+              <Player
+                component={ActionpackdPromoVideo}
+                durationInFrames={300}
+                compositionWidth={1280}
+                compositionHeight={720}
+                fps={30}
+                controls
+                autoPlay
+                loop
+                style={{
+                  width: '100%',
+                  height: '100%'
+                }}
+              />
             </div>
-          </div>
+          </AnimatedSection>
+
         </div>
       </section>
 
-      {/* TRUSTED BY */}
-      <section className="py-14 border-b border-slate-200 bg-slate-50/50">
+      {/* LOGO STRIP / INTEGRATIONS OVERVIEW */}
+      <section className="py-12 border-b border-slate-200 bg-slate-50/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-xs font-mono uppercase tracking-widest text-slate-400 mb-8">Trusted by 18,000+ teams shipping AI agents daily</p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-8 items-center justify-items-center opacity-60 hover:opacity-100 transition-all">
-            {['APEXSCALE', 'KINETIC.AI', 'TURBOSTACK', 'QUANTUMOPS', 'HYPERDRIVE', 'NEXTGEN'].map((name, i) => (
-              <div key={name} className={`font-extrabold text-lg tracking-wider font-mono ${i % 2 === 0 ? 'hover:text-[#FF003C]' : 'hover:text-[#3B82F6]'} transition-colors`}>{name}</div>
+          <p className="text-xs font-mono uppercase tracking-widest text-slate-400 mb-8 font-semibold">
+            Seamlessly Integrated with 200+ Enterprise Tools
+          </p>
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-6 items-center justify-items-center">
+            {integrations.map((int, i) => (
+              <div key={i} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 shadow-sm hover:border-[#FF003C]/40 transition-all w-full justify-center">
+                <img src={int.logo} alt={int.name} className="w-5 h-5 object-contain" />
+                <span className="text-xs font-mono font-bold text-slate-700">{int.name}</span>
+              </div>
             ))}
           </div>
-          <div className="mt-10 w-full h-px bg-slate-200 relative flex items-center justify-center">
-            <div className="w-40 h-0.5 bg-gradient-to-r from-[#FF003C] to-[#3B82F6] absolute"></div>
-          </div>
         </div>
       </section>
 
-      {/* FEATURES */}
+      {/* BENTO GRID FEATURE SECTION */}
       <section id="features" className="py-24 border-b border-slate-200 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          
           <AnimatedSection>
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
               <div>
-                <div className="text-[#FF003C] font-mono text-xs font-bold uppercase tracking-widest mb-2">// PLATFORM FEATURES</div>
-                <h2 className="text-3xl sm:text-4xl md:text-5xl font-outfit font-extrabold text-slate-900 tracking-tight">Everything you need to <span className="gradient-text">scale conversations.</span></h2>
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-50 border border-rose-200 text-[#FF003C] font-mono text-xs font-bold uppercase tracking-widest mb-3">
+                  // PLATFORM CAPABILITIES
+                </div>
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-outfit font-extrabold text-slate-900 tracking-tight">
+                  Everything required to <span className="gradient-text">scale conversations.</span>
+                </h2>
               </div>
-              <p className="text-slate-500 text-sm md:text-base max-w-md font-mono">Six powerful modules to build, automate, and analyze AI agent conversations across every channel.</p>
+              <p className="text-slate-600 text-sm md:text-base max-w-md font-sans leading-relaxed">
+                A unified AI infrastructure designed for WhatsApp automation, omni-channel customer support, and instant lead conversions.
+              </p>
             </div>
           </AnimatedSection>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {features.map((f, i) => (
-              <AnimatedSection key={i} delay={i * 0.08}>
-                <div className="card-hover relative bg-white border border-slate-200 rounded-2xl p-7 flex flex-col justify-between shadow-sm h-full">
+
+          {/* BENTO GRID 12-COLUMNS */}
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+            
+            {/* FEATURE 1 (LARGE SPAN 8 COLS) */}
+            <div className="md:col-span-8">
+              <AnimatedSection delay={0.05}>
+                <div className="bento-card p-8 h-full flex flex-col justify-between relative overflow-hidden bg-gradient-to-br from-white to-slate-50">
                   <div>
                     <div className="flex items-center justify-between mb-6">
-                      <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-200 overflow-hidden flex items-center justify-center">
-                        <img src={f.img} alt={f.title} className="w-full h-full object-cover" />
+                      <div className="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-200 flex items-center justify-center text-2xl">
+                        📡
                       </div>
-                      <span className="px-2.5 py-1 text-[10px] font-mono bg-slate-50 border border-slate-200 rounded-lg uppercase" style={{ color: f.tagColor }}>{f.tag}</span>
+                      <span className="px-3 py-1 text-xs font-mono bg-[#F0FDF4] text-[#25D366] border border-[#25D366]/40 rounded-full font-bold uppercase">
+                        Meta Approved API
+                      </span>
                     </div>
-                    <h3 className="text-xl font-outfit font-bold text-slate-900 mb-2">{f.title}</h3>
-                    <p className="text-slate-500 text-sm leading-relaxed mb-6">{f.desc}</p>
+                    <h3 className="text-2xl font-outfit font-bold text-slate-900 mb-3">
+                      Omni-Channel AI Hub & WhatsApp Business API
+                    </h3>
+                    <p className="text-slate-600 text-sm leading-relaxed mb-6 max-w-xl">
+                      Connect your official WhatsApp Business number alongside Web Chat, Twilio Voice, and Email webhooks in a single unified control center. Zero complex webhook configuration.
+                    </p>
                   </div>
-                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 font-mono text-[11px] space-y-2">
-                    {f.metric.map((m, j) => (
-                      <div key={j} className="flex items-center justify-between text-slate-600">
-                        <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full" style={{ background: m.color }}></span> {m.label}</span>
-                        {m.value && <span className="font-bold" style={{ color: m.color }}>{m.value}</span>}
-                      </div>
-                    ))}
+                  <div className="grid grid-cols-3 gap-3 bg-white border border-slate-200 rounded-xl p-4 font-mono text-xs">
+                    <div>
+                      <div className="text-slate-400 text-[10px] uppercase">WhatsApp API</div>
+                      <div className="text-[#25D366] font-bold mt-1">Active ●</div>
+                    </div>
+                    <div>
+                      <div className="text-slate-400 text-[10px] uppercase">Web Chat</div>
+                      <div className="text-[#3B82F6] font-bold mt-1">Active ●</div>
+                    </div>
+                    <div>
+                      <div className="text-slate-400 text-[10px] uppercase">Voice Dispatch</div>
+                      <div className="text-[#FF003C] font-bold mt-1">Active ●</div>
+                    </div>
                   </div>
                 </div>
               </AnimatedSection>
-            ))}
+            </div>
+
+            {/* FEATURE 2 (SPAN 4 COLS) */}
+            <div className="md:col-span-4">
+              <AnimatedSection delay={0.1}>
+                <div className="bento-card p-8 h-full flex flex-col justify-between bg-white">
+                  <div>
+                    <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-2xl mb-6">
+                      🤖
+                    </div>
+                    <h3 className="text-xl font-outfit font-bold text-slate-900 mb-2">Visual Bot Builder</h3>
+                    <p className="text-slate-600 text-sm leading-relaxed mb-6">
+                      Drag-and-drop conversational logic. Sync knowledge bases, PDFs, and internal databases with zero code.
+                    </p>
+                  </div>
+                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 font-mono text-xs text-slate-600">
+                    <div className="flex items-center justify-between mb-1">
+                      <span>Vector Sync:</span>
+                      <span className="text-[#25D366] font-bold">100% Ready</span>
+                    </div>
+                    <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                      <div className="bg-[#25D366] h-full w-full"></div>
+                    </div>
+                  </div>
+                </div>
+              </AnimatedSection>
+            </div>
+
+            {/* FEATURE 3 (SPAN 4 COLS) */}
+            <div className="md:col-span-4">
+              <AnimatedSection delay={0.15}>
+                <div className="bento-card p-8 h-full flex flex-col justify-between bg-white">
+                  <div>
+                    <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-2xl mb-6">
+                      📢
+                    </div>
+                    <h3 className="text-xl font-outfit font-bold text-slate-900 mb-2">Broadcast Campaigns</h3>
+                    <p className="text-slate-600 text-sm leading-relaxed mb-6">
+                      Send segmented, personalized WhatsApp broadcasts with automated abandoned cart recovery flows.
+                    </p>
+                  </div>
+                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 font-mono text-xs">
+                    <div className="text-slate-500 text-[10px] uppercase">Cart Recovery Rate</div>
+                    <div className="text-2xl font-extrabold text-[#25D366] mt-1">89.4%</div>
+                  </div>
+                </div>
+              </AnimatedSection>
+            </div>
+
+            {/* FEATURE 4 (SPAN 4 COLS) */}
+            <div className="md:col-span-4">
+              <AnimatedSection delay={0.2}>
+                <div className="bento-card p-8 h-full flex flex-col justify-between bg-white">
+                  <div>
+                    <div className="w-12 h-12 rounded-2xl bg-purple-50 border border-purple-200 flex items-center justify-center text-2xl mb-6">
+                      📥
+                    </div>
+                    <h3 className="text-xl font-outfit font-bold text-slate-900 mb-2">Shared Team Inbox</h3>
+                    <p className="text-slate-600 text-sm leading-relaxed mb-6">
+                      Let AI handle initial support triage, then pass off to human team members with internal notes.
+                    </p>
+                  </div>
+                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 font-mono text-xs">
+                    <div className="text-slate-500 text-[10px] uppercase">AI Resolution Rate</div>
+                    <div className="text-2xl font-extrabold text-[#7C3AED] mt-1">94.2%</div>
+                  </div>
+                </div>
+              </AnimatedSection>
+            </div>
+
+            {/* FEATURE 5 (SPAN 4 COLS) */}
+            <div className="md:col-span-4">
+              <AnimatedSection delay={0.25}>
+                <div className="bento-card p-8 h-full flex flex-col justify-between bg-white">
+                  <div>
+                    <div className="w-12 h-12 rounded-2xl bg-rose-50 border border-rose-200 flex items-center justify-center text-2xl mb-6">
+                      📊
+                    </div>
+                    <h3 className="text-xl font-outfit font-bold text-slate-900 mb-2">Real-Time Analytics</h3>
+                    <p className="text-slate-600 text-sm leading-relaxed mb-6">
+                      Deep telemetry on response times, customer sentiment index, and automated conversion rates.
+                    </p>
+                  </div>
+                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 font-mono text-xs">
+                    <div className="text-slate-500 text-[10px] uppercase">Average Response Latency</div>
+                    <div className="text-2xl font-extrabold text-[#FF003C] mt-1">0.38 Seconds</div>
+                  </div>
+                </div>
+              </AnimatedSection>
+            </div>
+
           </div>
         </div>
       </section>
 
-      {/* BOT TEMPLATES */}
-      <section id="bot-templates" className="py-24 border-b border-slate-200 bg-slate-50/50 relative overflow-hidden">
+      {/* INTERACTIVE PRE-BUILT BOT TEMPLATES */}
+      <section id="bot-templates" className="py-24 border-b border-slate-200 bg-slate-50/60 relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          
           <AnimatedSection>
             <div className="text-center mb-16">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#F0FDF4] border border-[#25D366]/30 mb-4">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#F0FDF4] border border-[#25D366]/40 mb-4 shadow-sm">
                 <CheckIcon color="#25D366" size={16} />
-                <span className="text-[#25D366] font-mono text-xs font-bold uppercase tracking-wider">Meta Approved · WhatsApp Business</span>
+                <span className="text-[#25D366] font-mono text-xs font-bold uppercase tracking-wider">
+                  Meta Verified Bot Templates
+                </span>
               </div>
-              <div className="text-[#FF003C] font-mono text-xs font-bold uppercase tracking-widest mb-2">// BOT TEMPLATES</div>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-outfit font-extrabold text-slate-900 tracking-tight">Pre-built WhatsApp bots. <span className="gradient-text">Try now.</span></h2>
-              <p className="text-slate-500 text-sm font-mono mt-3 max-w-xl mx-auto">Launch a production-ready WhatsApp bot in seconds. Click "Try Now" to test any template live.</p>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-outfit font-extrabold text-slate-900 tracking-tight">
+                Pre-built WhatsApp bots. <span className="gradient-text">Try live.</span>
+              </h2>
+              <p className="text-slate-600 text-sm font-sans mt-3 max-w-xl mx-auto">
+                Launch production-ready WhatsApp AI agents in seconds. Click "Try Now" to open a live interactive chat simulator!
+              </p>
             </div>
           </AnimatedSection>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {templates.map((t, i) => (
+            {Object.values(botTemplates).map((t, i) => (
               <AnimatedSection key={t.id} delay={i * 0.08}>
-                <div className="card-hover relative bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm h-full">
-                  <div className={`h-2 bg-gradient-to-r ${t.gradient}`}></div>
+                <div className="bento-card overflow-hidden bg-white flex flex-col justify-between h-full shadow-sm hover:shadow-xl">
+                  <div className="h-2 bg-gradient-to-r from-[#FF003C] via-[#7C3AED] to-[#25D366]"></div>
                   <div className="p-7">
                     <div className="flex items-center justify-between mb-5">
-                      <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-200 overflow-hidden flex items-center justify-center">
-                        <img src={t.img} alt={t.title} className="w-full h-full object-cover" />
+                      <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-2xl border border-slate-200">
+                        {t.avatar}
                       </div>
-                      <span className="px-2 py-1 text-[9px] font-mono bg-[#F0FDF4] text-[#25D366] border border-[#25D366]/30 rounded-lg uppercase font-bold flex items-center gap-1"><CheckIcon color="#25D366" size={12} /> Meta Verified</span>
+                      <span className="px-2.5 py-1 text-[10px] font-mono bg-[#F0FDF4] text-[#25D366] border border-[#25D366]/40 rounded-full uppercase font-bold flex items-center gap-1">
+                        <CheckIcon color="#25D366" size={12} /> Meta Ready
+                      </span>
                     </div>
-                    <h3 className="text-xl font-outfit font-bold text-slate-900 mb-2">{t.title}</h3>
-                    <p className="text-slate-500 text-sm leading-relaxed mb-6">{t.desc}</p>
-                    <button onClick={() => tryBotTemplate(t.id)} className="w-full py-3 rounded-xl bg-[#25D366] text-white font-outfit font-bold text-sm uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-[#1ebe5d] transition-colors shadow-md shadow-[#25D366]/30">
+                    <h3 className="text-xl font-outfit font-bold text-slate-900 mb-2">{t.name}</h3>
+                    <p className="text-slate-600 text-sm leading-relaxed mb-6">{t.welcome}</p>
+                    <button
+                      onClick={() => tryBotTemplate(t.id)}
+                      className="w-full py-3 rounded-xl bg-[#25D366] text-white font-outfit font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-[#1ebe5d] transition-colors shadow-md shadow-[#25D366]/20"
+                    >
                       <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38c1.45.79 3.08 1.21 4.79 1.21 5.46 0 9.91-4.45 9.91-9.91C22 6.45 17.5 2 12.04 2z"/></svg>
-                      Try Now
+                      Try Bot Live
                     </button>
                   </div>
                 </div>
               </AnimatedSection>
             ))}
           </div>
+
         </div>
       </section>
 
-      {/* META APPROVED */}
+      {/* META PARTNER HIGHLIGHT SECTION */}
       <section className="py-20 border-b border-slate-200 bg-white relative overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-[#25D366]/5 blur-[150px] rounded-full pointer-events-none"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <AnimatedSection>
-            <div className="rounded-2xl bg-white border border-[#25D366]/30 p-8 md:p-14 relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8 shadow-xl shadow-[#25D366]/5">
+            <div className="rounded-3xl bg-gradient-to-br from-emerald-50/80 via-white to-blue-50/80 border border-[#25D366]/30 p-8 md:p-14 flex flex-col md:flex-row items-center justify-between gap-8 shadow-xl shadow-emerald-500/5">
               <div className="max-w-xl">
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#F0FDF4] border border-[#25D366]/40 mb-4">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#F0FDF4] border border-[#25D366]/40 mb-4 shadow-sm">
                   <CheckIcon color="#25D366" size={20} />
-                  <span className="text-[#25D366] font-mono text-xs font-bold uppercase tracking-wider">Meta Business Partner</span>
+                  <span className="text-[#25D366] font-mono text-xs font-bold uppercase tracking-wider">
+                    Official Meta Business Partner
+                  </span>
                 </div>
-                <h2 className="text-3xl sm:text-4xl font-outfit font-extrabold text-slate-900 tracking-tight mb-4">Officially Meta-Approved for WhatsApp Business API.</h2>
-                <p className="text-slate-500 text-sm sm:text-base leading-relaxed">Actionpackd is a verified Meta Business Partner. Deploy WhatsApp Business API with confidence — official templates, green badge verification, and enterprise-grade security built in.</p>
+                <h2 className="text-3xl sm:text-4xl font-outfit font-extrabold text-slate-900 tracking-tight mb-4">
+                  Officially Approved for WhatsApp Business API.
+                </h2>
+                <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
+                  Actionpackd is a verified Meta Business Partner. Deploy enterprise WhatsApp messaging with official templates, green badge verification, and compliance out of the box.
+                </p>
               </div>
-              <div className="shrink-0 flex flex-col items-center gap-4">
-                <div className="w-32 h-32 rounded-full bg-[#F0FDF4] border-4 border-[#25D366]/40 flex items-center justify-center shadow-lg shadow-[#25D366]/20 animate-float">
+              <div className="shrink-0 flex flex-col items-center gap-3">
+                <div className="w-32 h-32 rounded-full bg-[#F0FDF4] border-4 border-[#25D366]/50 flex items-center justify-center shadow-lg shadow-[#25D366]/20 animate-pulse-soft">
                   <CheckIcon color="#25D366" size={64} />
                 </div>
                 <div className="text-center">
-                  <div className="text-[#25D366] font-mono text-sm font-bold uppercase tracking-wider">Verified</div>
-                  <div className="text-slate-400 text-xs font-mono">Meta Business Partner</div>
+                  <div className="text-[#25D366] font-mono text-sm font-bold uppercase tracking-wider">Verified Partner</div>
+                  <div className="text-slate-400 text-xs font-mono">Meta Cloud API</div>
                 </div>
               </div>
             </div>
@@ -557,26 +698,220 @@ export default function App() {
         </div>
       </section>
 
-      {/* SOLUTIONS */}
-      <section id="solutions" className="py-24 border-b border-slate-200">
+      {/* SOLUTIONS BY INDUSTRY */}
+      <section id="solutions" className="py-24 border-b border-slate-200 bg-slate-50/40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <AnimatedSection>
             <div className="mb-16">
               <div className="text-[#FF003C] font-mono text-xs font-bold uppercase tracking-widest mb-2">// INDUSTRY SOLUTIONS</div>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-outfit font-extrabold text-slate-900 tracking-tight">Built for <span className="gradient-text">every sector.</span></h2>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-outfit font-extrabold text-slate-900 tracking-tight">
+                Tailored for <span className="gradient-text">every industry sector.</span>
+              </h2>
             </div>
           </AnimatedSection>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {solutions.map((s, i) => (
+            {[
+              { icon: '🛒', title: 'E-Commerce & Retail', desc: 'Automated order tracking, product upsells, and 24/7 cart recovery automations on WhatsApp.' },
+              { icon: '🏠', title: 'Real Estate & Property', desc: 'Property inquiry filtering, tour scheduling, and instant lead pre-qualification.' },
+              { icon: '🎓', title: 'Education & Academies', desc: 'Student onboarding, 24/7 course FAQ resolution, and assignment reminders.' },
+              { icon: '🏥', title: 'Healthcare & Clinics', desc: 'Automated appointment booking, patient intake triage, and SMS/WhatsApp follow-ups.' },
+              { icon: '🎫', title: 'Events & Entertainment', desc: 'Ticket inquiries, schedule announcements, and venue guidance.' },
+              { icon: '🏢', title: 'Custom Enterprise', desc: 'Custom API mesh, dedicated GPU nodes, SOC2 compliance, and zero data retention.' }
+            ].map((s, i) => (
               <AnimatedSection key={i} delay={i * 0.08}>
-                <div className="card-hover relative bg-white border border-slate-200 rounded-2xl p-7 h-full">
-                  <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-200 overflow-hidden flex items-center justify-center mb-5">
-                    <img src={s.img} alt={s.title} className="w-full h-full object-cover" />
+                <div className="bento-card p-7 bg-white h-full">
+                  <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-2xl mb-4 border border-slate-200">
+                    {s.icon}
                   </div>
                   <h3 className="text-xl font-outfit font-bold text-slate-900 mb-2">{s.title}</h3>
-                  <p className="text-slate-500 text-sm leading-relaxed">{s.desc}</p>
-                  {s.title === 'Custom Enterprise' && (
-                    <button onClick={() => openModal('Custom Solution', 'Tell us about your specific workflow to see a custom agent demo.')} className="mt-4 text-xs font-mono text-[#FF003C] hover:underline uppercase font-bold">Explore Custom Solutions →</button>
+                  <p className="text-slate-600 text-sm leading-relaxed">{s.desc}</p>
+                </div>
+              </AnimatedSection>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* INTERACTIVE VOLUME / SAVINGS CALCULATOR */}
+      <section className="py-20 border-b border-slate-200 bg-white">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <AnimatedSection>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-[#3B82F6] font-mono text-xs font-bold uppercase tracking-widest mb-4">
+              // ROI CALCULATOR
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-outfit font-extrabold text-slate-900 mb-4">
+              Calculate your support cost savings.
+            </h2>
+            <p className="text-slate-600 text-sm font-sans max-w-xl mx-auto mb-10">
+              Drag the slider to match your monthly customer conversation volume:
+            </p>
+
+            <div className="bg-slate-50 border border-slate-200 rounded-3xl p-8 max-w-2xl mx-auto shadow-md">
+              <div className="flex items-center justify-between mb-4 font-mono text-xs text-slate-600">
+                <span>Monthly Conversations:</span>
+                <span className="text-[#FF003C] font-extrabold text-lg">{monthlyVolume.toLocaleString()} msgs</span>
+              </div>
+              <input
+                type="range"
+                min="5000"
+                max="200000"
+                step="5000"
+                value={monthlyVolume}
+                onChange={(e) => setMonthlyVolume(Number(e.target.value))}
+                className="w-full accent-[#FF003C] cursor-pointer mb-8"
+              />
+
+              <div className="grid grid-cols-2 gap-4 text-center divide-x divide-slate-200 pt-4 border-t border-slate-200">
+                <div>
+                  <div className="text-slate-400 text-xs font-mono uppercase">Human Support Hours Saved</div>
+                  <div className="text-3xl sm:text-4xl font-outfit font-extrabold text-[#25D366] mt-1">
+                    {Math.round(monthlyVolume * 0.08).toLocaleString()} hrs
+                  </div>
+                </div>
+                <div>
+                  <div className="text-slate-400 text-xs font-mono uppercase">Est. Monthly Cost Saved</div>
+                  <div className="text-3xl sm:text-4xl font-outfit font-extrabold text-[#3B82F6] mt-1">
+                    ${Math.round(monthlyVolume * 0.42).toLocaleString()}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </AnimatedSection>
+        </div>
+      </section>
+
+      {/* PRICING TIERS */}
+      <section id="pricing" className="py-24 border-b border-slate-200 bg-slate-50/50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <AnimatedSection>
+            <div className="text-center mb-16">
+              <div className="text-[#FF003C] font-mono text-xs font-bold uppercase tracking-widest mb-2">// PRICING</div>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-outfit font-extrabold text-slate-900 tracking-tight">
+                Simple, <span className="gradient-text">transparent tiers.</span>
+              </h2>
+            </div>
+          </AnimatedSection>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              {
+                name: 'FREE SANDBOX',
+                price: '$0',
+                period: '/ month',
+                desc: 'Perfect for building and testing AI agents on web chat and test channels.',
+                features: ['2 Active AI Agents', '1,000 Messages / mo', 'Web Chat & API Webhooks', 'Bot Template Access'],
+                featured: false,
+                cta: 'Start Building Free'
+              },
+              {
+                name: 'PRO AUTOMATION',
+                price: '$99',
+                period: '/ month',
+                desc: 'Full multi-channel deployment with official WhatsApp Business API.',
+                features: ['15 Active AI Agents', '50,000 Messages / mo', 'WhatsApp Business API', 'Twilio Voice API', 'Real-Time Analytics', 'Meta Verified Partner Badge'],
+                featured: true,
+                cta: 'Get Started with Pro'
+              },
+              {
+                name: 'ENTERPRISE SLA',
+                price: 'Custom',
+                period: '',
+                desc: 'Dedicated infrastructure, custom SLAs, and zero data-retention privacy.',
+                features: ['Unlimited AI Agents', 'Dedicated GPU Nodes', '99.99% Guaranteed SLA', 'Custom API Integrations', 'SOC2 / HIPAA Compliance'],
+                featured: false,
+                cta: 'Contact Sales'
+              }
+            ].map((tier, i) => (
+              <AnimatedSection key={i} delay={i * 0.1}>
+                <div className={`rounded-3xl p-8 flex flex-col justify-between relative h-full bg-white transition-all ${
+                  tier.featured ? 'border-2 border-[#FF003C] shadow-xl shadow-rose-500/10' : 'border border-slate-200 shadow-sm'
+                }`}>
+                  {tier.featured && (
+                    <div className="absolute -top-3.5 right-6 bg-[#FF003C] text-white px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider shadow-sm">
+                      MOST POPULAR
+                    </div>
+                  )}
+                  <div>
+                    <div className="text-xs font-mono text-slate-400 uppercase mb-2 font-bold">{tier.name}</div>
+                    <div className="text-4xl font-outfit font-extrabold text-slate-900 mb-3">
+                      {tier.price} <span className="text-xs font-mono text-slate-400 font-normal">{tier.period}</span>
+                    </div>
+                    <p className="text-slate-600 text-xs mb-6">{tier.desc}</p>
+                    <ul className="space-y-3 text-xs text-slate-700 font-sans mb-8">
+                      {tier.features.map((f, j) => (
+                        <li key={j} className="flex items-center gap-2.5">
+                          <CheckIcon color={f.includes('Meta') ? '#25D366' : '#FF003C'} size={16} />
+                          <span className={f.includes('Meta') ? 'font-bold text-slate-900' : ''}>{f}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <button
+                    onClick={() => openModal(tier.cta, `Get started with the Actionpackd ${tier.name} plan.`)}
+                    className={`w-full py-3.5 font-outfit font-bold text-xs uppercase tracking-wider rounded-xl border ${
+                      tier.featured
+                        ? 'btn-primary bg-[#FF003C] text-white border-[#FF003C]'
+                        : 'btn-outline bg-transparent text-slate-900 border-slate-200'
+                    }`}
+                  >
+                    {tier.cta}
+                  </button>
+                </div>
+              </AnimatedSection>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* PLATFORM TELEMETRY COUNTER */}
+      <section className="py-20 border-b border-slate-200 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+            {[
+              { label: 'Conversations Processed', target: 18450200, suffix: '+', color: '#3B82F6' },
+              { label: 'Platform Uptime', target: 99, suffix: '.99%', color: '#FFB703' },
+              { label: 'Supported Sectors', target: 52, suffix: '+', color: '#FF003C' },
+              { label: 'Availability', value: '24/7/365', color: '#25D366' }
+            ].map((s, i) => (
+              <div key={i} className="bento-card p-6 bg-slate-50/60 border border-slate-200">
+                <div className="text-[11px] font-mono text-slate-400 uppercase tracking-wider mb-2">{s.label}</div>
+                <div className="text-3xl sm:text-4xl font-extrabold font-mono" style={{ color: s.color }}>
+                  {s.value ? s.value : <CounterUp target={s.target} suffix={s.suffix} />}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ ACCORDION SECTION */}
+      <section id="faq" className="py-24 border-b border-slate-200 bg-slate-50/40">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <AnimatedSection>
+            <div className="text-center mb-16">
+              <div className="text-[#FF003C] font-mono text-xs font-bold uppercase tracking-widest mb-2">// FREQUENTLY ASKED QUESTIONS</div>
+              <h2 className="text-3xl sm:text-4xl font-outfit font-extrabold text-slate-900 tracking-tight">
+                Got questions? <span className="gradient-text">We've got answers.</span>
+              </h2>
+            </div>
+          </AnimatedSection>
+
+          <div className="space-y-4">
+            {faqs.map((faq, i) => (
+              <AnimatedSection key={i} delay={i * 0.06}>
+                <div className="bento-card overflow-hidden bg-white border border-slate-200">
+                  <button
+                    onClick={() => setOpenFaq(openFaq === i ? -1 : i)}
+                    className="w-full p-6 text-left font-outfit font-bold text-slate-900 flex items-center justify-between text-base sm:text-lg"
+                  >
+                    <span>{faq.q}</span>
+                    <span className="text-[#FF003C] font-mono text-xl">{openFaq === i ? '−' : '+'}</span>
+                  </button>
+                  {openFaq === i && (
+                    <div className="px-6 pb-6 text-slate-600 text-sm leading-relaxed font-sans border-t border-slate-100 pt-4 animate-slide-up">
+                      {faq.a}
+                    </div>
                   )}
                 </div>
               </AnimatedSection>
@@ -585,228 +920,58 @@ export default function App() {
         </div>
       </section>
 
-      {/* INTEGRATIONS */}
-      <section id="integrations" className="py-24 border-b border-slate-200 bg-slate-50/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <AnimatedSection>
-            <div className="text-center mb-16">
-              <div className="text-[#FF003C] font-mono text-xs font-bold uppercase tracking-widest mb-2">// INTEGRATIONS</div>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-outfit font-extrabold text-slate-900 tracking-tight">Connect <span className="gradient-text">everything.</span></h2>
-              <p className="text-slate-500 text-sm font-mono mt-3 max-w-xl mx-auto">200+ native integrations. Plug into your existing stack in minutes.</p>
-            </div>
-          </AnimatedSection>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {integrations.map((int, i) => (
-              <AnimatedSection key={i} delay={i * 0.04}>
-                <div className="card-hover relative bg-white border border-slate-200 rounded-xl p-5 flex flex-col items-center justify-center gap-2 h-full">
-                  <div className="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center">
-                    <img src={int.logo} alt={int.name} className="w-7 h-7 object-contain" style={{ filter: int.name === 'Notion' ? 'brightness(0)' : 'none' }} />
-                  </div>
-                  <span className="text-slate-600 text-xs font-mono font-bold">{int.name}</span>
-                </div>
-              </AnimatedSection>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* HOW IT WORKS */}
-      <section id="how-it-works" className="py-24 border-b border-slate-200 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <AnimatedSection>
-            <div className="text-center mb-16">
-              <div className="text-[#FF003C] font-mono text-xs font-bold uppercase tracking-widest mb-2">// HOW IT WORKS</div>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-outfit font-extrabold text-slate-900 tracking-tight">From idea to <span className="gradient-text">deployment.</span></h2>
-            </div>
-          </AnimatedSection>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {[
-              { num: '01', title: 'Build', desc: 'Pick a template or describe your workflow in plain English. No code needed.' },
-              { num: '02', title: 'Customize', desc: 'Connect knowledge bases, CRM APIs, and custom tool rules.' },
-              { num: '03', title: 'Deploy', desc: '1-click launch to WhatsApp, Web, Voice, or Email.' },
-              { num: '04', title: 'Scale', desc: 'Handle thousands of parallel conversations with real-time analytics.' },
-            ].map((step, i) => (
-              <AnimatedSection key={i} delay={i * 0.1}>
-                <div className="flex flex-col items-center text-center group">
-                  <div className="w-14 h-14 rounded-full bg-white border-2 border-slate-200 text-slate-900 font-mono font-bold flex items-center justify-center text-lg mb-4 group-hover:border-[#FF003C] transition-colors">{step.num}</div>
-                  <h4 className="text-lg font-outfit font-bold text-slate-900 mb-2">{step.title}</h4>
-                  <p className="text-xs text-slate-500">{step.desc}</p>
-                </div>
-              </AnimatedSection>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* PRICING */}
-      <section id="pricing" className="py-24 border-b border-slate-200 bg-slate-50/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <AnimatedSection>
-            <div className="text-center mb-16">
-              <div className="text-[#FF003C] font-mono text-xs font-bold uppercase tracking-widest mb-2">// PRICING</div>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-outfit font-extrabold text-slate-900 tracking-tight">Simple, <span className="gradient-text">transparent tiers.</span></h2>
-            </div>
-          </AnimatedSection>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              { name: 'FREE SANDBOX', price: '$0', period: '/ month', desc: 'Perfect for building and testing AI agents on local channels.', features: ['2 Active AI Agents', '1,000 Messages / mo', 'Web & Chat Webhooks', 'Bot Template Access'], featured: false, cta: 'Start Building Free' },
-              { name: 'PRO', price: '$99', period: '/ month', desc: 'Full multi-channel deployment with WhatsApp Business API.', features: ['15 Active AI Agents', '50,000 Messages / mo', 'WhatsApp Business API', 'Twilio Voice API', 'Real-Time Analytics', 'Meta Verified Badge'], featured: true, cta: 'Get Pro Access →' },
-              { name: 'ENTERPRISE', price: 'Custom', period: '', desc: 'Dedicated infrastructure, custom SLAs, and zero-retention privacy.', features: ['Unlimited AI Agents', 'Dedicated GPU Nodes', '99.99% Guaranteed SLA', 'Custom Integrations', 'SOC2 / HIPAA Compliance'], featured: false, cta: 'Contact Sales' },
-            ].map((tier, i) => (
-              <AnimatedSection key={i} delay={i * 0.1}>
-                <div className={`rounded-2xl p-8 flex flex-col justify-between relative h-full ${tier.featured ? 'bg-white border-2 border-[#FF003C] shadow-xl shadow-[#FF003C]/10' : 'bg-white border border-slate-200 shadow-sm'}`}>
-                  {tier.featured && <div className="absolute -top-3.5 right-6 bg-[#FF003C] text-white px-3.5 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider">MOST POPULAR</div>}
-                  <div>
-                    <div className="text-xs font-mono text-slate-400 uppercase mb-2">{tier.name}</div>
-                    <div className="text-4xl font-outfit font-extrabold text-slate-900 mb-4">{tier.price} <span className="text-xs font-mono text-slate-400 font-normal">{tier.period}</span></div>
-                    <p className="text-slate-500 text-xs mb-6">{tier.desc}</p>
-                    <ul className="space-y-3.5 text-xs text-slate-600 font-sans mb-8">
-                      {tier.features.map((f, j) => (
-                        <li key={j} className="flex items-center gap-2.5"><span style={{ color: f === 'Meta Verified Badge' ? '#25D366' : '#FF003C' }}>✔</span> {f}</li>
-                      ))}
-                    </ul>
-                  </div>
-                  <button onClick={() => openModal(tier.cta, 'Get started with Actionpackd.')} className={`w-full py-3.5 font-outfit font-bold text-xs uppercase tracking-wider rounded-xl border ${tier.featured ? 'btn-primary bg-[#FF003C] text-white border-[#FF003C]' : 'btn-outline bg-transparent text-slate-900 border-slate-200'}`}>{tier.cta}</button>
-                </div>
-              </AnimatedSection>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* STATS */}
-      <section id="stats" className="py-24 border-b border-slate-200 bg-white relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <AnimatedSection>
-            <div className="text-center mb-16">
-              <div className="text-[#FF003C] font-mono text-xs font-bold uppercase tracking-widest mb-2">// PLATFORM METRICS</div>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-outfit font-extrabold text-slate-900 tracking-tight">Numbers that <span className="gradient-text">speak.</span></h2>
-            </div>
-          </AnimatedSection>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              { label: 'Conversations', target: 18450200, suffix: '+', color: '#3B82F6', sub: 'Total automated dialogues' },
-              { label: 'Uptime', target: 99, suffix: '.99%', color: '#FFB703', sub: 'Zero-downtime cluster' },
-              { label: 'Sectors', target: 52, suffix: '+', color: '#FF003C', sub: 'Fintech, E-com, Healthcare' },
-              { label: 'Availability', value: '24/7/365', color: '#25D366', sub: 'Continuous execution' },
-            ].map((s, i) => (
-              <AnimatedSection key={i} delay={i * 0.08}>
-                <div className="card-hover p-7 rounded-2xl bg-white border border-slate-200 flex flex-col justify-between h-full">
-                  <div className="flex items-center justify-between text-[11px] font-mono text-slate-400 uppercase tracking-wider mb-4">
-                    <span>{s.label}</span>
-                    <span className="flex items-center gap-1.5" style={{ color: s.color }}><span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: s.color }}></span>LIVE</span>
-                  </div>
-                  <div className="text-3xl sm:text-4xl font-extrabold font-mono tracking-tighter my-2" style={{ color: s.color }}>
-                    {s.value ? s.value : <CounterUp target={s.target} suffix={s.suffix} />}
-                  </div>
-                  <div className="text-[11px] font-mono text-slate-400">{s.sub}</div>
-                </div>
-              </AnimatedSection>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* TESTIMONIALS */}
-      <section id="testimonials" className="py-24 border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <AnimatedSection>
-            <div className="mb-16">
-              <div className="text-[#FF003C] font-mono text-xs font-bold uppercase tracking-widest mb-2">// CUSTOMER STORIES</div>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-outfit font-extrabold text-slate-900 tracking-tight">Loved by <span className="gradient-text">teams worldwide.</span></h2>
-            </div>
-          </AnimatedSection>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {testimonials.map((t, i) => (
-              <AnimatedSection key={i} delay={i * 0.1}>
-                <div className="bg-white border-l-4 border border-slate-200 rounded-r-2xl p-7 flex flex-col justify-between shadow-sm h-full" style={{ borderLeftColor: t.color }}>
-                  <div>
-                    <div className="text-[11px] font-mono text-slate-400 uppercase mb-4 tracking-wider flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: t.color }}></span> STORY #{String(i + 1).padStart(2, '0')}
-                    </div>
-                    <p className="text-slate-600 text-sm leading-relaxed mb-6">"{t.text}"</p>
-                  </div>
-                  <div>
-                    <div className="font-outfit font-bold text-slate-900 text-sm">{t.name}</div>
-                    <div className="text-xs font-mono text-slate-400">{t.role}</div>
-                  </div>
-                </div>
-              </AnimatedSection>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* PARTNERS */}
-      <section id="partners" className="py-20 border-b border-slate-200 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <AnimatedSection>
-            <div className="rounded-2xl bg-white border border-slate-200 p-8 md:p-14 relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8 shadow-xl shadow-slate-200/50">
-              <div className="max-w-xl">
-                <div className="text-[#FF003C] font-mono text-xs font-bold uppercase tracking-widest mb-3">// PARTNER PROGRAM</div>
-                <h2 className="text-3xl sm:text-4xl font-outfit font-extrabold text-slate-900 tracking-tight mb-4">Earn 30% Lifetime Recurring Payouts.</h2>
-                <p className="text-slate-500 text-sm sm:text-base leading-relaxed">Partner with Actionpackd. Earn 30% commission on every sale, every month, for life when you introduce agencies or enterprise clients to our AI agent platform.</p>
-              </div>
-              <button onClick={() => openModal('Partner Program', 'Apply for the Actionpackd Partner Network & start earning 30% lifetime recurring payouts.')} className="btn-primary px-8 py-4 rounded-xl bg-[#FF003C] text-white font-outfit font-bold text-base uppercase tracking-wider border border-[#FF003C]">Become a Partner →</button>
-            </div>
-          </AnimatedSection>
-        </div>
-      </section>
-
       {/* FOOTER */}
-      <footer className="bg-white relative pt-1 border-t-2 border-[#FF003C]/30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-10 mb-16">
+      <footer className="bg-white border-t border-slate-200 pt-16 pb-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-10 mb-12">
             <div className="md:col-span-2 space-y-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-white border-2 border-[#FF003C] p-0.5 overflow-hidden shadow-md flex items-center justify-center">
-                  <img src="/assets/logo.png" alt="Actionpackd Logo" className="w-full h-full object-cover rounded-full" />
-                </div>
-                <span className="font-outfit font-extrabold text-lg tracking-tight text-slate-900 uppercase">ACTION<span className="gradient-text">PACKD</span></span>
+                <img src="/assets/logo_horizontal.png" alt="Actionpackd" className="h-10 w-auto object-contain" />
               </div>
-              <p className="text-slate-500 text-xs font-mono max-w-sm">AI Agent Platform for WhatsApp, Web, Voice, and Email. Build, deploy, and scale conversations in minutes. Meta-approved WhatsApp Business API.</p>
-              <div className="flex items-center gap-2 text-[11px] font-mono text-[#25D366] pt-2">
+              <p className="text-slate-600 text-xs font-sans max-w-sm leading-relaxed">
+                Modern AI Agent Automation Platform for WhatsApp Business API, Web Chat, Voice, and Email workflows.
+              </p>
+              <div className="flex items-center gap-2 text-xs font-mono text-[#25D366] pt-2">
                 <CheckIcon color="#25D366" size={16} />
-                <span>Meta Business Partner · WhatsApp API Approved</span>
+                <span>Meta Business Partner · Official WhatsApp API</span>
               </div>
             </div>
+
             <div>
-              <h4 className="text-xs font-mono font-bold text-slate-900 uppercase tracking-wider mb-4">Features</h4>
-              <ul className="space-y-2.5 text-xs text-slate-500 font-sans">
-                <li><a href="#features" className="hover:text-slate-900 transition-colors">Omni-Channel</a></li>
-                <li><a href="#features" className="hover:text-slate-900 transition-colors">Bot Builder</a></li>
-                <li><a href="#features" className="hover:text-slate-900 transition-colors">Broadcast</a></li>
+              <h4 className="text-xs font-mono font-bold text-slate-900 uppercase tracking-wider mb-4">Platform</h4>
+              <ul className="space-y-2 text-xs text-slate-600 font-sans">
+                <li><a href="#features" className="hover:text-slate-900 transition-colors">Omni-Channel Hub</a></li>
+                <li><a href="#features" className="hover:text-slate-900 transition-colors">Visual Flow Builder</a></li>
+                <li><a href="#features" className="hover:text-slate-900 transition-colors">Broadcast Campaigns</a></li>
                 <li><a href="#features" className="hover:text-slate-900 transition-colors">Shared Inbox</a></li>
-                <li><a href="#features" className="hover:text-slate-900 transition-colors">Analytics</a></li>
               </ul>
             </div>
+
             <div>
               <h4 className="text-xs font-mono font-bold text-slate-900 uppercase tracking-wider mb-4">Resources</h4>
-              <ul className="space-y-2.5 text-xs text-slate-500 font-sans">
+              <ul className="space-y-2 text-xs text-slate-600 font-sans">
                 <li><a href="#bot-templates" className="hover:text-slate-900 transition-colors">Bot Templates</a></li>
-                <li><a href="#docs" onClick={(e) => { e.preventDefault(); openModal('Documentation', 'Access complete developer documentation.') }} className="hover:text-slate-900 transition-colors">Documentation</a></li>
-                <li><a href="#api" onClick={(e) => { e.preventDefault(); openModal('API Reference', 'Explore webhooks and REST endpoints.') }} className="hover:text-slate-900 transition-colors">API Reference</a></li>
-                <li><a href="#blog" onClick={(e) => { e.preventDefault(); openModal('Blog', 'Read the latest articles.') }} className="hover:text-slate-900 transition-colors">Blog</a></li>
-                <li><a href="#help" onClick={(e) => { e.preventDefault(); openModal('Help Center', 'Browse guides and tutorials.') }} className="hover:text-slate-900 transition-colors">Help Center</a></li>
+                <li><a href="#faq" className="hover:text-slate-900 transition-colors">FAQ & Support</a></li>
+                <li><a href="#pricing" className="hover:text-slate-900 transition-colors">Pricing Tiers</a></li>
               </ul>
             </div>
+
             <div>
-              <h4 className="text-xs font-mono font-bold text-slate-900 uppercase tracking-wider mb-4">Company</h4>
-              <ul className="space-y-2.5 text-xs text-slate-500 font-sans">
-                <li><a href="#partners" className="hover:text-slate-900 transition-colors">Partners</a></li>
-                <li><a href="#pricing" className="hover:text-slate-900 transition-colors">Pricing</a></li>
-                <li><a href="#privacy" onClick={(e) => { e.preventDefault(); openModal('Privacy Policy', 'SOC2 Type II compliance.') }} className="hover:text-slate-900 transition-colors">Privacy Policy</a></li>
-                <li><a href="#terms" onClick={(e) => { e.preventDefault(); openModal('Terms of Service', 'Enterprise SLA details.') }} className="hover:text-slate-900 transition-colors">Terms of Service</a></li>
-                <li><a href="#security" onClick={(e) => { e.preventDefault(); openModal('Security', 'Zero retention option available.') }} className="hover:text-slate-900 transition-colors">Security</a></li>
+              <h4 className="text-xs font-mono font-bold text-slate-900 uppercase tracking-wider mb-4">Security</h4>
+              <ul className="space-y-2 text-xs text-slate-600 font-sans">
+                <li><span className="text-[#25D366] font-bold">Meta Approved</span></li>
+                <li><span>SOC2 Type II</span></li>
+                <li><span>Zero Retention Option</span></li>
               </ul>
             </div>
           </div>
-          <div className="pt-8 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between text-[11px] font-mono text-slate-400 gap-4">
+
+          <div className="pt-8 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between text-xs font-mono text-slate-400 gap-4">
             <div>© 2026 Actionpackd Inc. All rights reserved.</div>
             <div className="flex items-center gap-4">
-              <span className="text-[#25D366]">● Meta Approved</span>
+              <span className="text-[#25D366]">● Meta Verified</span>
               <span>●</span>
-              <span className="text-[#3B82F6]">99.99% Uptime</span>
+              <span className="text-[#3B82F6]">99.99% Uptime SLA</span>
             </div>
           </div>
         </div>
@@ -814,38 +979,44 @@ export default function App() {
 
       {/* CTA MODAL */}
       {modal.open && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={(e) => e.target === e.currentTarget && closeModal()}>
-          <div className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 max-w-md w-full shadow-2xl animate-slide-in">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-4 mb-4">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={(e) => e.target === e.currentTarget && closeModal()}>
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl animate-slide-up">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
               <div className="flex items-center gap-3">
-                <div className="w-7 h-7 rounded-full bg-white border border-[#FF003C] overflow-hidden flex items-center justify-center">
-                  <img src="/assets/logo.png" alt="Logo" className="w-full h-full object-cover" />
+                <div className="w-8 h-8 rounded-full bg-white border border-[#FF003C] overflow-hidden flex items-center justify-center">
+                  <img src="/assets/logo.png" alt="Logo" className="w-full h-full object-cover rounded-full" />
                 </div>
-                <h3 className="font-outfit font-extrabold text-lg text-slate-900">{modal.title}</h3>
+                <h3 className="font-outfit font-extrabold text-base text-slate-900">{modal.title}</h3>
               </div>
-              <button onClick={closeModal} className="text-slate-400 hover:text-slate-900 font-mono">✕</button>
+              <button onClick={closeModal} className="text-slate-400 hover:text-slate-900 font-mono text-lg">✕</button>
             </div>
-            <p className="text-slate-600 text-sm leading-relaxed mb-6">{modal.body}</p>
-            <form onSubmit={(e) => { e.preventDefault(); closeModal(); alert('⚡ Welcome to Actionpackd! Your account is ready.') }} className="space-y-4">
+            <p className="text-slate-600 text-xs leading-relaxed mb-6 font-sans">{modal.body}</p>
+            <form onSubmit={(e) => { e.preventDefault(); closeModal(); alert('⚡ Welcome to Actionpackd! Account setup complete.') }} className="space-y-4">
               <div>
-                <label className="block text-xs font-mono text-slate-400 mb-1.5">WORK EMAIL</label>
+                <label className="block text-[11px] font-mono text-slate-400 mb-1.5 uppercase font-bold">WORK EMAIL</label>
                 <input type="email" placeholder="you@company.com" required className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#FF003C] font-mono" />
               </div>
-              <button type="submit" className="btn-primary w-full py-3.5 bg-[#FF003C] text-white font-outfit font-bold text-xs uppercase tracking-wider rounded-xl border border-[#FF003C]">Get Started →</button>
+              <button type="submit" className="btn-primary w-full py-3.5 bg-[#FF003C] text-white font-outfit font-bold text-xs uppercase tracking-wider rounded-xl border border-[#FF003C]">
+                Get Started →
+              </button>
             </form>
           </div>
         </div>
       )}
 
-      {/* BOT TEMPLATE MODAL */}
+      {/* WHATSAPP BOT TEMPLATE SIMULATOR MODAL */}
       {botModal.open && botModal.template && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={(e) => e.target === e.currentTarget && closeBotModal()}>
-          <div className="bg-[#EFEAE2] border border-[#25D366]/30 rounded-2xl max-w-md w-full shadow-2xl overflow-hidden animate-slide-in">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={(e) => e.target === e.currentTarget && closeBotModal()}>
+          <div className="bg-[#EFEAE2] border border-[#25D366]/40 rounded-3xl max-w-md w-full shadow-2xl overflow-hidden animate-slide-up">
+            
+            {/* WHATSAPP APP BAR */}
             <div className="bg-[#1F2C34] p-4 flex items-center gap-3">
               <button onClick={closeBotModal} className="text-gray-400 hover:text-white">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/></svg>
               </button>
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#25D366] to-[#1D4ED8] flex items-center justify-center text-white font-bold text-lg">{botModal.template.avatar}</div>
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#25D366] to-[#3B82F6] flex items-center justify-center text-white font-bold text-lg shadow-sm">
+                {botModal.template.avatar}
+              </div>
               <div className="flex-1">
                 <div className="text-white font-semibold text-sm">{botModal.template.name}</div>
                 <div className="text-[#25D366] text-xs flex items-center gap-1">
@@ -854,22 +1025,39 @@ export default function App() {
               </div>
               <CheckIcon color="#25D366" size={20} />
             </div>
-            <div className="p-4 min-h-[320px] max-h-[400px] overflow-y-auto flex flex-col gap-2" style={{ backgroundImage: 'linear-gradient(rgba(239,234,226,0.95), rgba(239,234,226,0.95))' }}>
+
+            {/* CHAT BUBBLES */}
+            <div className="p-4 min-h-[320px] max-h-[400px] overflow-y-auto flex flex-col gap-2.5">
               {botMessages.map((msg, i) => (
-                <div key={i} className={`wa-bubble ${msg.type === 'bot' ? 'wa-bubble-bot' : 'wa-bubble-user'} animate-slide-in`}>
-                  {msg.text}<span className="wa-tick">✓✓</span>
+                <div key={i} className={`wa-bubble ${msg.type === 'bot' ? 'wa-bubble-bot' : 'wa-bubble-user'} animate-slide-up`}>
+                  {msg.text}
+                  <span className="wa-tick">✓✓</span>
                 </div>
               ))}
             </div>
+
+            {/* CHAT INPUT BAR */}
             <div className="p-3 bg-[#1F2C34] flex items-center gap-2">
-              <input value={botInput} onChange={(e) => setBotInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && sendBotMessage()} type="text" placeholder="Type a message..." className="flex-1 bg-[#2A3942] text-white text-sm rounded-full px-4 py-2.5 border-none focus:outline-none placeholder-gray-500" />
-              <button onClick={sendBotMessage} className="w-10 h-10 rounded-full bg-[#25D366] flex items-center justify-center hover:bg-[#1ebe5d] transition-colors shrink-0">
+              <input
+                value={botInput}
+                onChange={(e) => setBotInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && sendBotMessage()}
+                type="text"
+                placeholder="Type a test message to the AI bot..."
+                className="flex-1 bg-[#2A3942] text-white text-xs rounded-full px-4 py-2.5 border-none focus:outline-none placeholder-gray-400 font-sans"
+              />
+              <button
+                onClick={sendBotMessage}
+                className="w-10 h-10 rounded-full bg-[#25D366] flex items-center justify-center hover:bg-[#1ebe5d] transition-colors shrink-0 shadow-sm"
+              >
                 <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>
               </button>
             </div>
+
           </div>
         </div>
       )}
+
     </div>
   )
 }
