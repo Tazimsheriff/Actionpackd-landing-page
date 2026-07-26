@@ -259,14 +259,23 @@ const SeeItInActionSection = () => {
   const activeTab = Math.min(tabs.length - 1, Math.floor(progress * tabs.length))
   const current = tabs[activeTab]
 
+  const handleTabClick = (idx) => {
+    if (!containerRef.current) return
+    const rect = containerRef.current.getBoundingClientRect()
+    const scrollTop = window.scrollY + rect.top
+    const totalScrollable = rect.height - window.innerHeight
+    const targetScroll = scrollTop + (totalScrollable * (idx / (tabs.length - 1)))
+    window.scrollTo({ top: targetScroll, behavior: 'smooth' })
+  }
+
   return (
-    <section ref={containerRef} className="relative h-[350vh] bg-[#090A0F] text-white border-b border-slate-800 bg-grid-dark">
+    <section ref={containerRef} className="relative h-[380vh] bg-[#090A0F] text-white border-b border-slate-800 bg-grid-dark">
       
-      {/* STICKY CONTAINER PINNED DURING SCROLL */}
-      <div className="sticky top-0 h-screen flex flex-col justify-center overflow-hidden">
+      {/* STICKY CONTAINER PINNED BELOW FLOATING NAVBAR */}
+      <div className="sticky top-20 min-h-[calc(100vh-5rem)] flex flex-col justify-center py-4 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           
-          <div className="flex items-center justify-between mb-10">
+          <div className="flex items-center justify-between mb-8">
             <div>
               <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#14161C] text-[#FF003C] border border-[#FF003C]/40 font-mono text-xs font-bold uppercase tracking-widest mb-3">
                 // SCROLL-DRIVEN FLOW SIMULATOR
@@ -278,21 +287,22 @@ const SeeItInActionSection = () => {
 
             <div className="hidden sm:flex items-center gap-3 bg-[#14161C] border border-slate-800 px-4 py-2 rounded-full font-mono text-xs text-slate-300">
               <span className="w-2 h-2 rounded-full bg-[#FF003C] animate-pulse"></span>
-              <span>SCROLL PROGRESS: <span className="text-[#FF003C] font-bold">{Math.round(progress * 100)}%</span></span>
+              <span>SCROLL STEP: <span className="text-[#FF003C] font-bold">0{activeTab + 1} / 05</span> ({Math.round(progress * 100)}%)</span>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             
-            {/* LEFT SELECTOR TABS WITH SCROLL PROGRESS HIGHLIGHTS */}
+            {/* LEFT SELECTOR TABS WITH SCROLL PROGRESS HIGHLIGHTS & CLICK TO SCROLL */}
             <div className="lg:col-span-5 space-y-3">
               {tabs.map((tab, idx) => (
-                <div
+                <button
                   key={tab.id}
-                  className={`w-full text-left p-4 sm:p-5 rounded-2xl border transition-all relative overflow-hidden flex items-center justify-between ${
+                  onClick={() => handleTabClick(idx)}
+                  className={`w-full text-left p-4 rounded-2xl border transition-all relative overflow-hidden flex items-center justify-between cursor-pointer ${
                     activeTab === idx
-                      ? 'bg-[#181A22] border-[#FF003C] text-white shadow-xl shadow-rose-500/10'
-                      : 'bg-[#12141A] border-slate-800 text-slate-500 opacity-60'
+                      ? 'bg-[#181A22] border-[#FF003C] text-white shadow-xl shadow-rose-500/10 scale-[1.02]'
+                      : 'bg-[#12141A] border-slate-800 text-slate-500 opacity-60 hover:opacity-100 hover:border-slate-700'
                   }`}
                 >
                   {/* PROGRESS BAR FILL ON ACTIVE TAB */}
@@ -306,11 +316,11 @@ const SeeItInActionSection = () => {
                   )}
 
                   <div>
-                    <div className="font-outfit font-bold text-base sm:text-xl text-white">{tab.label}</div>
-                    <div className="text-[10px] font-mono text-[#FF003C] font-bold tracking-widest mt-1">{tab.subLabel}</div>
+                    <div className="font-outfit font-bold text-base sm:text-lg text-white">{tab.label}</div>
+                    <div className="text-[10px] font-mono text-[#FF003C] font-bold tracking-widest mt-0.5">{tab.subLabel}</div>
                   </div>
                   {activeTab === idx && <span className="text-[#FF003C] font-mono font-bold text-xl">→</span>}
-                </div>
+                </button>
               ))}
             </div>
 
