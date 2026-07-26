@@ -55,6 +55,369 @@ const CounterUp = ({ target, suffix = '', duration = 1800 }) => {
   return <span ref={ref}>{value.toLocaleString()}{suffix}</span>
 }
 
+// ===================== MANYCHAT-STYLE: "TURN COMMENTS INTO CONVERSATIONS" SECTION =====================
+const TurnCommentsToSalesSection = ({ onStartFree }) => {
+  const [activeSlide, setActiveSlide] = useState(0)
+
+  const slides = [
+    {
+      title: "Turn comments into conversations that sell.",
+      quote: '"How much is this?" or "Do you ship to Mars?" — Instant reply. Boom — wallets open, money lands, and you didn\'t even blink.',
+      userComment: "Jessica Peel: I\'ll be watching 👀",
+      botReply: "Hey Jessica! Sent you a direct message with the instant video link & discount code! 🚀",
+      badge: "Auto-reply on every comment (1/2)"
+    },
+    {
+      title: "Convert Instagram & WhatsApp DMs automatically.",
+      quote: '"Can I see your price list?" — AI Bot auto-triggers interactive product cards & 1-click WhatsApp checkout.',
+      userComment: "Marcus V.: Sent you a DM about pricing!",
+      botReply: "Hi Marcus! Here is our 2026 catalog + 15% VIP discount link valid for 2 hours! 🎁",
+      badge: "Instant 0.38s DM dispatch (2/2)"
+    }
+  ]
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setActiveSlide(prev => (prev + 1) % slides.length)
+    }, 5000)
+    return () => clearInterval(timer)
+  }, [])
+
+  const current = slides[activeSlide]
+
+  return (
+    <section className="py-20 bg-[#FF003C] text-white overflow-hidden relative border-y-4 border-[#090A0F]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        
+        {/* SLIDE PROGRESS BARS */}
+        <div className="flex justify-center gap-2 mb-10">
+          {slides.map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => setActiveSlide(idx)}
+              className={`h-1.5 rounded-full transition-all ${activeSlide === idx ? 'w-12 bg-white' : 'w-4 bg-white/40'}`}
+            />
+          ))}
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          
+          {/* LEFT DISPLAY TEXT */}
+          <div className="lg:col-span-7 text-left space-y-6">
+            <h2 className="text-4xl sm:text-6xl font-outfit font-black tracking-tight text-white leading-[1.05] uppercase">
+              {current.title}
+            </h2>
+            <p className="text-lg sm:text-xl font-sans text-white/90 leading-relaxed max-w-xl">
+              {current.quote}
+            </p>
+            <div className="pt-4">
+              <button
+                onClick={onStartFree}
+                className="btn-black px-10 py-4 rounded-full font-outfit font-black text-sm uppercase tracking-widest shadow-2xl"
+              >
+                GET STARTED FREE →
+              </button>
+            </div>
+          </div>
+
+          {/* RIGHT PHONE INTERACTIVE MOCKUP */}
+          <div className="lg:col-span-5 flex justify-center">
+            <div className="w-full max-w-sm rounded-[36px] bg-[#090A0F] border-4 border-white shadow-2xl p-4 overflow-hidden relative text-left">
+              
+              {/* PHONE MOCKUP HEADER */}
+              <div className="flex items-center gap-3 pb-3 border-b border-slate-800 mb-4">
+                <img src="/assets/logo_mascot.png" alt="Mascot" className="w-8 h-8 rounded-full bg-white p-0.5 object-contain" />
+                <div>
+                  <div className="text-xs font-bold text-white font-mono">actionpackd.bot</div>
+                  <div className="text-[10px] text-[#25D366] font-mono">● Auto-DM Active</div>
+                </div>
+              </div>
+
+              {/* POST MOCKUP IMAGE */}
+              <div className="rounded-2xl overflow-hidden bg-slate-900 aspect-video relative mb-4 border border-slate-800 flex items-center justify-center text-center p-4">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+                <span className="relative z-10 font-outfit font-extrabold text-sm text-white bg-[#FF003C]/90 px-3 py-1.5 rounded-full shadow-lg">
+                  🔥 New Product Drop! Comment "LINK"
+                </span>
+              </div>
+
+              {/* COMMENT & BOT AUTO-DM */}
+              <div className="space-y-3 font-sans text-xs">
+                <div className="bg-[#181A22] border border-slate-800 p-3 rounded-xl text-slate-200 font-mono">
+                  <span className="text-[#FF003C] font-bold">● User Comment:</span> {current.userComment}
+                </div>
+                <div className="bg-[#FF003C] text-white p-3.5 rounded-xl font-sans font-semibold shadow-md animate-slide-up">
+                  <div className="text-[10px] font-mono opacity-80 mb-1">⚡ INSTANT AUTO-DM</div>
+                  {current.botReply}
+                </div>
+              </div>
+
+              {/* BADGE */}
+              <div className="mt-4 pt-3 border-t border-slate-800 bg-[#FF003C] text-white text-center text-[10px] font-mono font-bold uppercase tracking-wider py-2 rounded-xl">
+                {current.badge}
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+  )
+}
+
+// ===================== MANYCHAT-STYLE: "SEE IT IN ACTION..." INTERACTIVE FLOW SWITCHER =====================
+const SeeItInActionSection = () => {
+  const [activeTab, setActiveTab] = useState(0)
+
+  const tabs = [
+    {
+      id: 0,
+      label: "Auto-DM from Comments",
+      subLabel: "CHECK IT OUT →",
+      phoneHeader: "Instagram & WhatsApp Auto-DM",
+      messages: [
+        { type: 'user', text: "Commented: 'Where can I order this?'" },
+        { type: 'bot', text: "Hey! Thanks for commenting. Here is your direct 1-click checkout link with 15% OFF applied!" }
+      ]
+    },
+    {
+      id: 1,
+      label: "Send Welcome Messages",
+      subLabel: "CHECK IT OUT →",
+      phoneHeader: "WhatsApp Welcome Automation",
+      messages: [
+        { type: 'user', text: "Hey! Just subscribed to your WhatsApp channel." },
+        { type: 'bot', text: "Welcome to Actionpackd VIP! 🚀 Here is your instant onboarding guide and instant support link." }
+      ]
+    },
+    {
+      id: 2,
+      label: "Automate FAQs 24/7",
+      subLabel: "CHECK IT OUT →",
+      phoneHeader: "24/7 Knowledge Base Bot",
+      messages: [
+        { type: 'user', text: "What is your refund policy & shipping timeline?" },
+        { type: 'bot', text: "We offer 30-day money-back guarantee with instant 2-day delivery! Want me to start a return?" }
+      ]
+    },
+    {
+      id: 3,
+      label: "Abandoned Cart Recovery",
+      subLabel: "CHECK IT OUT →",
+      phoneHeader: "Cart Recovery Automation",
+      messages: [
+        { type: 'user', text: "[Left items in checkout cart]" },
+        { type: 'bot', text: "Your cart is waiting! Use code SAVE10 for an extra 10% discount valid for the next 30 minutes. 🛒" }
+      ]
+    },
+    {
+      id: 4,
+      label: "Book Appointments",
+      subLabel: "CHECK IT OUT →",
+      phoneHeader: "Calendar Appointment Booking",
+      messages: [
+        { type: 'user', text: "I'd like to book a 1-on-1 strategy call." },
+        { type: 'bot', text: "I have open slots tomorrow at 10 AM & 3 PM. Tap a slot to confirm your calendar invite!" }
+      ]
+    }
+  ]
+
+  const current = tabs[activeTab]
+
+  return (
+    <section className="py-24 bg-[#090A0F] text-white border-b border-slate-800 bg-grid-dark relative">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <AnimatedSection>
+          <div className="mb-14">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#14161C] text-[#FF003C] border border-[#FF003C]/40 font-mono text-xs font-bold uppercase tracking-widest mb-3">
+              // INTERACTIVE FLOW SIMULATOR
+            </div>
+            <h2 className="text-4xl sm:text-5xl md:text-6xl font-outfit font-extrabold text-white tracking-tight">
+              See it in <span className="gradient-text-red">action...</span>
+            </h2>
+          </div>
+        </AnimatedSection>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+          
+          {/* LEFT SELECTOR TABS */}
+          <div className="lg:col-span-5 space-y-3">
+            {tabs.map((tab, idx) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(idx)}
+                className={`w-full text-left p-5 rounded-2xl border transition-all flex items-center justify-between ${
+                  activeTab === idx
+                    ? 'bg-[#181A22] border-[#FF003C] text-white shadow-xl shadow-rose-500/10'
+                    : 'bg-[#12141A] border-slate-800 text-slate-400 hover:border-slate-700 hover:text-white'
+                }`}
+              >
+                <div>
+                  <div className="font-outfit font-bold text-lg sm:text-xl text-white">{tab.label}</div>
+                  <div className="text-[10px] font-mono text-[#FF003C] font-bold tracking-widest mt-1">{tab.subLabel}</div>
+                </div>
+                {activeTab === idx && <span className="text-[#FF003C] font-mono font-bold text-xl">→</span>}
+              </button>
+            ))}
+          </div>
+
+          {/* RIGHT ANIMATED PHONE CONTAINER */}
+          <div className="lg:col-span-7 flex justify-center">
+            <div className="w-full max-w-md rounded-[40px] bg-[#12141A] border-4 border-slate-800 p-6 shadow-2xl text-left relative overflow-hidden min-h-[460px] flex flex-col justify-between">
+              
+              {/* PHONE HEADER */}
+              <div>
+                <div className="flex items-center justify-between pb-4 border-b border-slate-800 mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-[#FF003C] flex items-center justify-center text-white font-bold text-lg shadow-md">
+                      🤖
+                    </div>
+                    <div>
+                      <div className="text-sm font-bold text-white">{current.phoneHeader}</div>
+                      <div className="text-[10px] font-mono text-[#25D366]">● Meta Verified Bot</div>
+                    </div>
+                  </div>
+                  <span className="text-xs font-mono bg-[#FF003C] text-white px-2.5 py-1 rounded-full font-bold">
+                    LIVE FLOW
+                  </span>
+                </div>
+
+                {/* MESSAGES ANIMATION */}
+                <div className="space-y-4 font-sans text-sm min-h-[260px] flex flex-col justify-end">
+                  {current.messages.map((msg, i) => (
+                    <div
+                      key={i}
+                      className={`p-4 rounded-2xl max-w-[88%] animate-slide-up ${
+                        msg.type === 'user'
+                          ? 'bg-[#181A22] border border-slate-800 text-slate-200 self-start font-mono text-xs'
+                          : 'bg-[#FF003C] text-white self-end font-medium shadow-lg shadow-rose-500/20'
+                      }`}
+                    >
+                      {msg.type === 'bot' && <div className="text-[10px] font-mono opacity-80 mb-1">ACTIONPACKD AI AGENT</div>}
+                      {msg.text}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* BOTTOM ACTION CTA */}
+              <div className="pt-4 border-t border-slate-800 flex items-center justify-between text-xs font-mono text-slate-400">
+                <span>⚡ Latency: 0.38s</span>
+                <span className="text-[#FF003C] font-bold">● Active Workflow</span>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+  )
+}
+
+// ===================== MANYCHAT-STYLE: "BEFORE VS AFTER ACTIONPACKD" OVERLAPPING CARDS =====================
+const BeforeAfterComparisonSection = ({ onStartFree }) => {
+  return (
+    <section className="py-24 bg-white text-[#090A0F] relative overflow-hidden border-b border-slate-200">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <AnimatedSection>
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#090A0F] text-[#FF003C] border border-slate-800 font-mono text-xs font-bold uppercase tracking-widest mb-3">
+              // THE ACTIONPACKD EFFECT
+            </div>
+            <h2 className="text-4xl sm:text-5xl md:text-6xl font-outfit font-extrabold tracking-tight text-[#090A0F]">
+              Stop grinding. <span className="gradient-text-red">Start scaling.</span>
+            </h2>
+          </div>
+        </AnimatedSection>
+
+        {/* OVERLAPPING COMPARISON CARDS */}
+        <div className="relative max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+          
+          {/* CARD 1: BEFORE ACTIONPACKD (SLATE / GREY CARD) */}
+          <div className="md:col-span-6 bento-card-light p-8 sm:p-10 bg-slate-100/90 border-2 border-slate-300 rounded-3xl text-left shadow-lg">
+            <div className="text-xs font-mono font-bold text-slate-500 uppercase tracking-widest mb-2">BEFORE ACTIONPACKD</div>
+            <h3 className="text-3xl font-outfit font-black text-slate-900 mb-6 leading-tight">
+              All grind and <br />no pay.
+            </h3>
+            
+            <ul className="space-y-4 font-mono text-xs text-slate-700">
+              <li className="flex items-start gap-3">
+                <span className="text-red-500 font-bold text-base">✕</span>
+                <span>Copy-pasting the same reply 417 times per day manually.</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-red-500 font-bold text-base">✕</span>
+                <span>Losing hot qualified leads buried in endless unanswered DMs.</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-red-500 font-bold text-base">✕</span>
+                <span>Missed revenue & sales opportunities while you sleep.</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-red-500 font-bold text-base">✕</span>
+                <span>Every comment & inquiry left unattended for hours.</span>
+              </li>
+            </ul>
+
+            <div className="mt-8 pt-6 border-t border-slate-300">
+              <button
+                onClick={onStartFree}
+                className="btn-outline w-full py-3.5 rounded-xl font-outfit font-bold text-xs uppercase tracking-wider"
+              >
+                Old Way (Slow)
+              </button>
+            </div>
+          </div>
+
+          {/* CARD 2: AFTER ACTIONPACKD (OVERLAPPING CRIMSON RED / OBSIDIAN CARD) */}
+          <div className="md:col-span-6 bento-card-dark p-8 sm:p-10 bg-[#FF003C] text-white border-2 border-white rounded-3xl text-left shadow-2xl md:-ml-6 md:-mt-4 relative z-10">
+            <div className="text-xs font-mono font-bold text-white/80 uppercase tracking-widest mb-2">AFTER ACTIONPACKD</div>
+            <h3 className="text-3xl sm:text-4xl font-outfit font-black text-white mb-6 leading-tight">
+              Less grind and <br />10x more pay.
+            </h3>
+            
+            <ul className="space-y-4 font-sans text-sm text-white font-medium">
+              <li className="flex items-start gap-3">
+                <span className="bg-white text-[#FF003C] w-5 h-5 rounded-full flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">✓</span>
+                <span>Smart AI replies handle FAQs instantly in 0.38s.</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="bg-white text-[#FF003C] w-5 h-5 rounded-full flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">✓</span>
+                <span>Organized, auto-tagged leads synced to CRM 24/7.</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="bg-white text-[#FF003C] w-5 h-5 rounded-full flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">✓</span>
+                <span>Automated WhatsApp sales going off while you sleep.</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="bg-white text-[#FF003C] w-5 h-5 rounded-full flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">✓</span>
+                <span>Every interaction automatically converted into revenue.</span>
+              </li>
+            </ul>
+
+            <div className="mt-8 pt-6 border-t border-white/20">
+              <button
+                onClick={onStartFree}
+                className="btn-black w-full py-4 rounded-xl font-outfit font-black text-xs uppercase tracking-wider shadow-2xl"
+              >
+                GET STARTED FREE NOW →
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+  )
+}
+
 export default function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [modal, setModal] = useState({ open: false, title: '', body: '' })
@@ -241,12 +604,12 @@ export default function App() {
 
           {/* NAV LINKS */}
           <nav className="hidden lg:flex items-center gap-1 text-xs font-semibold text-[#090A0F]">
+            <a href="#see-in-action" className="px-3.5 py-1.5 rounded-full hover:text-[#FF003C] hover:bg-slate-100/80 transition-colors">Interactive Demo</a>
             <a href="#features" className="px-3.5 py-1.5 rounded-full hover:text-[#FF003C] hover:bg-slate-100/80 transition-colors">Features</a>
             <a href="#bot-templates" className="px-3.5 py-1.5 rounded-full hover:text-[#FF003C] hover:bg-slate-100/80 transition-colors flex items-center gap-1.5">
               <span>Bot Templates</span>
               <span className="bg-[#FF003C] text-white text-[9px] px-1.5 py-0.2 rounded-full font-bold">LIVE</span>
             </a>
-            <a href="#solutions" className="px-3.5 py-1.5 rounded-full hover:text-[#FF003C] hover:bg-slate-100/80 transition-colors">Solutions</a>
             <a href="#pricing" className="px-3.5 py-1.5 rounded-full hover:text-[#FF003C] hover:bg-slate-100/80 transition-colors">Pricing</a>
             <a href="#faq" className="px-3.5 py-1.5 rounded-full hover:text-[#FF003C] hover:bg-slate-100/80 transition-colors">FAQ</a>
           </nav>
@@ -273,9 +636,9 @@ export default function App() {
         {/* MOBILE MENU DROPDOWN */}
         {mobileMenuOpen && (
           <div className="mt-2 rounded-2xl bg-white border-2 border-[#090A0F] p-4 shadow-2xl lg:hidden text-xs font-semibold space-y-2 animate-slide-up">
+            <a href="#see-in-action" onClick={() => setMobileMenuOpen(false)} className="block p-2 text-[#090A0F] hover:bg-rose-50 rounded-lg">Interactive Demo</a>
             <a href="#features" onClick={() => setMobileMenuOpen(false)} className="block p-2 text-[#090A0F] hover:bg-rose-50 rounded-lg">Features</a>
             <a href="#bot-templates" onClick={() => setMobileMenuOpen(false)} className="block p-2 text-[#090A0F] hover:bg-rose-50 rounded-lg">Bot Templates</a>
-            <a href="#solutions" onClick={() => setMobileMenuOpen(false)} className="block p-2 text-[#090A0F] hover:bg-rose-50 rounded-lg">Solutions</a>
             <a href="#pricing" onClick={() => setMobileMenuOpen(false)} className="block p-2 text-[#090A0F] hover:bg-rose-50 rounded-lg">Pricing</a>
             <a href="#faq" onClick={() => setMobileMenuOpen(false)} className="block p-2 text-[#090A0F] hover:bg-rose-50 rounded-lg">FAQ</a>
           </div>
@@ -411,6 +774,9 @@ export default function App() {
         </div>
       </section>
 
+      {/* MANYCHAT-STYLE: "TURN COMMENTS INTO CONVERSATIONS THAT SELL" SECTION */}
+      <TurnCommentsToSalesSection onStartFree={() => openModal('Start Free Sandbox', 'Get instant access to Actionpackd Comment Auto-DM & AI Bot builder.')} />
+
       {/* LOGO STRIP / INTEGRATIONS OVERVIEW */}
       <section className="py-14 border-b border-slate-200 bg-[#090A0F] text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -432,6 +798,11 @@ export default function App() {
           </div>
         </div>
       </section>
+
+      {/* MANYCHAT-STYLE: "SEE IT IN ACTION..." INTERACTIVE FLOW SWITCHER */}
+      <div id="see-in-action">
+        <SeeItInActionSection />
+      </div>
 
       {/* BENTO GRID FEATURE SECTION */}
       <section id="features" className="py-24 border-b border-slate-200 relative">
@@ -586,6 +957,9 @@ export default function App() {
           </div>
         </div>
       </section>
+
+      {/* MANYCHAT-STYLE: "BEFORE VS AFTER ACTIONPACKD" OVERLAPPING CARDS */}
+      <BeforeAfterComparisonSection onStartFree={() => openModal('Start Free Sandbox', 'Deploy Actionpackd AI agents today.')} />
 
       {/* INTERACTIVE PRE-BUILT BOT TEMPLATES (DARK OBSIDIAN SECTION) */}
       <section id="bot-templates" className="py-24 border-b border-slate-800 bg-[#090A0F] text-white bg-grid-dark relative overflow-hidden">
@@ -812,7 +1186,7 @@ export default function App() {
                     <div className="text-4xl font-outfit font-extrabold mb-3">
                       {tier.price} <span className={`text-xs font-mono font-normal ${tier.featured ? 'text-slate-400' : 'text-slate-500'}`}>{tier.period}</span>
                     </div>
-                    <p className={`text-xs mb-6 ${tier.featured ? 'text-slate-300' : 'text-slate-600'}`}>{tier.desc}</p>
+                    <p className={`text-xs mb-6 ${tier.featured ? 'text-[#090A0F]' : 'text-slate-600'}`}>{tier.desc}</p>
                     <ul className="space-y-3 text-xs font-sans mb-8">
                       {tier.features.map((f, j) => (
                         <li key={j} className="flex items-center gap-2.5">
