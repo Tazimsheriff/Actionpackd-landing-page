@@ -29,7 +29,7 @@ const useScrollProgress = (ref, stickyOffset = 80) => {
 
       const startScroll = elementTop - stickyOffset
       const currentScroll = window.scrollY - startScroll
-      const calculated = Math.max(0, Math.min(1, currentScroll / totalScrollable))
+      const calculated = Math.max(0, Math.min(0.9999, currentScroll / totalScrollable))
       setProgress(calculated)
     }
 
@@ -106,8 +106,8 @@ const TurnCommentsToSalesSection = ({ onStartFree }) => {
   ]
 
   // Map scroll progress (0..1) to active slide index
-  const activeSlide = Math.min(slides.length - 1, Math.floor(progress * slides.length))
-  const current = slides[activeSlide]
+  const activeSlide = Math.max(0, Math.min(slides.length - 1, Math.floor(progress * slides.length)))
+  const current = slides[activeSlide] || slides[0]
 
   return (
     <section ref={containerRef} className="relative h-[250vh] bg-[#FF003C] text-white border-y-4 border-[#090A0F]">
@@ -263,8 +263,8 @@ const SeeItInActionSection = () => {
   ]
 
   // Map scroll progress (0..1) to active tab index
-  const activeTab = Math.min(tabs.length - 1, Math.floor(progress * tabs.length))
-  const current = tabs[activeTab]
+  const activeTab = Math.max(0, Math.min(tabs.length - 1, Math.floor(progress * tabs.length)))
+  const current = tabs[activeTab] || tabs[0]
 
   const handleTabClick = (idx) => {
     if (!containerRef.current) return
