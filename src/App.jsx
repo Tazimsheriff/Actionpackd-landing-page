@@ -3,8 +3,6 @@ import { Player } from '@remotion/player'
 import { ActionpackdPromoVideo } from './ActionpackdPromoVideo'
 import { HeroConsoleVideo } from './HeroConsoleVideo'
 
-
-
 // ===================== SCROLL ANIMATION HOOK =====================
 const useInView = (options = {}) => {
   const ref = useRef(null)
@@ -63,9 +61,6 @@ export default function App() {
   const [botModal, setBotModal] = useState({ open: false, template: null })
   const [botMessages, setBotMessages] = useState([])
   const [botInput, setBotInput] = useState('')
-  const [channel, setChannel] = useState('whatsapp')
-  const [heroInput, setHeroInput] = useState('')
-  const [heroResponse, setHeroResponse] = useState('"Hi! Your order #4821 is out for delivery. I can schedule a delivery window for tomorrow between 10 AM – 12 PM. Shall I confirm?"')
   
   // Interactive Calculator State
   const [monthlyVolume, setMonthlyVolume] = useState(25000)
@@ -175,24 +170,6 @@ export default function App() {
     }, 550)
   }
 
-  const channelResponses = {
-    whatsapp: '"Hi! Your order #4821 is out for delivery. I can schedule a delivery window for tomorrow between 10 AM – 12 PM. Shall I confirm?"',
-    web: '"Welcome to Actionpackd! I\'m your AI agent. How can I assist you today? I can answer questions, resolve tickets, or route you to sales."',
-    voice: '"[Voice Agent Connected]: Please state your inquiry or account number. I can transfer you or handle your booking in real time."',
-    email: '"[Email Automation Active]: Re: Ticket #4821 — Resolution details have been auto-generated with 99.4% confidence score."'
-  }
-
-  const switchChannel = (ch) => {
-    setChannel(ch)
-    setHeroResponse(channelResponses[ch])
-  }
-
-  const sendHeroMessage = () => {
-    if (!heroInput.trim()) return
-    setHeroResponse(`"${heroInput.trim()}" — Request logged. Executing workflow across ${channel.toUpperCase()} with 0.38s latency.`)
-    setHeroInput('')
-  }
-
   useEffect(() => {
     const handleEsc = (e) => {
       if (e.key === 'Escape') {
@@ -204,15 +181,9 @@ export default function App() {
     return () => document.removeEventListener('keydown', handleEsc)
   }, [])
 
-  const CheckIcon = ({ color = '#25D366', size = 16 }) => (
+  const CheckIcon = ({ color = '#FF003C', size = 16 }) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill={color} className="shrink-0">
       <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-    </svg>
-  )
-
-  const ChevronDown = () => (
-    <svg className="w-3.5 h-3.5 opacity-60 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"/>
     </svg>
   )
 
@@ -228,7 +199,7 @@ export default function App() {
     { name: 'Airtable', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/airtable.svg' },
     { name: 'Google', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/googleanalytics.svg' },
     { name: 'Mailchimp', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/mailchimp.svg' },
-    { name: '+200 More', logo: '/assets/logo.png' }
+    { name: '+200 More', logo: '/assets/logo_mascot.png' }
   ]
 
   const faqs = [
@@ -255,12 +226,11 @@ export default function App() {
   ]
 
   return (
-    <div className="min-h-screen bg-white text-slate-900 bg-grid relative overflow-x-hidden">
+    <div className="min-h-screen bg-white text-[#090A0F] bg-grid-light relative overflow-x-hidden">
       
-      {/* AMBIENT BACKGROUND GLOW BLOBS */}
-      <div className="fixed top-12 left-1/2 -translate-x-1/2 w-[900px] h-[500px] blob-glow-1 rounded-full pointer-events-none z-0 animate-blob"></div>
-      <div className="fixed bottom-20 right-10 w-[600px] h-[600px] blob-glow-2 rounded-full pointer-events-none z-0 animate-blob" style={{ animationDelay: '4s' }}></div>
-      <div className="fixed top-1/3 left-10 w-[550px] h-[550px] blob-glow-3 rounded-full pointer-events-none z-0 animate-blob" style={{ animationDelay: '8s' }}></div>
+      {/* AMBIENT BACKGROUND BLOBS */}
+      <div className="fixed top-12 left-1/2 -translate-x-1/2 w-[900px] h-[500px] blob-red-glow rounded-full pointer-events-none z-0 animate-blob"></div>
+      <div className="fixed bottom-20 right-10 w-[600px] h-[600px] blob-black-glow rounded-full pointer-events-none z-0 animate-blob" style={{ animationDelay: '4s' }}></div>
 
       {/* FLOATING PILL NAVBAR */}
       <header className="fixed top-4 left-4 right-4 max-w-6xl mx-auto z-50">
@@ -270,31 +240,31 @@ export default function App() {
           </a>
 
           {/* NAV LINKS */}
-          <nav className="hidden lg:flex items-center gap-1 text-xs font-semibold text-slate-600">
-            <a href="#features" className="px-3 py-1.5 rounded-full hover:text-slate-900 hover:bg-slate-100/80 transition-colors">Features</a>
-            <a href="#bot-templates" className="px-3 py-1.5 rounded-full hover:text-slate-900 hover:bg-slate-100/80 transition-colors flex items-center gap-1.5">
+          <nav className="hidden lg:flex items-center gap-1 text-xs font-semibold text-[#090A0F]">
+            <a href="#features" className="px-3.5 py-1.5 rounded-full hover:text-[#FF003C] hover:bg-slate-100/80 transition-colors">Features</a>
+            <a href="#bot-templates" className="px-3.5 py-1.5 rounded-full hover:text-[#FF003C] hover:bg-slate-100/80 transition-colors flex items-center gap-1.5">
               <span>Bot Templates</span>
-              <span className="bg-[#25D366] text-white text-[9px] px-1.5 py-0.2 rounded-full font-bold">LIVE</span>
+              <span className="bg-[#FF003C] text-white text-[9px] px-1.5 py-0.2 rounded-full font-bold">LIVE</span>
             </a>
-            <a href="#solutions" className="px-3 py-1.5 rounded-full hover:text-slate-900 hover:bg-slate-100/80 transition-colors">Solutions</a>
-            <a href="#pricing" className="px-3 py-1.5 rounded-full hover:text-slate-900 hover:bg-slate-100/80 transition-colors">Pricing</a>
-            <a href="#faq" className="px-3 py-1.5 rounded-full hover:text-slate-900 hover:bg-slate-100/80 transition-colors">FAQ</a>
+            <a href="#solutions" className="px-3.5 py-1.5 rounded-full hover:text-[#FF003C] hover:bg-slate-100/80 transition-colors">Solutions</a>
+            <a href="#pricing" className="px-3.5 py-1.5 rounded-full hover:text-[#FF003C] hover:bg-slate-100/80 transition-colors">Pricing</a>
+            <a href="#faq" className="px-3.5 py-1.5 rounded-full hover:text-[#FF003C] hover:bg-slate-100/80 transition-colors">FAQ</a>
           </nav>
 
           {/* META VERIFIED & CTA BUTTONS */}
           <div className="flex items-center gap-3">
-            <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-[#F0FDF4] border border-[#25D366]/40 rounded-full">
-              <CheckIcon color="#25D366" size={14} />
-              <span className="text-[10px] font-mono text-[#25D366] font-bold uppercase tracking-wider">Meta Approved</span>
+            <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-[#090A0F] border border-slate-800 rounded-full">
+              <CheckIcon color="#FF003C" size={14} />
+              <span className="text-[10px] font-mono text-white font-bold uppercase tracking-wider">Meta Approved</span>
             </div>
             <button
               onClick={() => openModal('Start Free Sandbox', 'Get instant access to Actionpackd AI Agent Builder. No credit card required.')}
-              className="btn-primary px-5 py-2 rounded-full bg-[#FF003C] text-white font-outfit font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 border border-[#FF003C]"
+              className="btn-primary px-6 py-2.5 rounded-full font-outfit font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 shadow-md shadow-rose-500/20"
             >
               <span>Start Free</span>
               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
             </button>
-            <button className="lg:hidden p-1.5 text-slate-600" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+            <button className="lg:hidden p-1.5 text-[#090A0F]" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
             </button>
           </div>
@@ -302,42 +272,42 @@ export default function App() {
 
         {/* MOBILE MENU DROPDOWN */}
         {mobileMenuOpen && (
-          <div className="mt-2 rounded-2xl bg-white/95 backdrop-blur-xl border border-slate-200 p-4 shadow-xl lg:hidden text-xs font-semibold space-y-2 animate-slide-up">
-            <a href="#features" onClick={() => setMobileMenuOpen(false)} className="block p-2 text-slate-700 hover:bg-slate-50 rounded-lg">Features</a>
-            <a href="#bot-templates" onClick={() => setMobileMenuOpen(false)} className="block p-2 text-slate-700 hover:bg-slate-50 rounded-lg">Bot Templates</a>
-            <a href="#solutions" onClick={() => setMobileMenuOpen(false)} className="block p-2 text-slate-700 hover:bg-slate-50 rounded-lg">Solutions</a>
-            <a href="#pricing" onClick={() => setMobileMenuOpen(false)} className="block p-2 text-slate-700 hover:bg-slate-50 rounded-lg">Pricing</a>
-            <a href="#faq" onClick={() => setMobileMenuOpen(false)} className="block p-2 text-slate-700 hover:bg-slate-50 rounded-lg">FAQ</a>
+          <div className="mt-2 rounded-2xl bg-white border-2 border-[#090A0F] p-4 shadow-2xl lg:hidden text-xs font-semibold space-y-2 animate-slide-up">
+            <a href="#features" onClick={() => setMobileMenuOpen(false)} className="block p-2 text-[#090A0F] hover:bg-rose-50 rounded-lg">Features</a>
+            <a href="#bot-templates" onClick={() => setMobileMenuOpen(false)} className="block p-2 text-[#090A0F] hover:bg-rose-50 rounded-lg">Bot Templates</a>
+            <a href="#solutions" onClick={() => setMobileMenuOpen(false)} className="block p-2 text-[#090A0F] hover:bg-rose-50 rounded-lg">Solutions</a>
+            <a href="#pricing" onClick={() => setMobileMenuOpen(false)} className="block p-2 text-[#090A0F] hover:bg-rose-50 rounded-lg">Pricing</a>
+            <a href="#faq" onClick={() => setMobileMenuOpen(false)} className="block p-2 text-[#090A0F] hover:bg-rose-50 rounded-lg">FAQ</a>
           </div>
         )}
       </header>
 
-      {/* TOP ANNOUNCEMENT BANNER */}
-      <div className="pt-24 pb-2 bg-gradient-to-r from-slate-100 via-emerald-50 to-blue-50 border-b border-slate-200 text-center text-xs font-mono text-slate-600 flex items-center justify-center gap-2">
-        <span className="px-2 py-0.5 bg-[#25D366] text-white rounded-full font-bold text-[10px] uppercase flex items-center gap-1">
+      {/* TOP BLACK & RED ANNOUNCEMENT BANNER */}
+      <div className="pt-24 pb-2 bg-[#090A0F] text-white border-b border-slate-800 text-center text-xs font-mono flex items-center justify-center gap-2">
+        <span className="px-2 py-0.5 bg-[#FF003C] text-white rounded-full font-bold text-[10px] uppercase flex items-center gap-1">
           <CheckIcon color="#FFFFFF" size={12} /> META PARTNER
         </span>
-        <span>WhatsApp Business API Cloud v20.0 Released</span>
-        <a href="#bot-templates" className="text-[#FF003C] font-bold underline hover:text-[#B00028] ml-1">Explore Templates →</a>
+        <span className="text-slate-300">WhatsApp Business API Cloud v20.0 Released</span>
+        <a href="#bot-templates" className="text-[#FF003C] font-bold underline hover:text-[#FF2A55] ml-1">Explore Templates →</a>
       </div>
 
       {/* HERO SECTION */}
-      <section className="relative pt-12 pb-20 md:pt-20 md:pb-28 border-b border-slate-200/80 overflow-hidden z-10">
+      <section className="relative pt-12 pb-20 md:pt-20 md:pb-28 border-b border-slate-200 overflow-hidden z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
           
           {/* EYEBROW BADGE */}
           <AnimatedSection delay={0}>
-            <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-[#F0FDF4] border border-[#25D366]/40 text-xs font-mono text-slate-700 mb-8 shadow-sm">
-              <CheckIcon color="#25D366" size={16} />
-              <span className="text-slate-500 uppercase tracking-wider text-[11px]">WhatsApp Business API:</span>
-              <span className="text-[#25D366] font-extrabold text-[11px] uppercase">META APPROVED & VERIFIED</span>
+            <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-[#090A0F] text-white border border-slate-800 text-xs font-mono mb-8 shadow-md">
+              <CheckIcon color="#FF003C" size={16} />
+              <span className="text-slate-400 uppercase tracking-wider text-[11px]">WhatsApp Business API:</span>
+              <span className="text-[#FF003C] font-extrabold text-[11px] uppercase">META APPROVED & VERIFIED</span>
             </div>
           </AnimatedSection>
 
           {/* MAIN HERO HEADLINE */}
           <AnimatedSection delay={0.1}>
-            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-outfit font-extrabold tracking-tight text-slate-900 leading-[1.08] max-w-4xl mx-auto mb-6">
-              Build AI agents that<br className="hidden sm:inline" /> actually <span className="gradient-text">convert customers.</span>
+            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-outfit font-extrabold tracking-tight text-[#090A0F] leading-[1.08] max-w-4xl mx-auto mb-6">
+              Build AI agents that<br className="hidden sm:inline" /> actually <span className="gradient-text-red">convert customers.</span>
             </h1>
           </AnimatedSection>
 
@@ -353,16 +323,16 @@ export default function App() {
             <div className="flex flex-wrap items-center justify-center gap-4 mb-12">
               <button
                 onClick={() => openModal('Start Free Sandbox', 'Deploy your first AI agent on WhatsApp in under 5 minutes.')}
-                className="btn-primary px-8 py-4 rounded-full bg-[#FF003C] text-white font-outfit font-bold text-base uppercase tracking-wider flex items-center justify-center gap-3 border border-[#FF003C] shadow-lg shadow-[#FF003C]/20"
+                className="btn-primary px-8 py-4 rounded-full font-outfit font-bold text-base uppercase tracking-wider flex items-center justify-center gap-3 shadow-lg shadow-rose-500/25"
               >
                 <span>Start Building Free</span>
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
               </button>
               <a
                 href="#bot-templates"
-                className="btn-outline px-8 py-4 rounded-full bg-white text-slate-800 font-outfit font-bold text-base uppercase tracking-wider flex items-center justify-center gap-2 border border-slate-200 shadow-sm hover:text-[#25D366]"
+                className="btn-black px-8 py-4 rounded-full font-outfit font-bold text-base uppercase tracking-wider flex items-center justify-center gap-2 shadow-md"
               >
-                <svg className="w-5 h-5 text-[#25D366]" fill="currentColor" viewBox="0 0 24 24"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38c1.45.79 3.08 1.21 4.79 1.21 5.46 0 9.91-4.45 9.91-9.91C22 6.45 17.5 2 12.04 2z"/></svg>
+                <img src="/assets/logo_mascot.png" alt="Mascot" className="w-5 h-5 object-contain" />
                 <span>Try Bot Templates</span>
               </a>
             </div>
@@ -370,14 +340,14 @@ export default function App() {
 
           {/* HERO METRICS STRIP */}
           <AnimatedSection delay={0.4}>
-            <div className="max-w-3xl mx-auto bg-slate-50/80 border border-slate-200/80 backdrop-blur-md rounded-2xl p-4 mb-12 font-mono text-xs text-slate-600 grid grid-cols-3 gap-4 divide-x divide-slate-200 text-center shadow-sm">
+            <div className="max-w-3xl mx-auto bg-[#090A0F] text-white border border-slate-800 rounded-2xl p-4 mb-12 font-mono text-xs grid grid-cols-3 gap-4 divide-x divide-slate-800 text-center shadow-xl">
               <div>
                 <div className="text-[10px] text-slate-400 uppercase tracking-widest">Deploy Time</div>
-                <div className="text-[#3B82F6] font-extrabold text-base sm:text-xl mt-1">5 Minutes</div>
+                <div className="text-[#FF003C] font-extrabold text-base sm:text-xl mt-1">5 Minutes</div>
               </div>
               <div>
                 <div className="text-[10px] text-slate-400 uppercase tracking-widest">Global Uptime</div>
-                <div className="text-[#FFB703] font-extrabold text-base sm:text-xl mt-1">99.99%</div>
+                <div className="text-white font-extrabold text-base sm:text-xl mt-1">99.99%</div>
               </div>
               <div>
                 <div className="text-[10px] text-slate-400 uppercase tracking-widest">Live AI Agents</div>
@@ -388,7 +358,7 @@ export default function App() {
 
           {/* INTERACTIVE HERO AI MOCKUP WINDOW WITH REMOTION */}
           <AnimatedSection delay={0.5}>
-            <div className="max-w-4xl mx-auto rounded-3xl border-2 border-slate-200 bg-white shadow-2xl shadow-slate-200/80 overflow-hidden relative text-left aspect-[16/10] sm:aspect-[16/9]">
+            <div className="max-w-4xl mx-auto rounded-3xl border-2 border-[#090A0F] bg-white shadow-2xl shadow-rose-500/10 overflow-hidden relative text-left aspect-[16/10] sm:aspect-[16/9]">
               <Player
                 component={HeroConsoleVideo}
                 durationInFrames={300}
@@ -407,20 +377,20 @@ export default function App() {
           </AnimatedSection>
 
           {/* REMOTION VIDEO DEMO SHOWCASE */}
-          <AnimatedSection delay={0.6} className="mt-16">
+          <AnimatedSection delay={0.6} className="mt-20">
             <div className="max-w-4xl mx-auto text-center mb-6">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-50 border border-rose-200 text-[#FF003C] font-mono text-xs font-bold uppercase tracking-widest mb-3">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#090A0F] text-[#FF003C] border border-[#FF003C]/40 font-mono text-xs font-bold uppercase tracking-widest mb-3 shadow-md">
                 🎬 REMOTION DYNAMIC MOTION SHOWCASE
               </div>
-              <h3 className="text-2xl sm:text-3xl font-outfit font-extrabold text-slate-900 tracking-tight">
+              <h3 className="text-2xl sm:text-3xl font-outfit font-extrabold text-[#090A0F] tracking-tight">
                 Watch Actionpackd in Motion.
               </h3>
               <p className="text-slate-600 text-xs sm:text-sm font-sans max-w-lg mx-auto mt-2">
-                Powered by Remotion with programmatic frame animations, dynamic physics, and brand color system.
+                Programmatic frame animations, dynamic physics, and Black, Red & White brand color system.
               </p>
             </div>
 
-            <div className="relative rounded-3xl overflow-hidden border-2 border-[#FF003C]/40 shadow-2xl shadow-rose-500/20 bg-[#0A0B0F] aspect-video max-w-4xl mx-auto group">
+            <div className="relative rounded-3xl overflow-hidden border-2 border-[#FF003C] shadow-2xl shadow-rose-500/30 bg-[#090A0F] aspect-video max-w-4xl mx-auto group">
               <Player
                 component={ActionpackdPromoVideo}
                 durationInFrames={300}
@@ -442,16 +412,16 @@ export default function App() {
       </section>
 
       {/* LOGO STRIP / INTEGRATIONS OVERVIEW */}
-      <section className="py-12 border-b border-slate-200 bg-slate-50/50">
+      <section className="py-14 border-b border-slate-200 bg-[#090A0F] text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <p className="text-xs font-mono uppercase tracking-widest text-slate-400 mb-8 font-semibold">
             Seamlessly Integrated with 200+ Enterprise Tools
           </p>
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-6 items-center justify-items-center">
             {integrations.map((int, i) => (
-              <div key={i} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 shadow-sm hover:border-[#FF003C]/40 transition-all w-full justify-center">
-                <img src={int.logo} alt={int.name} className="w-5 h-5 object-contain" />
-                <span className="text-xs font-mono font-bold text-slate-700">{int.name}</span>
+              <div key={i} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#14161C] border border-slate-800 shadow-sm hover:border-[#FF003C] transition-all w-full justify-center">
+                <img src={int.logo} alt={int.name} className="w-5 h-5 object-contain" style={{ filter: int.name === 'Notion' ? 'invert(1)' : 'none' }} />
+                <span className="text-xs font-mono font-bold text-slate-200">{int.name}</span>
               </div>
             ))}
           </div>
@@ -465,11 +435,11 @@ export default function App() {
           <AnimatedSection>
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
               <div>
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-50 border border-rose-200 text-[#FF003C] font-mono text-xs font-bold uppercase tracking-widest mb-3">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#090A0F] text-[#FF003C] border border-slate-800 font-mono text-xs font-bold uppercase tracking-widest mb-3">
                   // PLATFORM CAPABILITIES
                 </div>
-                <h2 className="text-3xl sm:text-4xl md:text-5xl font-outfit font-extrabold text-slate-900 tracking-tight">
-                  Everything required to <span className="gradient-text">scale conversations.</span>
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-outfit font-extrabold text-[#090A0F] tracking-tight">
+                  Everything required to <span className="gradient-text-red">scale conversations.</span>
                 </h2>
               </div>
               <p className="text-slate-600 text-sm md:text-base max-w-md font-sans leading-relaxed">
@@ -481,34 +451,34 @@ export default function App() {
           {/* BENTO GRID 12-COLUMNS */}
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
             
-            {/* FEATURE 1 (LARGE SPAN 8 COLS) */}
+            {/* FEATURE 1 (LARGE SPAN 8 COLS - DARK OBSIDIAN BENTO) */}
             <div className="md:col-span-8">
               <AnimatedSection delay={0.05}>
-                <div className="bento-card p-8 h-full flex flex-col justify-between relative overflow-hidden bg-gradient-to-br from-white to-slate-50">
+                <div className="bento-card-dark p-8 h-full flex flex-col justify-between relative overflow-hidden">
                   <div>
                     <div className="flex items-center justify-between mb-6">
-                      <div className="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-200 flex items-center justify-center text-2xl">
+                      <div className="w-12 h-12 rounded-2xl bg-[#FF003C] text-white border border-[#FF003C] flex items-center justify-center text-2xl shadow-lg shadow-rose-500/30">
                         📡
                       </div>
-                      <span className="px-3 py-1 text-xs font-mono bg-[#F0FDF4] text-[#25D366] border border-[#25D366]/40 rounded-full font-bold uppercase">
+                      <span className="px-3 py-1 text-xs font-mono bg-[#FF003C] text-white rounded-full font-bold uppercase">
                         Meta Approved API
                       </span>
                     </div>
-                    <h3 className="text-2xl font-outfit font-bold text-slate-900 mb-3">
+                    <h3 className="text-2xl font-outfit font-bold text-white mb-3">
                       Omni-Channel AI Hub & WhatsApp Business API
                     </h3>
-                    <p className="text-slate-600 text-sm leading-relaxed mb-6 max-w-xl">
+                    <p className="text-slate-400 text-sm leading-relaxed mb-6 max-w-xl">
                       Connect your official WhatsApp Business number alongside Web Chat, Twilio Voice, and Email webhooks in a single unified control center. Zero complex webhook configuration.
                     </p>
                   </div>
-                  <div className="grid grid-cols-3 gap-3 bg-white border border-slate-200 rounded-xl p-4 font-mono text-xs">
+                  <div className="grid grid-cols-3 gap-3 bg-[#14161C] border border-slate-800 rounded-xl p-4 font-mono text-xs">
                     <div>
                       <div className="text-slate-400 text-[10px] uppercase">WhatsApp API</div>
-                      <div className="text-[#25D366] font-bold mt-1">Active ●</div>
+                      <div className="text-[#FF003C] font-bold mt-1">Active ●</div>
                     </div>
                     <div>
                       <div className="text-slate-400 text-[10px] uppercase">Web Chat</div>
-                      <div className="text-[#3B82F6] font-bold mt-1">Active ●</div>
+                      <div className="text-white font-bold mt-1">Active ●</div>
                     </div>
                     <div>
                       <div className="text-slate-400 text-[10px] uppercase">Voice Dispatch</div>
@@ -519,83 +489,83 @@ export default function App() {
               </AnimatedSection>
             </div>
 
-            {/* FEATURE 2 (SPAN 4 COLS) */}
+            {/* FEATURE 2 (SPAN 4 COLS - LIGHT BENTO) */}
             <div className="md:col-span-4">
               <AnimatedSection delay={0.1}>
-                <div className="bento-card p-8 h-full flex flex-col justify-between bg-white">
+                <div className="bento-card-light p-8 h-full flex flex-col justify-between">
                   <div>
-                    <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-2xl mb-6">
+                    <div className="w-12 h-12 rounded-2xl bg-[#090A0F] text-white flex items-center justify-center text-2xl mb-6">
                       🤖
                     </div>
-                    <h3 className="text-xl font-outfit font-bold text-slate-900 mb-2">Visual Bot Builder</h3>
+                    <h3 className="text-xl font-outfit font-bold text-[#090A0F] mb-2">Visual Bot Builder</h3>
                     <p className="text-slate-600 text-sm leading-relaxed mb-6">
                       Drag-and-drop conversational logic. Sync knowledge bases, PDFs, and internal databases with zero code.
                     </p>
                   </div>
-                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 font-mono text-xs text-slate-600">
+                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 font-mono text-xs text-[#090A0F]">
                     <div className="flex items-center justify-between mb-1">
                       <span>Vector Sync:</span>
-                      <span className="text-[#25D366] font-bold">100% Ready</span>
+                      <span className="text-[#FF003C] font-bold">100% Ready</span>
                     </div>
                     <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
-                      <div className="bg-[#25D366] h-full w-full"></div>
+                      <div className="bg-[#FF003C] h-full w-full"></div>
                     </div>
                   </div>
                 </div>
               </AnimatedSection>
             </div>
 
-            {/* FEATURE 3 (SPAN 4 COLS) */}
+            {/* FEATURE 3 (SPAN 4 COLS - LIGHT BENTO) */}
             <div className="md:col-span-4">
               <AnimatedSection delay={0.15}>
-                <div className="bento-card p-8 h-full flex flex-col justify-between bg-white">
+                <div className="bento-card-light p-8 h-full flex flex-col justify-between">
                   <div>
-                    <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-2xl mb-6">
+                    <div className="w-12 h-12 rounded-2xl bg-[#090A0F] text-white flex items-center justify-center text-2xl mb-6">
                       📢
                     </div>
-                    <h3 className="text-xl font-outfit font-bold text-slate-900 mb-2">Broadcast Campaigns</h3>
+                    <h3 className="text-xl font-outfit font-bold text-[#090A0F] mb-2">Broadcast Campaigns</h3>
                     <p className="text-slate-600 text-sm leading-relaxed mb-6">
                       Send segmented, personalized WhatsApp broadcasts with automated abandoned cart recovery flows.
                     </p>
                   </div>
                   <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 font-mono text-xs">
                     <div className="text-slate-500 text-[10px] uppercase">Cart Recovery Rate</div>
-                    <div className="text-2xl font-extrabold text-[#25D366] mt-1">89.4%</div>
+                    <div className="text-2xl font-extrabold text-[#FF003C] mt-1">89.4%</div>
                   </div>
                 </div>
               </AnimatedSection>
             </div>
 
-            {/* FEATURE 4 (SPAN 4 COLS) */}
+            {/* FEATURE 4 (SPAN 4 COLS - DARK BENTO) */}
             <div className="md:col-span-4">
               <AnimatedSection delay={0.2}>
-                <div className="bento-card p-8 h-full flex flex-col justify-between bg-white">
+                <div className="bento-card-dark p-8 h-full flex flex-col justify-between">
                   <div>
-                    <div className="w-12 h-12 rounded-2xl bg-purple-50 border border-purple-200 flex items-center justify-center text-2xl mb-6">
+                    <div className="w-12 h-12 rounded-2xl bg-[#FF003C] text-white flex items-center justify-center text-2xl mb-6">
                       📥
                     </div>
-                    <h3 className="text-xl font-outfit font-bold text-slate-900 mb-2">Shared Team Inbox</h3>
-                    <p className="text-slate-600 text-sm leading-relaxed mb-6">
+                    <h3 className="text-xl font-outfit font-bold text-white mb-2">Shared Team Inbox</h3>
+                    <p className="text-slate-400 text-sm leading-relaxed mb-6">
                       Let AI handle initial support triage, then pass off to human team members with internal notes.
                     </p>
                   </div>
-                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 font-mono text-xs">
-                    <div className="text-slate-500 text-[10px] uppercase">AI Resolution Rate</div>
-                    <div className="text-2xl font-extrabold text-[#7C3AED] mt-1">94.2%</div>
+                  <div className="bg-[#14161C] border border-slate-800 rounded-xl p-3.5 font-mono text-xs">
+                    <div className="text-slate-400 text-[10px] uppercase">AI Resolution Rate</div>
+                    <div className="text-2xl font-extrabold text-white mt-1">94.2%</div>
                   </div>
                 </div>
               </AnimatedSection>
             </div>
 
-            {/* FEATURE 5 (SPAN 4 COLS) */}
+            {/* FEATURE 5 (SPAN 4 COLS - LIGHT BENTO) */}
             <div className="md:col-span-4">
               <AnimatedSection delay={0.25}>
-                <div className="bento-card p-8 h-full flex flex-col justify-between bg-white">
+                <div className="bento-card-light p-8 h-full flex flex-col justify-between">
                   <div>
-                    <div className="w-12 h-12 rounded-2xl bg-rose-50 border border-rose-200 flex items-center justify-center text-2xl mb-6">
+                    <div className="w-12 h-12 rounded-2xl bg-[#090A0F] text-white flex items-center justify-center text-2xl mb-6">
                       📊
                     </div>
-                    <h3 className="text-xl font-outfit font-bold text-slate-900 mb-2">Real-Time Analytics</h3>
+                    <h3 className="text-xl font-outfit font-bold text-[#090A0F] mb-2">Real-Time Analytics</h3>
                     <p className="text-slate-600 text-sm leading-relaxed mb-6">
                       Deep telemetry on response times, customer sentiment index, and automated conversion rates.
                     </p>
@@ -612,23 +582,23 @@ export default function App() {
         </div>
       </section>
 
-      {/* INTERACTIVE PRE-BUILT BOT TEMPLATES */}
-      <section id="bot-templates" className="py-24 border-b border-slate-200 bg-slate-50/60 relative overflow-hidden">
+      {/* INTERACTIVE PRE-BUILT BOT TEMPLATES (DARK OBSIDIAN SECTION) */}
+      <section id="bot-templates" className="py-24 border-b border-slate-800 bg-[#090A0F] text-white bg-grid-dark relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           
           <AnimatedSection>
             <div className="text-center mb-16">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#F0FDF4] border border-[#25D366]/40 mb-4 shadow-sm">
-                <CheckIcon color="#25D366" size={16} />
-                <span className="text-[#25D366] font-mono text-xs font-bold uppercase tracking-wider">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#14161C] border border-[#FF003C]/40 mb-4 shadow-sm">
+                <CheckIcon color="#FF003C" size={16} />
+                <span className="text-[#FF003C] font-mono text-xs font-bold uppercase tracking-wider">
                   Meta Verified Bot Templates
                 </span>
               </div>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-outfit font-extrabold text-slate-900 tracking-tight">
-                Pre-built WhatsApp bots. <span className="gradient-text">Try live.</span>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-outfit font-extrabold text-white tracking-tight">
+                Pre-built WhatsApp bots. <span className="gradient-text-red">Try live.</span>
               </h2>
-              <p className="text-slate-600 text-sm font-sans mt-3 max-w-xl mx-auto">
-                Launch production-ready WhatsApp AI agents in seconds. Click "Try Now" to open a live interactive chat simulator!
+              <p className="text-slate-400 text-sm font-sans mt-3 max-w-xl mx-auto">
+                Launch production-ready WhatsApp AI agents in seconds. Click "Try Bot Live" to open a live interactive chat simulator!
               </p>
             </div>
           </AnimatedSection>
@@ -636,22 +606,22 @@ export default function App() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {Object.values(botTemplates).map((t, i) => (
               <AnimatedSection key={t.id} delay={i * 0.08}>
-                <div className="bento-card overflow-hidden bg-white flex flex-col justify-between h-full shadow-sm hover:shadow-xl">
-                  <div className="h-2 bg-gradient-to-r from-[#FF003C] via-[#7C3AED] to-[#25D366]"></div>
+                <div className="bento-card-dark overflow-hidden flex flex-col justify-between h-full hover:border-[#FF003C] transition-all">
+                  <div className="h-2 bg-[#FF003C]"></div>
                   <div className="p-7">
                     <div className="flex items-center justify-between mb-5">
-                      <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-2xl border border-slate-200">
+                      <div className="w-12 h-12 rounded-2xl bg-[#14161C] flex items-center justify-center text-2xl border border-slate-800">
                         {t.avatar}
                       </div>
-                      <span className="px-2.5 py-1 text-[10px] font-mono bg-[#F0FDF4] text-[#25D366] border border-[#25D366]/40 rounded-full uppercase font-bold flex items-center gap-1">
-                        <CheckIcon color="#25D366" size={12} /> Meta Ready
+                      <span className="px-2.5 py-1 text-[10px] font-mono bg-[#FF003C]/20 text-[#FF003C] border border-[#FF003C]/40 rounded-full uppercase font-bold flex items-center gap-1">
+                        <CheckIcon color="#FF003C" size={12} /> Meta Ready
                       </span>
                     </div>
-                    <h3 className="text-xl font-outfit font-bold text-slate-900 mb-2">{t.name}</h3>
-                    <p className="text-slate-600 text-sm leading-relaxed mb-6">{t.welcome}</p>
+                    <h3 className="text-xl font-outfit font-bold text-white mb-2">{t.name}</h3>
+                    <p className="text-slate-400 text-sm leading-relaxed mb-6">{t.welcome}</p>
                     <button
                       onClick={() => tryBotTemplate(t.id)}
-                      className="w-full py-3 rounded-xl bg-[#25D366] text-white font-outfit font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-[#1ebe5d] transition-colors shadow-md shadow-[#25D366]/20"
+                      className="btn-primary w-full py-3 rounded-xl font-outfit font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2"
                     >
                       <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38c1.45.79 3.08 1.21 4.79 1.21 5.46 0 9.91-4.45 9.91-9.91C22 6.45 17.5 2 12.04 2z"/></svg>
                       Try Bot Live
@@ -669,27 +639,27 @@ export default function App() {
       <section className="py-20 border-b border-slate-200 bg-white relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <AnimatedSection>
-            <div className="rounded-3xl bg-gradient-to-br from-emerald-50/80 via-white to-blue-50/80 border border-[#25D366]/30 p-8 md:p-14 flex flex-col md:flex-row items-center justify-between gap-8 shadow-xl shadow-emerald-500/5">
+            <div className="rounded-3xl bg-[#090A0F] text-white border-2 border-slate-800 p-8 md:p-14 flex flex-col md:flex-row items-center justify-between gap-8 shadow-2xl">
               <div className="max-w-xl">
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#F0FDF4] border border-[#25D366]/40 mb-4 shadow-sm">
-                  <CheckIcon color="#25D366" size={20} />
-                  <span className="text-[#25D366] font-mono text-xs font-bold uppercase tracking-wider">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#14161C] border border-[#FF003C]/40 mb-4 shadow-sm">
+                  <CheckIcon color="#FF003C" size={20} />
+                  <span className="text-[#FF003C] font-mono text-xs font-bold uppercase tracking-wider">
                     Official Meta Business Partner
                   </span>
                 </div>
-                <h2 className="text-3xl sm:text-4xl font-outfit font-extrabold text-slate-900 tracking-tight mb-4">
+                <h2 className="text-3xl sm:text-4xl font-outfit font-extrabold text-white tracking-tight mb-4">
                   Officially Approved for WhatsApp Business API.
                 </h2>
-                <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
+                <p className="text-slate-400 text-sm sm:text-base leading-relaxed">
                   Actionpackd is a verified Meta Business Partner. Deploy enterprise WhatsApp messaging with official templates, green badge verification, and compliance out of the box.
                 </p>
               </div>
               <div className="shrink-0 flex flex-col items-center gap-3">
-                <div className="w-32 h-32 rounded-full bg-[#F0FDF4] border-4 border-[#25D366]/50 flex items-center justify-center shadow-lg shadow-[#25D366]/20 animate-pulse-soft">
-                  <CheckIcon color="#25D366" size={64} />
+                <div className="w-32 h-32 rounded-full bg-[#14161C] border-4 border-[#FF003C] flex items-center justify-center shadow-lg shadow-rose-500/30">
+                  <img src="/assets/logo_mascot.png" alt="Mascot" className="w-20 h-20 object-contain" />
                 </div>
                 <div className="text-center">
-                  <div className="text-[#25D366] font-mono text-sm font-bold uppercase tracking-wider">Verified Partner</div>
+                  <div className="text-[#FF003C] font-mono text-sm font-bold uppercase tracking-wider">Verified Partner</div>
                   <div className="text-slate-400 text-xs font-mono">Meta Cloud API</div>
                 </div>
               </div>
@@ -699,13 +669,13 @@ export default function App() {
       </section>
 
       {/* SOLUTIONS BY INDUSTRY */}
-      <section id="solutions" className="py-24 border-b border-slate-200 bg-slate-50/40">
+      <section id="solutions" className="py-24 border-b border-slate-200 bg-slate-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <AnimatedSection>
             <div className="mb-16">
               <div className="text-[#FF003C] font-mono text-xs font-bold uppercase tracking-widest mb-2">// INDUSTRY SOLUTIONS</div>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-outfit font-extrabold text-slate-900 tracking-tight">
-                Tailored for <span className="gradient-text">every industry sector.</span>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-outfit font-extrabold text-[#090A0F] tracking-tight">
+                Tailored for <span className="gradient-text-red">every industry sector.</span>
               </h2>
             </div>
           </AnimatedSection>
@@ -720,11 +690,11 @@ export default function App() {
               { icon: '🏢', title: 'Custom Enterprise', desc: 'Custom API mesh, dedicated GPU nodes, SOC2 compliance, and zero data retention.' }
             ].map((s, i) => (
               <AnimatedSection key={i} delay={i * 0.08}>
-                <div className="bento-card p-7 bg-white h-full">
-                  <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-2xl mb-4 border border-slate-200">
+                <div className="bento-card-light p-7 bg-white h-full">
+                  <div className="w-12 h-12 rounded-2xl bg-[#090A0F] text-white flex items-center justify-center text-2xl mb-4">
                     {s.icon}
                   </div>
-                  <h3 className="text-xl font-outfit font-bold text-slate-900 mb-2">{s.title}</h3>
+                  <h3 className="text-xl font-outfit font-bold text-[#090A0F] mb-2">{s.title}</h3>
                   <p className="text-slate-600 text-sm leading-relaxed">{s.desc}</p>
                 </div>
               </AnimatedSection>
@@ -737,20 +707,20 @@ export default function App() {
       <section className="py-20 border-b border-slate-200 bg-white">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <AnimatedSection>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-[#3B82F6] font-mono text-xs font-bold uppercase tracking-widest mb-4">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#090A0F] text-[#FF003C] border border-slate-800 font-mono text-xs font-bold uppercase tracking-widest mb-4">
               // ROI CALCULATOR
             </div>
-            <h2 className="text-3xl sm:text-4xl font-outfit font-extrabold text-slate-900 mb-4">
+            <h2 className="text-3xl sm:text-4xl font-outfit font-extrabold text-[#090A0F] mb-4">
               Calculate your support cost savings.
             </h2>
             <p className="text-slate-600 text-sm font-sans max-w-xl mx-auto mb-10">
               Drag the slider to match your monthly customer conversation volume:
             </p>
 
-            <div className="bg-slate-50 border border-slate-200 rounded-3xl p-8 max-w-2xl mx-auto shadow-md">
-              <div className="flex items-center justify-between mb-4 font-mono text-xs text-slate-600">
+            <div className="bg-[#090A0F] text-white border-2 border-slate-800 rounded-3xl p-8 max-w-2xl mx-auto shadow-2xl">
+              <div className="flex items-center justify-between mb-4 font-mono text-xs text-slate-300">
                 <span>Monthly Conversations:</span>
-                <span className="text-[#FF003C] font-extrabold text-lg">{monthlyVolume.toLocaleString()} msgs</span>
+                <span className="text-[#FF003C] font-extrabold text-xl">{monthlyVolume.toLocaleString()} msgs</span>
               </div>
               <input
                 type="range"
@@ -762,16 +732,16 @@ export default function App() {
                 className="w-full accent-[#FF003C] cursor-pointer mb-8"
               />
 
-              <div className="grid grid-cols-2 gap-4 text-center divide-x divide-slate-200 pt-4 border-t border-slate-200">
+              <div className="grid grid-cols-2 gap-4 text-center divide-x divide-slate-800 pt-4 border-t border-slate-800">
                 <div>
                   <div className="text-slate-400 text-xs font-mono uppercase">Human Support Hours Saved</div>
-                  <div className="text-3xl sm:text-4xl font-outfit font-extrabold text-[#25D366] mt-1">
+                  <div className="text-3xl sm:text-4xl font-outfit font-extrabold text-white mt-1">
                     {Math.round(monthlyVolume * 0.08).toLocaleString()} hrs
                   </div>
                 </div>
                 <div>
                   <div className="text-slate-400 text-xs font-mono uppercase">Est. Monthly Cost Saved</div>
-                  <div className="text-3xl sm:text-4xl font-outfit font-extrabold text-[#3B82F6] mt-1">
+                  <div className="text-3xl sm:text-4xl font-outfit font-extrabold text-[#FF003C] mt-1">
                     ${Math.round(monthlyVolume * 0.42).toLocaleString()}
                   </div>
                 </div>
@@ -782,13 +752,13 @@ export default function App() {
       </section>
 
       {/* PRICING TIERS */}
-      <section id="pricing" className="py-24 border-b border-slate-200 bg-slate-50/50">
+      <section id="pricing" className="py-24 border-b border-slate-200 bg-slate-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <AnimatedSection>
             <div className="text-center mb-16">
               <div className="text-[#FF003C] font-mono text-xs font-bold uppercase tracking-widest mb-2">// PRICING</div>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-outfit font-extrabold text-slate-900 tracking-tight">
-                Simple, <span className="gradient-text">transparent tiers.</span>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-outfit font-extrabold text-[#090A0F] tracking-tight">
+                Simple, <span className="gradient-text-red">transparent tiers.</span>
               </h2>
             </div>
           </AnimatedSection>
@@ -824,35 +794,35 @@ export default function App() {
               }
             ].map((tier, i) => (
               <AnimatedSection key={i} delay={i * 0.1}>
-                <div className={`rounded-3xl p-8 flex flex-col justify-between relative h-full bg-white transition-all ${
-                  tier.featured ? 'border-2 border-[#FF003C] shadow-xl shadow-rose-500/10' : 'border border-slate-200 shadow-sm'
+                <div className={`rounded-3xl p-8 flex flex-col justify-between relative h-full transition-all ${
+                  tier.featured ? 'bg-[#090A0F] text-white border-2 border-[#FF003C] shadow-2xl shadow-rose-500/20' : 'bg-white text-[#090A0F] border-2 border-slate-200 shadow-sm'
                 }`}>
                   {tier.featured && (
-                    <div className="absolute -top-3.5 right-6 bg-[#FF003C] text-white px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider shadow-sm">
+                    <div className="absolute -top-3.5 right-6 bg-[#FF003C] text-white px-3.5 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider shadow-md">
                       MOST POPULAR
                     </div>
                   )}
                   <div>
-                    <div className="text-xs font-mono text-slate-400 uppercase mb-2 font-bold">{tier.name}</div>
-                    <div className="text-4xl font-outfit font-extrabold text-slate-900 mb-3">
-                      {tier.price} <span className="text-xs font-mono text-slate-400 font-normal">{tier.period}</span>
+                    <div className={`text-xs font-mono uppercase mb-2 font-bold ${tier.featured ? 'text-[#FF003C]' : 'text-slate-500'}`}>{tier.name}</div>
+                    <div className="text-4xl font-outfit font-extrabold mb-3">
+                      {tier.price} <span className={`text-xs font-mono font-normal ${tier.featured ? 'text-slate-400' : 'text-slate-500'}`}>{tier.period}</span>
                     </div>
-                    <p className="text-slate-600 text-xs mb-6">{tier.desc}</p>
-                    <ul className="space-y-3 text-xs text-slate-700 font-sans mb-8">
+                    <p className={`text-xs mb-6 ${tier.featured ? 'text-slate-300' : 'text-slate-600'}`}>{tier.desc}</p>
+                    <ul className="space-y-3 text-xs font-sans mb-8">
                       {tier.features.map((f, j) => (
                         <li key={j} className="flex items-center gap-2.5">
-                          <CheckIcon color={f.includes('Meta') ? '#25D366' : '#FF003C'} size={16} />
-                          <span className={f.includes('Meta') ? 'font-bold text-slate-900' : ''}>{f}</span>
+                          <CheckIcon color="#FF003C" size={16} />
+                          <span className={f.includes('Meta') ? 'font-bold' : ''}>{f}</span>
                         </li>
                       ))}
                     </ul>
                   </div>
                   <button
                     onClick={() => openModal(tier.cta, `Get started with the Actionpackd ${tier.name} plan.`)}
-                    className={`w-full py-3.5 font-outfit font-bold text-xs uppercase tracking-wider rounded-xl border ${
+                    className={`w-full py-3.5 font-outfit font-bold text-xs uppercase tracking-wider rounded-xl ${
                       tier.featured
-                        ? 'btn-primary bg-[#FF003C] text-white border-[#FF003C]'
-                        : 'btn-outline bg-transparent text-slate-900 border-slate-200'
+                        ? 'btn-primary shadow-lg shadow-rose-500/30'
+                        : 'btn-black'
                     }`}
                   >
                     {tier.cta}
@@ -864,35 +834,14 @@ export default function App() {
         </div>
       </section>
 
-      {/* PLATFORM TELEMETRY COUNTER */}
-      <section className="py-20 border-b border-slate-200 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-            {[
-              { label: 'Conversations Processed', target: 18450200, suffix: '+', color: '#3B82F6' },
-              { label: 'Platform Uptime', target: 99, suffix: '.99%', color: '#FFB703' },
-              { label: 'Supported Sectors', target: 52, suffix: '+', color: '#FF003C' },
-              { label: 'Availability', value: '24/7/365', color: '#25D366' }
-            ].map((s, i) => (
-              <div key={i} className="bento-card p-6 bg-slate-50/60 border border-slate-200">
-                <div className="text-[11px] font-mono text-slate-400 uppercase tracking-wider mb-2">{s.label}</div>
-                <div className="text-3xl sm:text-4xl font-extrabold font-mono" style={{ color: s.color }}>
-                  {s.value ? s.value : <CounterUp target={s.target} suffix={s.suffix} />}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* FAQ ACCORDION SECTION */}
-      <section id="faq" className="py-24 border-b border-slate-200 bg-slate-50/40">
+      <section id="faq" className="py-24 border-b border-slate-200 bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <AnimatedSection>
             <div className="text-center mb-16">
               <div className="text-[#FF003C] font-mono text-xs font-bold uppercase tracking-widest mb-2">// FREQUENTLY ASKED QUESTIONS</div>
-              <h2 className="text-3xl sm:text-4xl font-outfit font-extrabold text-slate-900 tracking-tight">
-                Got questions? <span className="gradient-text">We've got answers.</span>
+              <h2 className="text-3xl sm:text-4xl font-outfit font-extrabold text-[#090A0F] tracking-tight">
+                Got questions? <span className="gradient-text-red">We've got answers.</span>
               </h2>
             </div>
           </AnimatedSection>
@@ -900,13 +849,13 @@ export default function App() {
           <div className="space-y-4">
             {faqs.map((faq, i) => (
               <AnimatedSection key={i} delay={i * 0.06}>
-                <div className="bento-card overflow-hidden bg-white border border-slate-200">
+                <div className="bento-card-light overflow-hidden bg-white">
                   <button
                     onClick={() => setOpenFaq(openFaq === i ? -1 : i)}
-                    className="w-full p-6 text-left font-outfit font-bold text-slate-900 flex items-center justify-between text-base sm:text-lg"
+                    className="w-full p-6 text-left font-outfit font-bold text-[#090A0F] flex items-center justify-between text-base sm:text-lg"
                   >
                     <span>{faq.q}</span>
-                    <span className="text-[#FF003C] font-mono text-xl">{openFaq === i ? '−' : '+'}</span>
+                    <span className="text-[#FF003C] font-mono text-xl font-bold">{openFaq === i ? '−' : '+'}</span>
                   </button>
                   {openFaq === i && (
                     <div className="px-6 pb-6 text-slate-600 text-sm leading-relaxed font-sans border-t border-slate-100 pt-4 animate-slide-up">
@@ -920,58 +869,58 @@ export default function App() {
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer className="bg-white border-t border-slate-200 pt-16 pb-12">
+      {/* FOOTER (DEEP OBSIDIAN BLACK) */}
+      <footer className="bg-[#090A0F] text-white border-t border-slate-800 pt-16 pb-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-5 gap-10 mb-12">
             <div className="md:col-span-2 space-y-4">
               <div className="flex items-center gap-3">
-                <img src="/assets/logo_horizontal.png" alt="Actionpackd" className="h-10 w-auto object-contain" />
+                <img src="/assets/logo_horizontal.png" alt="Actionpackd" className="h-10 w-auto object-contain" style={{ filter: 'brightness(1.1)' }} />
               </div>
-              <p className="text-slate-600 text-xs font-sans max-w-sm leading-relaxed">
+              <p className="text-slate-400 text-xs font-sans max-w-sm leading-relaxed">
                 Modern AI Agent Automation Platform for WhatsApp Business API, Web Chat, Voice, and Email workflows.
               </p>
-              <div className="flex items-center gap-2 text-xs font-mono text-[#25D366] pt-2">
-                <CheckIcon color="#25D366" size={16} />
+              <div className="flex items-center gap-2 text-xs font-mono text-[#FF003C] pt-2 font-bold">
+                <CheckIcon color="#FF003C" size={16} />
                 <span>Meta Business Partner · Official WhatsApp API</span>
               </div>
             </div>
 
             <div>
-              <h4 className="text-xs font-mono font-bold text-slate-900 uppercase tracking-wider mb-4">Platform</h4>
-              <ul className="space-y-2 text-xs text-slate-600 font-sans">
-                <li><a href="#features" className="hover:text-slate-900 transition-colors">Omni-Channel Hub</a></li>
-                <li><a href="#features" className="hover:text-slate-900 transition-colors">Visual Flow Builder</a></li>
-                <li><a href="#features" className="hover:text-slate-900 transition-colors">Broadcast Campaigns</a></li>
-                <li><a href="#features" className="hover:text-slate-900 transition-colors">Shared Inbox</a></li>
+              <h4 className="text-xs font-mono font-bold text-white uppercase tracking-wider mb-4">Platform</h4>
+              <ul className="space-y-2 text-xs text-slate-400 font-sans">
+                <li><a href="#features" className="hover:text-white transition-colors">Omni-Channel Hub</a></li>
+                <li><a href="#features" className="hover:text-white transition-colors">Visual Flow Builder</a></li>
+                <li><a href="#features" className="hover:text-white transition-colors">Broadcast Campaigns</a></li>
+                <li><a href="#features" className="hover:text-white transition-colors">Shared Inbox</a></li>
               </ul>
             </div>
 
             <div>
-              <h4 className="text-xs font-mono font-bold text-slate-900 uppercase tracking-wider mb-4">Resources</h4>
-              <ul className="space-y-2 text-xs text-slate-600 font-sans">
-                <li><a href="#bot-templates" className="hover:text-slate-900 transition-colors">Bot Templates</a></li>
-                <li><a href="#faq" className="hover:text-slate-900 transition-colors">FAQ & Support</a></li>
-                <li><a href="#pricing" className="hover:text-slate-900 transition-colors">Pricing Tiers</a></li>
+              <h4 className="text-xs font-mono font-bold text-white uppercase tracking-wider mb-4">Resources</h4>
+              <ul className="space-y-2 text-xs text-slate-400 font-sans">
+                <li><a href="#bot-templates" className="hover:text-white transition-colors">Bot Templates</a></li>
+                <li><a href="#faq" className="hover:text-white transition-colors">FAQ & Support</a></li>
+                <li><a href="#pricing" className="hover:text-white transition-colors">Pricing Tiers</a></li>
               </ul>
             </div>
 
             <div>
-              <h4 className="text-xs font-mono font-bold text-slate-900 uppercase tracking-wider mb-4">Security</h4>
-              <ul className="space-y-2 text-xs text-slate-600 font-sans">
-                <li><span className="text-[#25D366] font-bold">Meta Approved</span></li>
+              <h4 className="text-xs font-mono font-bold text-white uppercase tracking-wider mb-4">Security</h4>
+              <ul className="space-y-2 text-xs text-slate-400 font-sans">
+                <li><span className="text-[#FF003C] font-bold">Meta Approved</span></li>
                 <li><span>SOC2 Type II</span></li>
                 <li><span>Zero Retention Option</span></li>
               </ul>
             </div>
           </div>
 
-          <div className="pt-8 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between text-xs font-mono text-slate-400 gap-4">
+          <div className="pt-8 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between text-xs font-mono text-slate-500 gap-4">
             <div>© 2026 Actionpackd Inc. All rights reserved.</div>
             <div className="flex items-center gap-4">
-              <span className="text-[#25D366]">● Meta Verified</span>
+              <span className="text-[#FF003C]">● Meta Verified</span>
               <span>●</span>
-              <span className="text-[#3B82F6]">99.99% Uptime SLA</span>
+              <span className="text-white">99.99% Uptime SLA</span>
             </div>
           </div>
         </div>
@@ -979,24 +928,22 @@ export default function App() {
 
       {/* CTA MODAL */}
       {modal.open && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={(e) => e.target === e.currentTarget && closeModal()}>
-          <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl animate-slide-up">
+        <div className="fixed inset-0 bg-[#090A0F]/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={(e) => e.target === e.currentTarget && closeModal()}>
+          <div className="bg-white border-2 border-[#090A0F] rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl animate-slide-up">
             <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-white border border-[#FF003C] overflow-hidden flex items-center justify-center">
-                  <img src="/assets/logo.png" alt="Logo" className="w-full h-full object-cover rounded-full" />
-                </div>
-                <h3 className="font-outfit font-extrabold text-base text-slate-900">{modal.title}</h3>
+                <img src="/assets/logo_mascot.png" alt="Mascot" className="w-8 h-8 object-contain" />
+                <h3 className="font-outfit font-extrabold text-base text-[#090A0F]">{modal.title}</h3>
               </div>
-              <button onClick={closeModal} className="text-slate-400 hover:text-slate-900 font-mono text-lg">✕</button>
+              <button onClick={closeModal} className="text-slate-400 hover:text-[#090A0F] font-mono text-lg">✕</button>
             </div>
             <p className="text-slate-600 text-xs leading-relaxed mb-6 font-sans">{modal.body}</p>
             <form onSubmit={(e) => { e.preventDefault(); closeModal(); alert('⚡ Welcome to Actionpackd! Account setup complete.') }} className="space-y-4">
               <div>
                 <label className="block text-[11px] font-mono text-slate-400 mb-1.5 uppercase font-bold">WORK EMAIL</label>
-                <input type="email" placeholder="you@company.com" required className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#FF003C] font-mono" />
+                <input type="email" placeholder="you@company.com" required className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-[#090A0F] placeholder-slate-400 focus:outline-none focus:border-[#FF003C] font-mono" />
               </div>
-              <button type="submit" className="btn-primary w-full py-3.5 bg-[#FF003C] text-white font-outfit font-bold text-xs uppercase tracking-wider rounded-xl border border-[#FF003C]">
+              <button type="submit" className="btn-primary w-full py-3.5 rounded-xl font-outfit font-bold text-xs uppercase tracking-wider">
                 Get Started →
               </button>
             </form>
@@ -1006,24 +953,24 @@ export default function App() {
 
       {/* WHATSAPP BOT TEMPLATE SIMULATOR MODAL */}
       {botModal.open && botModal.template && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={(e) => e.target === e.currentTarget && closeBotModal()}>
-          <div className="bg-[#EFEAE2] border border-[#25D366]/40 rounded-3xl max-w-md w-full shadow-2xl overflow-hidden animate-slide-up">
+        <div className="fixed inset-0 bg-[#090A0F]/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={(e) => e.target === e.currentTarget && closeBotModal()}>
+          <div className="bg-[#EFEAE2] border-2 border-[#FF003C] rounded-3xl max-w-md w-full shadow-2xl overflow-hidden animate-slide-up">
             
             {/* WHATSAPP APP BAR */}
             <div className="bg-[#1F2C34] p-4 flex items-center gap-3">
               <button onClick={closeBotModal} className="text-gray-400 hover:text-white">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/></svg>
               </button>
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#25D366] to-[#3B82F6] flex items-center justify-center text-white font-bold text-lg shadow-sm">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#FF003C] to-[#090A0F] flex items-center justify-center text-white font-bold text-lg shadow-sm border border-[#FF003C]">
                 {botModal.template.avatar}
               </div>
               <div className="flex-1">
                 <div className="text-white font-semibold text-sm">{botModal.template.name}</div>
-                <div className="text-[#25D366] text-xs flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#25D366] animate-pulse"></span>online · Meta Verified
+                <div className="text-[#FF003C] text-xs flex items-center gap-1 font-mono font-bold">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#FF003C] animate-pulse"></span>online · Meta Verified
                 </div>
               </div>
-              <CheckIcon color="#25D366" size={20} />
+              <CheckIcon color="#FF003C" size={20} />
             </div>
 
             {/* CHAT BUBBLES */}
@@ -1048,7 +995,7 @@ export default function App() {
               />
               <button
                 onClick={sendBotMessage}
-                className="w-10 h-10 rounded-full bg-[#25D366] flex items-center justify-center hover:bg-[#1ebe5d] transition-colors shrink-0 shadow-sm"
+                className="w-10 h-10 rounded-full bg-[#FF003C] flex items-center justify-center hover:bg-[#E60036] transition-colors shrink-0 shadow-sm"
               >
                 <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>
               </button>

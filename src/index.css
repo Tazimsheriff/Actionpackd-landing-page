@@ -1,21 +1,18 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700;800&display=swap');
 
 :root {
-  --brand: #FF003C;
-  --brand-light: #FF2A55;
-  --brand-dark: #B00028;
-  --blue: #3B82F6;
-  --blue-light: #60A5FA;
-  --violet: #7C3AED;
-  --meta: #25D366;
-  --gold: #FFB703;
-  --bg: #FFFFFF;
-  --bg-subtle: #F8FAFC;
-  --border: #E2E8F0;
-  --border-hover: #CBD5E1;
-  --text: #0F172A;
-  --text-soft: #475569;
-  --text-muted: #94A3B8;
+  --black: #090A0F;
+  --black-surface: #12141A;
+  --black-card: #181A22;
+  --red: #FF003C;
+  --red-light: #FF2A55;
+  --red-dark: #B00028;
+  --white: #FFFFFF;
+  --white-subtle: #F8FAFC;
+  --border-light: #E2E8F0;
+  --border-dark: #222632;
+  --text-dark: #090A0F;
+  --text-muted: #64748B;
 }
 
 * {
@@ -31,7 +28,7 @@ html {
 body {
   font-family: 'Inter', sans-serif;
   background-color: #FFFFFF;
-  color: #0F172A;
+  color: #090A0F;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -46,41 +43,44 @@ body {
 ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: #FF003C; }
 
-/* Glowing Background Blobs */
-.blob-glow-1 {
-  background: radial-gradient(circle, rgba(124, 58, 237, 0.12) 0%, rgba(59, 130, 246, 0.08) 50%, transparent 70%);
-  filter: blur(60px);
-}
-
-.blob-glow-2 {
-  background: radial-gradient(circle, rgba(255, 0, 60, 0.1) 0%, rgba(255, 183, 3, 0.06) 50%, transparent 70%);
-  filter: blur(70px);
-}
-
-.blob-glow-3 {
-  background: radial-gradient(circle, rgba(37, 211, 102, 0.12) 0%, rgba(59, 130, 246, 0.08) 50%, transparent 70%);
-  filter: blur(65px);
-}
-
 /* Background Grid Pattern */
-.bg-grid {
+.bg-grid-light {
   background-image:
-    radial-gradient(rgba(15, 23, 42, 0.06) 1.2px, transparent 1.2px),
-    linear-gradient(to right, rgba(226, 232, 240, 0.5) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(226, 232, 240, 0.5) 1px, transparent 1px);
+    radial-gradient(rgba(255, 0, 60, 0.08) 1.2px, transparent 1.2px),
+    linear-gradient(to right, rgba(226, 232, 240, 0.6) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(226, 232, 240, 0.6) 1px, transparent 1px);
   background-size: 32px 32px, 48px 48px, 48px 48px;
 }
 
+.bg-grid-dark {
+  background-image:
+    radial-gradient(rgba(255, 0, 60, 0.15) 1.2px, transparent 1.2px),
+    linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 32px 32px, 48px 48px, 48px 48px;
+}
+
+/* Glowing Background Blobs */
+.blob-red-glow {
+  background: radial-gradient(circle, rgba(255, 0, 60, 0.16) 0%, rgba(255, 42, 85, 0.08) 45%, transparent 70%);
+  filter: blur(70px);
+}
+
+.blob-black-glow {
+  background: radial-gradient(circle, rgba(9, 10, 15, 0.12) 0%, rgba(18, 20, 26, 0.06) 45%, transparent 70%);
+  filter: blur(80px);
+}
+
 /* Gradient Text */
-.gradient-text {
-  background: linear-gradient(135deg, #FF003C 0%, #7C3AED 50%, #3B82F6 100%);
+.gradient-text-red {
+  background: linear-gradient(135deg, #FF003C 0%, #FF2A55 50%, #B00028 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-.gradient-text-meta {
-  background: linear-gradient(135deg, #25D366 0%, #059669 100%);
+.gradient-text-black {
+  background: linear-gradient(135deg, #090A0F 0%, #2D3748 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -88,17 +88,20 @@ body {
 
 /* Floating Nav Glassmorphism */
 .floating-nav {
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(226, 232, 240, 0.8);
-  box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.08), 0 4px 12px rgba(0, 0, 0, 0.03);
+  border: 1.5px solid rgba(9, 10, 15, 0.12);
+  box-shadow: 0 10px 30px -10px rgba(9, 10, 15, 0.12), 0 0 20px rgba(255, 0, 60, 0.06);
 }
 
-/* Buttons */
+/* High-Contrast Buttons */
 .btn-primary {
   position: relative;
   overflow: hidden;
+  background: #FF003C;
+  color: #FFFFFF;
+  border: 1px solid #FF003C;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   z-index: 1;
 }
@@ -107,7 +110,7 @@ body {
   position: absolute;
   top: 0; left: 0;
   width: 100%; height: 100%;
-  background: linear-gradient(135deg, #FF003C 0%, #E60036 50%, #B00028 100%);
+  background: linear-gradient(135deg, #090A0F 0%, #181A22 100%);
   z-index: -1;
   transform: translateX(-101%);
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -115,97 +118,68 @@ body {
 .btn-primary:hover::before { transform: translateX(0); }
 .btn-primary:hover {
   transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 10px 25px rgba(255, 0, 60, 0.25);
+  border-color: #090A0F;
+  box-shadow: 0 10px 25px rgba(255, 0, 60, 0.3);
+}
+
+.btn-black {
+  background: #090A0F;
+  color: #FFFFFF;
+  border: 1px solid #090A0F;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn-black:hover {
+  background: #FF003C;
+  border-color: #FF003C;
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 10px 25px rgba(255, 0, 60, 0.35);
 }
 
 .btn-outline {
+  background: #FFFFFF;
+  color: #090A0F;
+  border: 1.5px solid #090A0F;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .btn-outline:hover {
   transform: translateY(-2px) scale(1.02);
   border-color: #FF003C;
-  box-shadow: 0 8px 20px rgba(255, 0, 60, 0.12);
+  color: #FF003C;
+  box-shadow: 0 8px 20px rgba(255, 0, 60, 0.15);
 }
 
-/* Bento Card Hover */
-.bento-card {
+/* Bento Card Styling */
+.bento-card-light {
   background: #FFFFFF;
-  border: 1px solid #E2E8F0;
-  border-radius: 20px;
+  border: 1.5px solid #E2E8F0;
+  border-radius: 24px;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.bento-card:hover {
+.bento-card-light:hover {
   transform: translateY(-5px);
-  border-color: rgba(255, 0, 60, 0.3);
-  box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.08), 0 0 30px rgba(255, 0, 60, 0.06);
+  border-color: #FF003C;
+  box-shadow: 0 20px 40px -15px rgba(9, 10, 15, 0.1), 0 0 25px rgba(255, 0, 60, 0.12);
 }
 
-/* Dropdown Menu */
-.nav-dropdown { position: relative; }
-.dropdown-panel {
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%) translateY(10px);
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-  z-index: 50;
-  padding-top: 10px;
+.bento-card-dark {
+  background: #090A0F;
+  border: 1.5px solid #222632;
+  color: #FFFFFF;
+  border-radius: 24px;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.nav-dropdown:hover .dropdown-panel,
-.nav-dropdown:focus-within .dropdown-panel {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-  transform: translateX(-50%) translateY(0);
+.bento-card-dark:hover {
+  transform: translateY(-5px);
+  border-color: #FF003C;
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6), 0 0 30px rgba(255, 0, 60, 0.25);
 }
 
-/* WhatsApp Chat Bubbles */
-.wa-bubble {
-  position: relative;
-  padding: 10px 14px;
-  border-radius: 12px;
-  font-size: 13px;
-  line-height: 1.45;
-  max-width: 85%;
-}
-.wa-bubble-bot {
-  background: #FFFFFF;
-  color: #111B21;
-  align-self: flex-start;
-  border-top-left-radius: 2px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-}
-.wa-bubble-user {
-  background: #D9FDD3;
-  color: #111B21;
-  align-self: flex-end;
-  border-top-right-radius: 2px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-}
-.wa-tick { color: #53BDEB; font-size: 11px; margin-left: 6px; }
-
-/* Keyframe Animations */
-@keyframes floatSlow {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-10px) rotate(1deg); }
-}
-.animate-float-slow { animation: floatSlow 6s ease-in-out infinite; }
-
+/* Keyframes */
 @keyframes blobDrift {
   0%, 100% { transform: translate(0px, 0px) scale(1); }
-  33% { transform: translate(30px, -40px) scale(1.08); }
-  66% { transform: translate(-20px, 20px) scale(0.95); }
+  50% { transform: translate(25px, -30px) scale(1.06); }
 }
-.animate-blob { animation: blobDrift 14s ease-in-out infinite; }
-
-@keyframes pulseSoft {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.7; transform: scale(0.98); }
-}
-.animate-pulse-soft { animation: pulseSoft 2.5s ease-in-out infinite; }
+.animate-blob { animation: blobDrift 12s ease-in-out infinite; }
 
 @keyframes slideUp {
   from { opacity: 0; transform: translateY(16px); }
