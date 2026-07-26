@@ -3,7 +3,7 @@ import { Player } from '@remotion/player'
 import { ActionpackdPromoVideo } from './ActionpackdPromoVideo'
 import { HeroConsoleVideo } from './HeroConsoleVideo'
 
-// ===================== SCROLL ANIMATION & PROGRESS HOOKS =====================
+// ===================== SCROLL ANIMATION HOOK =====================
 const useInView = (options = {}) => {
   const ref = useRef(null)
   const [inView, setInView] = useState(false)
@@ -15,32 +15,6 @@ const useInView = (options = {}) => {
     return () => observer.disconnect()
   }, [])
   return [ref, inView]
-}
-
-const useScrollProgress = (ref, stickyOffset = 80) => {
-  const [progress, setProgress] = useState(0)
-  useEffect(() => {
-    const handleScroll = () => {
-      if (!ref.current) return
-      const rect = ref.current.getBoundingClientRect()
-      const maxScroll = rect.height - window.innerHeight
-      if (maxScroll <= 0) return
-
-      const scrolled = stickyOffset - rect.top
-      const calculated = Math.max(0, Math.min(0.999, scrolled / maxScroll))
-      setProgress(calculated)
-    }
-
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    window.addEventListener('resize', handleScroll, { passive: true })
-    handleScroll()
-    return () => {
-      window.removeEventListener('scroll', handleScroll)
-      window.removeEventListener('resize', handleScroll)
-    }
-  }, [ref, stickyOffset])
-
-  return progress
 }
 
 const AnimatedSection = ({ children, delay = 0, className = '' }) => {
@@ -81,10 +55,9 @@ const CounterUp = ({ target, suffix = '', duration = 1800 }) => {
   return <span ref={ref}>{value.toLocaleString()}{suffix}</span>
 }
 
-// ===================== SCROLL-CONTROLLED: "TURN COMMENTS INTO CONVERSATIONS" =====================
+// ===================== MANYCHAT-STYLE: "TURN COMMENTS INTO CONVERSATIONS" SECTION =====================
 const TurnCommentsToSalesSection = ({ onStartFree }) => {
-  const containerRef = useRef(null)
-  const progress = useScrollProgress(containerRef)
+  const [activeSlide, setActiveSlide] = useState(0)
 
   const slides = [
     {
@@ -103,115 +76,113 @@ const TurnCommentsToSalesSection = ({ onStartFree }) => {
     }
   ]
 
-  // Map scroll progress (0..1) to active slide index
-  const activeSlide = Math.max(0, Math.min(slides.length - 1, Math.floor(progress * slides.length)))
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setActiveSlide(prev => (prev + 1) % slides.length)
+    }, 4500)
+    return () => clearInterval(timer)
+  }, [slides.length])
+
   const current = slides[activeSlide] || slides[0]
 
   return (
-    <section ref={containerRef} className="relative h-[250vh] bg-[#FF003C] text-white border-y-4 border-[#090A0F]">
-      
-      {/* STICKY CONTAINER PINNED DURING SCROLL */}
-      <div className="sticky top-0 h-screen flex flex-col justify-center overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10">
+    <section className="py-20 bg-[#FF003C] text-white overflow-hidden relative border-y-4 border-[#090A0F]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        
+        {/* SLIDE PROGRESS INDICATORS */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex gap-2">
+            {slides.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => setActiveSlide(idx)}
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  activeSlide === idx ? 'w-16 bg-white' : 'w-4 bg-white/40'
+                }`}
+              />
+            ))}
+          </div>
+          <div className="text-xs font-mono font-bold text-white bg-[#090A0F] px-3 py-1 rounded-full border border-white/20">
+            AUTO-CYCLED DEMO · STEP 0{activeSlide + 1}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           
-          {/* SLIDE PROGRESS BARS & SCROLL INDICATOR */}
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex gap-2">
-              {slides.map((_, idx) => (
-                <div
-                  key={idx}
-                  className={`h-2 rounded-full transition-all duration-300 ${
-                    activeSlide === idx ? 'w-16 bg-white' : 'w-4 bg-white/40'
-                  }`}
-                />
-              ))}
-            </div>
-            <div className="text-xs font-mono font-bold text-white bg-[#090A0F] px-3 py-1 rounded-full border border-white/20">
-              SCROLL CONTROLLED · {Math.round(progress * 100)}%
+          {/* LEFT DISPLAY TEXT */}
+          <div className="lg:col-span-7 text-left space-y-6">
+            <h2 className="text-4xl sm:text-6xl font-outfit font-black tracking-tight text-white leading-[1.05] uppercase transition-all duration-300">
+              {current.title}
+            </h2>
+            <p className="text-lg sm:text-xl font-sans text-white/90 leading-relaxed max-w-xl">
+              {current.quote}
+            </p>
+            <div className="pt-4 flex items-center gap-4">
+              <button
+                onClick={onStartFree}
+                className="btn-black px-10 py-4 rounded-full font-outfit font-black text-sm uppercase tracking-widest shadow-2xl"
+              >
+                GET STARTED FREE →
+              </button>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            
-            {/* LEFT DISPLAY TEXT */}
-            <div className="lg:col-span-7 text-left space-y-6">
-              <h2 className="text-4xl sm:text-6xl font-outfit font-black tracking-tight text-white leading-[1.05] uppercase">
-                {current.title}
-              </h2>
-              <p className="text-lg sm:text-xl font-sans text-white/90 leading-relaxed max-w-xl">
-                {current.quote}
-              </p>
-              <div className="pt-4 flex items-center gap-4">
-                <button
-                  onClick={onStartFree}
-                  className="btn-black px-10 py-4 rounded-full font-outfit font-black text-sm uppercase tracking-widest shadow-2xl"
-                >
-                  GET STARTED FREE →
-                </button>
-                <span className="text-xs font-mono text-white/80 animate-pulse hidden sm:inline">
-                  ↓ Scroll down to switch slides
+          {/* RIGHT PHONE INTERACTIVE MOCKUP */}
+          <div className="lg:col-span-5 flex justify-center">
+            <div className="w-full max-w-sm rounded-[36px] bg-[#090A0F] border-4 border-white shadow-2xl p-4 overflow-hidden relative text-left">
+              
+              {/* PHONE MOCKUP HEADER */}
+              <div className="flex items-center gap-3 pb-3 border-b border-slate-800 mb-4">
+                <img src="/assets/logo_mascot.png" alt="Mascot" className="w-8 h-8 rounded-full bg-white p-0.5 object-contain" />
+                <div>
+                  <div className="text-xs font-bold text-white font-mono">actionpackd.bot</div>
+                  <div className="text-[10px] text-[#25D366] font-mono">● Auto-DM Active</div>
+                </div>
+              </div>
+
+              {/* POST MOCKUP IMAGE */}
+              <div className="rounded-2xl overflow-hidden bg-slate-900 aspect-video relative mb-4 border border-slate-800 flex items-center justify-center text-center p-4">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+                <span className="relative z-10 font-outfit font-extrabold text-sm text-white bg-[#FF003C]/90 px-3 py-1.5 rounded-full shadow-lg">
+                  🔥 New Product Drop! Comment "LINK"
                 </span>
               </div>
-            </div>
 
-            {/* RIGHT PHONE INTERACTIVE MOCKUP */}
-            <div className="lg:col-span-5 flex justify-center">
-              <div className="w-full max-w-sm rounded-[36px] bg-[#090A0F] border-4 border-white shadow-2xl p-4 overflow-hidden relative text-left transition-transform duration-300">
-                
-                {/* PHONE MOCKUP HEADER */}
-                <div className="flex items-center gap-3 pb-3 border-b border-slate-800 mb-4">
-                  <img src="/assets/logo_mascot.png" alt="Mascot" className="w-8 h-8 rounded-full bg-white p-0.5 object-contain" />
-                  <div>
-                    <div className="text-xs font-bold text-white font-mono">actionpackd.bot</div>
-                    <div className="text-[10px] text-[#25D366] font-mono">● Auto-DM Active</div>
-                  </div>
+              {/* COMMENT & BOT AUTO-DM */}
+              <div className="space-y-3 font-sans text-xs">
+                <div className="bg-[#181A22] border border-slate-800 p-3 rounded-xl text-slate-200 font-mono">
+                  <span className="text-[#FF003C] font-bold">● User Comment:</span> {current.userComment}
                 </div>
-
-                {/* POST MOCKUP IMAGE */}
-                <div className="rounded-2xl overflow-hidden bg-slate-900 aspect-video relative mb-4 border border-slate-800 flex items-center justify-center text-center p-4">
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
-                  <span className="relative z-10 font-outfit font-extrabold text-sm text-white bg-[#FF003C]/90 px-3 py-1.5 rounded-full shadow-lg">
-                    🔥 New Product Drop! Comment "LINK"
-                  </span>
+                <div className="bg-[#FF003C] text-white p-3.5 rounded-xl font-sans font-semibold shadow-md animate-slide-up">
+                  <div className="text-[10px] font-mono opacity-80 mb-1">⚡ INSTANT AUTO-DM</div>
+                  {current.botReply}
                 </div>
-
-                {/* COMMENT & BOT AUTO-DM */}
-                <div className="space-y-3 font-sans text-xs">
-                  <div className="bg-[#181A22] border border-slate-800 p-3 rounded-xl text-slate-200 font-mono">
-                    <span className="text-[#FF003C] font-bold">● User Comment:</span> {current.userComment}
-                  </div>
-                  <div className="bg-[#FF003C] text-white p-3.5 rounded-xl font-sans font-semibold shadow-md animate-slide-up">
-                    <div className="text-[10px] font-mono opacity-80 mb-1">⚡ INSTANT AUTO-DM</div>
-                    {current.botReply}
-                  </div>
-                </div>
-
-                {/* BADGE */}
-                <div className="mt-4 pt-3 border-t border-slate-800 bg-[#FF003C] text-white text-center text-[10px] font-mono font-bold uppercase tracking-wider py-2 rounded-xl">
-                  {current.badge}
-                </div>
-
               </div>
-            </div>
 
+              {/* BADGE */}
+              <div className="mt-4 pt-3 border-t border-slate-800 bg-[#FF003C] text-white text-center text-[10px] font-mono font-bold uppercase tracking-wider py-2 rounded-xl">
+                {current.badge}
+              </div>
+
+            </div>
           </div>
 
         </div>
+
       </div>
     </section>
   )
 }
 
-// ===================== SCROLL-CONTROLLED: "SEE IT IN ACTION..." FLOW SIMULATOR =====================
+// ===================== MANYCHAT-STYLE: "SEE IT IN ACTION..." FLOW SIMULATOR =====================
 const SeeItInActionSection = () => {
-  const containerRef = useRef(null)
-  const progress = useScrollProgress(containerRef)
+  const [activeTab, setActiveTab] = useState(0)
 
   const tabs = [
     {
       id: 0,
       label: "Auto-DM from Comments",
-      subLabel: "SCROLL STEP 01 →",
+      subLabel: "STEP 01 →",
       phoneHeader: "Instagram & WhatsApp Auto-DM",
       messages: [
         { type: 'user', text: "Commented: 'Where can I order this?'" },
@@ -221,7 +192,7 @@ const SeeItInActionSection = () => {
     {
       id: 1,
       label: "Send Welcome Messages",
-      subLabel: "SCROLL STEP 02 →",
+      subLabel: "STEP 02 →",
       phoneHeader: "WhatsApp Welcome Automation",
       messages: [
         { type: 'user', text: "Hey! Just subscribed to your WhatsApp channel." },
@@ -231,7 +202,7 @@ const SeeItInActionSection = () => {
     {
       id: 2,
       label: "Automate FAQs 24/7",
-      subLabel: "SCROLL STEP 03 →",
+      subLabel: "STEP 03 →",
       phoneHeader: "24/7 Knowledge Base Bot",
       messages: [
         { type: 'user', text: "What is your refund policy & shipping timeline?" },
@@ -241,7 +212,7 @@ const SeeItInActionSection = () => {
     {
       id: 3,
       label: "Abandoned Cart Recovery",
-      subLabel: "SCROLL STEP 04 →",
+      subLabel: "STEP 04 →",
       phoneHeader: "Cart Recovery Automation",
       messages: [
         { type: 'user', text: "[Left items in checkout cart]" },
@@ -251,7 +222,7 @@ const SeeItInActionSection = () => {
     {
       id: 4,
       label: "Book Appointments",
-      subLabel: "SCROLL STEP 05 →",
+      subLabel: "STEP 05 →",
       phoneHeader: "Calendar Appointment Booking",
       messages: [
         { type: 'user', text: "I'd like to book a 1-on-1 strategy call." },
@@ -260,125 +231,113 @@ const SeeItInActionSection = () => {
     }
   ]
 
-  // Map scroll progress (0..1) to active tab index
-  const activeTab = Math.max(0, Math.min(tabs.length - 1, Math.floor(progress * tabs.length)))
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setActiveTab(prev => (prev + 1) % tabs.length)
+    }, 5000)
+    return () => clearInterval(timer)
+  }, [tabs.length])
+
   const current = tabs[activeTab] || tabs[0]
 
-  const handleTabClick = (idx) => {
-    if (!containerRef.current) return
-    const rect = containerRef.current.getBoundingClientRect()
-    const maxScroll = rect.height - window.innerHeight
-    const targetScroll = window.scrollY + rect.top - 80 + (maxScroll * (idx / (tabs.length - 1))) + 5
-    window.scrollTo({ top: targetScroll, behavior: 'smooth' })
-  }
-
   return (
-    <section ref={containerRef} className="relative h-[280vh] bg-[#090A0F] text-white border-b border-slate-800 bg-grid-dark">
-      
-      {/* STICKY CONTAINER PINNED BELOW FLOATING NAVBAR */}
-      <div className="sticky top-20 min-h-[calc(100vh-5rem)] flex flex-col justify-center py-4 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-          
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#14161C] text-[#FF003C] border border-[#FF003C]/40 font-mono text-xs font-bold uppercase tracking-widest mb-3">
-                // SCROLL-DRIVEN FLOW SIMULATOR
-              </div>
-              <h2 className="text-3xl sm:text-5xl font-outfit font-extrabold text-white tracking-tight">
-                See it in <span className="gradient-text-red">action...</span>
-              </h2>
+    <section className="py-24 bg-[#090A0F] text-white border-b border-slate-800 bg-grid-dark relative overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+        
+        <div className="flex items-center justify-between mb-10">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#14161C] text-[#FF003C] border border-[#FF003C]/40 font-mono text-xs font-bold uppercase tracking-widest mb-3">
+              // INTERACTIVE FLOW SIMULATOR
             </div>
-
-            <div className="hidden sm:flex items-center gap-3 bg-[#14161C] border border-slate-800 px-4 py-2 rounded-full font-mono text-xs text-slate-300">
-              <span className="w-2 h-2 rounded-full bg-[#FF003C] animate-pulse"></span>
-              <span>SCROLL STEP: <span className="text-[#FF003C] font-bold">0{activeTab + 1} / 05</span> ({Math.round(progress * 100)}%)</span>
-            </div>
+            <h2 className="text-3xl sm:text-5xl font-outfit font-extrabold text-white tracking-tight">
+              See it in <span className="gradient-text-red">action...</span>
+            </h2>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            
-            {/* LEFT SELECTOR TABS WITH SCROLL PROGRESS HIGHLIGHTS & CLICK TO SCROLL */}
-            <div className="lg:col-span-5 space-y-3">
-              {tabs.map((tab, idx) => (
-                <button
-                  key={tab.id}
-                  onClick={() => handleTabClick(idx)}
-                  className={`w-full text-left p-4 rounded-2xl border transition-all relative overflow-hidden flex items-center justify-between cursor-pointer ${
-                    activeTab === idx
-                      ? 'bg-[#181A22] border-[#FF003C] text-white shadow-xl shadow-rose-500/10 scale-[1.02]'
-                      : 'bg-[#12141A] border-slate-800 text-slate-500 opacity-60 hover:opacity-100 hover:border-slate-700'
-                  }`}
-                >
-                  {/* PROGRESS BAR FILL ON ACTIVE TAB */}
-                  {activeTab === idx && (
-                    <div
-                      className="absolute bottom-0 left-0 h-1 bg-[#FF003C] transition-all duration-150"
-                      style={{
-                        width: `${Math.min(100, Math.max(0, ((progress * tabs.length) - idx) * 100))}%`
-                      }}
-                    />
-                  )}
+          <div className="hidden sm:flex items-center gap-3 bg-[#14161C] border border-slate-800 px-4 py-2 rounded-full font-mono text-xs text-slate-300">
+            <span className="w-2 h-2 rounded-full bg-[#FF003C] animate-pulse"></span>
+            <span>ACTIVE WORKFLOW: <span className="text-[#FF003C] font-bold">0{activeTab + 1} / 05</span></span>
+          </div>
+        </div>
 
-                  <div>
-                    <div className="font-outfit font-bold text-base sm:text-lg text-white">{tab.label}</div>
-                    <div className="text-[10px] font-mono text-[#FF003C] font-bold tracking-widest mt-0.5">{tab.subLabel}</div>
-                  </div>
-                  {activeTab === idx && <span className="text-[#FF003C] font-mono font-bold text-xl">→</span>}
-                </button>
-              ))}
-            </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          
+          {/* LEFT SELECTOR TABS */}
+          <div className="lg:col-span-5 space-y-3">
+            {tabs.map((tab, idx) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(idx)}
+                className={`w-full text-left p-4 sm:p-5 rounded-2xl border transition-all relative overflow-hidden flex items-center justify-between cursor-pointer ${
+                  activeTab === idx
+                    ? 'bg-[#181A22] border-[#FF003C] text-white shadow-xl shadow-rose-500/10 scale-[1.02]'
+                    : 'bg-[#12141A] border-slate-800 text-slate-500 opacity-60 hover:opacity-100 hover:border-slate-700'
+                }`}
+              >
+                {/* PROGRESS BAR FILL ON ACTIVE TAB */}
+                {activeTab === idx && (
+                  <div className="absolute bottom-0 left-0 h-1 bg-[#FF003C] w-full animate-pulse" />
+                )}
 
-            {/* RIGHT ANIMATED PHONE CONTAINER */}
-            <div className="lg:col-span-7 flex justify-center">
-              <div className="w-full max-w-md rounded-[40px] bg-[#12141A] border-4 border-slate-800 p-6 shadow-2xl text-left relative overflow-hidden min-h-[440px] flex flex-col justify-between">
-                
-                {/* PHONE HEADER */}
                 <div>
-                  <div className="flex items-center justify-between pb-4 border-b border-slate-800 mb-6">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-[#FF003C] flex items-center justify-center text-white font-bold text-lg shadow-md">
-                        🤖
-                      </div>
-                      <div>
-                        <div className="text-sm font-bold text-white">{current.phoneHeader}</div>
-                        <div className="text-[10px] font-mono text-[#25D366]">● Meta Verified Bot</div>
-                      </div>
+                  <div className="font-outfit font-bold text-base sm:text-lg text-white">{tab.label}</div>
+                  <div className="text-[10px] font-mono text-[#FF003C] font-bold tracking-widest mt-0.5">{tab.subLabel}</div>
+                </div>
+                {activeTab === idx && <span className="text-[#FF003C] font-mono font-bold text-xl">→</span>}
+              </button>
+            ))}
+          </div>
+
+          {/* RIGHT ANIMATED PHONE CONTAINER */}
+          <div className="lg:col-span-7 flex justify-center">
+            <div className="w-full max-w-md rounded-[40px] bg-[#12141A] border-4 border-slate-800 p-6 shadow-2xl text-left relative overflow-hidden min-h-[440px] flex flex-col justify-between">
+              
+              {/* PHONE HEADER */}
+              <div>
+                <div className="flex items-center justify-between pb-4 border-b border-slate-800 mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-[#FF003C] flex items-center justify-center text-white font-bold text-lg shadow-md">
+                      🤖
                     </div>
-                    <span className="text-xs font-mono bg-[#FF003C] text-white px-2.5 py-1 rounded-full font-bold">
-                      LIVE STEP 0{activeTab + 1}
-                    </span>
+                    <div>
+                      <div className="text-sm font-bold text-white">{current.phoneHeader}</div>
+                      <div className="text-[10px] font-mono text-[#25D366]">● Meta Verified Bot</div>
+                    </div>
                   </div>
-
-                  {/* MESSAGES ANIMATION */}
-                  <div className="space-y-4 font-sans text-sm min-h-[250px] flex flex-col justify-end">
-                    {current.messages.map((msg, i) => (
-                      <div
-                        key={i}
-                        className={`p-4 rounded-2xl max-w-[88%] animate-slide-up ${
-                          msg.type === 'user'
-                            ? 'bg-[#181A22] border border-slate-800 text-slate-200 self-start font-mono text-xs'
-                            : 'bg-[#FF003C] text-white self-end font-medium shadow-lg shadow-rose-500/20'
-                        }`}
-                      >
-                        {msg.type === 'bot' && <div className="text-[10px] font-mono opacity-80 mb-1">ACTIONPACKD AI AGENT</div>}
-                        {msg.text}
-                      </div>
-                    ))}
-                  </div>
+                  <span className="text-xs font-mono bg-[#FF003C] text-white px-2.5 py-1 rounded-full font-bold">
+                    LIVE STEP 0{activeTab + 1}
+                  </span>
                 </div>
 
-                {/* BOTTOM ACTION CTA */}
-                <div className="pt-4 border-t border-slate-800 flex items-center justify-between text-xs font-mono text-slate-400">
-                  <span>⚡ Latency: 0.38s</span>
-                  <span className="text-[#FF003C] font-bold">● Scroll Step {activeTab + 1}/5</span>
+                {/* MESSAGES ANIMATION */}
+                <div className="space-y-4 font-sans text-sm min-h-[250px] flex flex-col justify-end">
+                  {current.messages.map((msg, i) => (
+                    <div
+                      key={i}
+                      className={`p-4 rounded-2xl max-w-[88%] animate-slide-up ${
+                        msg.type === 'user'
+                          ? 'bg-[#181A22] border border-slate-800 text-slate-200 self-start font-mono text-xs'
+                          : 'bg-[#FF003C] text-white self-end font-medium shadow-lg shadow-rose-500/20'
+                      }`}
+                    >
+                      {msg.type === 'bot' && <div className="text-[10px] font-mono opacity-80 mb-1">ACTIONPACKD AI AGENT</div>}
+                      {msg.text}
+                    </div>
+                  ))}
                 </div>
-
               </div>
-            </div>
 
+              {/* BOTTOM ACTION CTA */}
+              <div className="pt-4 border-t border-slate-800 flex items-center justify-between text-xs font-mono text-slate-400">
+                <span>⚡ Latency: 0.38s</span>
+                <span className="text-[#FF003C] font-bold">● Active Step {activeTab + 1}/5</span>
+              </div>
+
+            </div>
           </div>
 
         </div>
+
       </div>
     </section>
   )
@@ -839,7 +798,7 @@ export default function App() {
         </div>
       </section>
 
-      {/* SCROLL-CONTROLLED: MANYCHAT-STYLE "TURN COMMENTS INTO CONVERSATIONS" SECTION */}
+      {/* MANYCHAT-STYLE: "TURN COMMENTS INTO CONVERSATIONS THAT SELL" SECTION */}
       <TurnCommentsToSalesSection onStartFree={() => openModal('Start Free Sandbox', 'Get instant access to Actionpackd Comment Auto-DM & AI Bot builder.')} />
 
       {/* LOGO STRIP / INTEGRATIONS OVERVIEW */}
@@ -864,7 +823,7 @@ export default function App() {
         </div>
       </section>
 
-      {/* SCROLL-CONTROLLED: MANYCHAT-STYLE "SEE IT IN ACTION..." FLOW SIMULATOR */}
+      {/* MANYCHAT-STYLE: "SEE IT IN ACTION..." FLOW SIMULATOR */}
       <div id="see-in-action">
         <SeeItInActionSection />
       </div>
@@ -1405,7 +1364,7 @@ export default function App() {
               <button onClick={closeBotModal} className="text-gray-400 hover:text-white">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/></svg>
               </button>
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#FF003C] to-[#090A0F] flex items-center justify-center text-white font-bold text-lg shadow-sm border border-[#FF003C]">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#FF003C] to-[#090A0F] flex items-center justify-center text-[#FF003C] font-bold text-lg shadow-sm border border-[#FF003C]">
                 {botModal.template.avatar}
               </div>
               <div className="flex-1">
