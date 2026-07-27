@@ -1,177 +1,548 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { interpolate, spring, useCurrentFrame, useVideoConfig, AbsoluteFill } from 'remotion'
 
 export const HeroConsoleVideo = () => {
-  const frame = useCurrentFrame()
-  const { fps } = useVideoConfig()
+  // 1. Try Remotion frame
+  let remotionFrame = 0
+  try {
+    remotionFrame = useCurrentFrame()
+  } catch (e) {
+    remotionFrame = 0
+  }
 
-  // 1. Channel Tab switching animation (whatsapp selected initially, switching to web live chat or staying on whatsapp)
-  const channelTab = frame < 120 ? 'whatsapp' : (frame < 240 ? 'web' : 'voice')
+  // 2. High-performance fallback frame loop (30 FPS)
+  const [liveFrame, setLiveFrame] = useState(0)
 
-  // 2. Typing in input field: "Can you process my refund and return order #4821?"
-  const inputPrompt = "Can you process my return and order refund?"
-  const typingStartFrame = 30
-  const typingEndFrame = 110
-  const typedCharCount = Math.max(0, Math.min(inputPrompt.length, Math.floor(interpolate(frame, [typingStartFrame, typingEndFrame], [0, inputPrompt.length]))))
-  const currentTypedText = inputPrompt.substring(0, typedCharCount)
+  useEffect(() => {
+    let animId
+    const startTime = performance.now()
+    const update = (now) => {
+      const elapsed = (now - startTime) / 1000
+      const currentF = Math.floor(elapsed * 30) // 30 FPS
+      setLiveFrame(currentF)
+      animId = requestAnimationFrame(update)
+    }
+    animId = requestAnimationFrame(update)
+    return () => cancelAnimationFrame(animId)
+  }, [])
 
-  // 3. Animated Cursor moving to "SEND" button & clicking
-  const cursorX = interpolate(frame, [110, 135], [400, 640], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' })
-  const cursorY = interpolate(frame, [110, 135], [350, 365], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' })
-  const isSendClicked = frame >= 135
+  const frame = remotionFrame > 0 ? remotionFrame : liveFrame
+  const fps = 30
 
-  const sendBtnScale = isSendClicked && frame < 150
-    ? spring({ frame: frame - 135, fps, config: { damping: 8, mass: 0.4, stiffness: 180 } })
-    : 1
+  // 300 frames total loop (10 seconds)
+  const loopFrame = frame % 300
 
-  // 4. Sent User Message sliding in after SEND click
+  // 1. Typing in WhatsApp input: "Can you process my return and order refund #4821?"
+  const inputPrompt = "Can you process my return and refund order #4821?"
+  const typingStart = 20
+  const typingEnd = 90
+  const typedCount = Math.max(
+    0,
+    Math.min(
+      inputPrompt.length,
+      Math.floor(interpolate(loopFrame, [typingStart, typingEnd], [0, inputPrompt.length]))
+    )
+  )
+  const currentTypedText = inputPrompt.substring(0, typedCount)
+
+  // 2. Cursor movement to Send Button
+  const isSendClicked = loopFrame >= 105
+  const cursorX = interpolate(loopFrame, [85, 105], [520, 720], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp'
+  })
+  const cursorY = interpolate(loopFrame, [85, 105], [380, 420], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp'
+  })
+
+  // 3. User message sent (frame >= 105)
   const userMsgOpacity = isSendClicked
-    ? interpolate(frame - 135, [0, 15], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' })
+    ? interpolate(loopFrame - 105, [0, 15], [0, 1], {
+        extrapolateLeft: 'clamp',
+        extrapolateRight: 'clamp'
+      })
     : 0
   const userMsgY = isSendClicked
-    ? interpolate(frame - 135, [0, 15], [20, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' })
+    ? interpolate(loopFrame - 105, [0, 15], [20, 0], {
+        extrapolateLeft: 'clamp',
+        extrapolateRight: 'clamp'
+      })
     : 20
 
-  // 5. AI Response sliding in after 0.38s latency delay (frame >= 155)
-  const aiResponseVisible = frame >= 155
-  const aiMsgOpacity = aiResponseVisible
-    ? interpolate(frame - 155, [0, 18], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' })
+  // 4. AI typing indicator (frame 120 to 155)
+  const isAiTyping = loopFrame >= 120 && loopFrame < 155
+
+  // 5. AI WhatsApp Response (frame >= 155)
+  const isAiResponded = loopFrame >= 155
+  const aiMsgOpacity = isAiResponded
+    ? interpolate(loopFrame - 155, [0, 18], [0, 1], {
+        extrapolateLeft: 'clamp',
+        extrapolateRight: 'clamp'
+      })
     : 0
-  const aiMsgY = aiResponseVisible
-    ? interpolate(frame - 155, [0, 18], [20, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' })
+  const aiMsgY = isAiResponded
+    ? interpolate(loopFrame - 155, [0, 18], [20, 0], {
+        extrapolateLeft: 'clamp',
+        extrapolateRight: 'clamp'
+      })
     : 20
 
-  const responseText = isSendClicked
-    ? '"Return request for order #4821 processed! A pre-paid shipping label has been generated and sent to your email. Refund of $149.00 will credit within 24h."'
-    : '"Hi! Your order #4821 is out for delivery. I can schedule a delivery window for tomorrow between 10 AM – 12 PM. Shall I confirm?"'
+  // 6. Action PDF attachment card (frame >= 210)
+  const isPdfVisible = loopFrame >= 210
+  const pdfOpacity = isPdfVisible
+    ? interpolate(loopFrame - 210, [0, 18], [0, 1], {
+        extrapolateLeft: 'clamp',
+        extrapolateRight: 'clamp'
+      })
+    : 0
 
   return (
-    <AbsoluteFill style={{ backgroundColor: '#FFFFFF', padding: 24, fontFamily: 'Inter, sans-serif', color: '#0F172A', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-      
-      {/* WINDOW HEADER */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #E2E8F0', paddingBottom: 12, marginBottom: 16, fontFamily: 'JetBrains Mono, monospace', fontSize: 12 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ width: 12, height: 12, borderRadius: '50%', background: '#FF003C' }} />
-          <span style={{ width: 12, height: 12, borderRadius: '50%', background: '#FFB703' }} />
-          <span style={{ width: 12, height: 12, borderRadius: '50%', background: '#25D366' }} />
-          <span style={{ color: '#334155', fontWeight: 800, marginLeft: 6 }}>actionpackd_ai_console.v2</span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#25D366', fontWeight: 800, fontSize: 11 }}>
-          <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#25D366', opacity: Math.sin(frame / 4) > 0 ? 1 : 0.4 }} />
-          META CLOUD LIVE
-        </div>
-      </div>
+    <AbsoluteFill
+      style={{
+        backgroundColor: '#0B141A',
+        fontFamily: 'Inter, sans-serif',
+        display: 'flex',
+        flexDirection: 'column',
+        justify: 'space-between',
+        overflow: 'hidden',
+        backgroundImage: 'radial-gradient(#182229 1.5px, transparent 1.5px)',
+        backgroundSize: '24px 24px'
+      }}
+    >
+      {/* WHATSAPP TOP NAVIGATION APP BAR */}
+      <div
+        style={{
+          backgroundColor: '#1F2C34',
+          borderBottom: '1px solid #2A3942',
+          padding: '12px 20px',
+          display: 'flex',
+          alignItems: 'center',
+          justify: 'space-between',
+          zIndex: 20
+        }}
+      >
+        {/* LEFT: BACK ARROW & BOT PROFILE */}
+        <div style={{ display: 'flex', items: 'center', gap: '14px' }}>
+          <div style={{ color: '#AEBAC1', fontSize: '18px', display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+            ←
+          </div>
+          
+          <div style={{ position: 'relative' }}>
+            <div
+              style={{
+                width: '42px',
+                height: '42px',
+                borderRadius: '50%',
+                backgroundColor: '#090A0F',
+                border: '2px solid #25D366',
+                display: 'flex',
+                alignItems: 'center',
+                justify: 'center',
+                overflow: 'hidden',
+                boxShadow: '0 2px 8px rgba(37,211,102,0.3)'
+              }}
+            >
+              <img
+                src="/assets/logo_mascot.png"
+                alt="Actionpackd Bot Mascot"
+                style={{ width: '30px', height: '30px', objectFit: 'contain' }}
+              />
+            </div>
+            {/* ONLINE GREEN BADGE */}
+            <span
+              style={{
+                position: 'absolute',
+                bottom: 0,
+                right: 0,
+                width: '12px',
+                height: '12px',
+                borderRadius: '50%',
+                backgroundColor: '#25D366',
+                border: '2px solid #1F2C34'
+              }}
+            />
+          </div>
 
-      {/* CHANNEL SWITCHER TABS */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 16, overflowX: 'hidden' }}>
-        {[
-          { id: 'whatsapp', name: 'WhatsApp API', icon: '💬', badge: 'Meta Verified' },
-          { id: 'web', name: 'Web Live Chat', icon: '🌐', badge: 'Instant SDK' },
-          { id: 'voice', name: 'Twilio Voice', icon: '🎙️', badge: '0.38s Latency' }
-        ].map(tab => (
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ color: '#E9EDEF', fontWeight: 800, fontSize: '14px', fontFamily: 'Outfit, sans-serif' }}>
+                Actionpackd AI Business Assistant
+              </span>
+              {/* META OFFICIAL GREEN VERIFIED BADGE */}
+              <span
+                style={{
+                  backgroundColor: '#25D366',
+                  color: '#FFFFFF',
+                  borderRadius: '50%',
+                  width: '15px',
+                  height: '15px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justify: 'center',
+                  fontSize: '9px',
+                  fontWeight: 900
+                }}
+              >
+                ✓
+              </span>
+            </div>
+            <div style={{ color: '#25D366', fontSize: '11px', fontFamily: 'JetBrains Mono, monospace', fontWeight: 700, marginTop: '2px' }}>
+              {isAiTyping ? 'typing...' : 'online · Meta Verified API'}
+            </div>
+          </div>
+        </div>
+
+        {/* RIGHT: OFFICIAL WHATSAPP LOGO & ACTIONS */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
           <div
-            key={tab.id}
             style={{
-              padding: '8px 14px',
-              borderRadius: 12,
-              fontSize: 12,
-              fontFamily: 'JetBrains Mono, monospace',
-              fontWeight: 700,
               display: 'flex',
               alignItems: 'center',
-              gap: 6,
-              background: channelTab === tab.id ? '#0F172A' : '#F8FAFC',
-              color: channelTab === tab.id ? '#FFFFFF' : '#475569',
-              border: channelTab === tab.id ? '1px solid #0F172A' : '1px solid #E2E8F0',
-              transition: 'all 0.2s'
+              gap: '6px',
+              backgroundColor: 'rgba(37,211,102,0.12)',
+              border: '1px solid rgba(37,211,102,0.3)',
+              padding: '4px 10px',
+              borderRadius: '999px'
             }}
           >
-            <span>{tab.icon}</span>
-            <span>{tab.name}</span>
-            <span style={{ fontSize: 9, padding: '2px 6px', borderRadius: 999, background: channelTab === tab.id ? '#25D366' : '#E2E8F0', color: channelTab === tab.id ? '#FFFFFF' : '#475569', fontWeight: 800 }}>
-              {tab.badge}
+            <img
+              src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/whatsapp.svg"
+              alt="Official WhatsApp Logo"
+              style={{ width: '16px', height: '16px', filter: 'brightness(0) invert(1)' }}
+            />
+            <span style={{ color: '#25D366', fontSize: '10px', fontFamily: 'JetBrains Mono, monospace', fontWeight: 800 }}>
+              WhatsApp API v20.0
             </span>
           </div>
-        ))}
+
+          <span style={{ color: '#AEBAC1', fontSize: '18px', cursor: 'pointer' }}>📞</span>
+          <span style={{ color: '#AEBAC1', fontSize: '18px', cursor: 'pointer' }}>🎥</span>
+          <span style={{ color: '#AEBAC1', fontSize: '18px', cursor: 'pointer' }}>⋮</span>
+        </div>
       </div>
 
-      {/* CHAT MESSAGES CONTAINER */}
-      <div style={{ flex: 1, background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 16, padding: 18, display: 'flex', flexDirection: 'column', gap: 14, justifyContent: 'flex-end', marginBottom: 16, overflow: 'hidden' }}>
-        
-        {/* INITIAL USER MSG */}
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-          <div style={{ width: 32, height: 32, borderRadius: 8, background: '#E2E8F0', color: '#475569', fontSize: 10, fontFamily: 'JetBrains Mono, monospace', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            USR
-          </div>
-          <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 14, padding: '10px 14px', fontSize: 13, fontFamily: 'JetBrains Mono, monospace', color: '#1E293B', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', maxWidth: '85%' }}>
-            "I want to check order #4821 status and request delivery reschedule."
-          </div>
+      {/* WHATSAPP CHAT AREA */}
+      <div
+        style={{
+          flex: 1,
+          padding: '20px 24px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '14px',
+          justify: 'flex-end',
+          overflowY: 'hidden'
+        }}
+      >
+        {/* ENCRYPTED BANNER */}
+        <div
+          style={{
+            margin: '0 auto 12px auto',
+            backgroundColor: '#182229',
+            border: '1px solid #222D34',
+            color: '#FFE169',
+            fontSize: '10px',
+            fontFamily: 'JetBrains Mono, monospace',
+            padding: '6px 14px',
+            borderRadius: '8px',
+            textAlign: 'center',
+            maxWidth: '380px'
+          }}
+        >
+          🔒 Messages are end-to-end encrypted. Official Meta Cloud API.
         </div>
 
-        {/* NEW SENT USER MSG (SLIDES IN AFTER CLICK) */}
+        {/* INITIAL INCOMING USER MESSAGE */}
+        <div
+          style={{
+            alignSelf: 'flex-start',
+            backgroundColor: '#202C33',
+            color: '#E9EDEF',
+            borderRadius: '12px 12px 12px 2px',
+            padding: '10px 14px',
+            fontSize: '13px',
+            maxWidth: '75%',
+            boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
+            position: 'relative'
+          }}
+        >
+          <span>"Hi! I want to check order #4821 status and request delivery reschedule."</span>
+          <span
+            style={{
+              display: 'inline-block',
+              marginLeft: '12px',
+              fontSize: '10px',
+              color: '#8696A0',
+              fontFamily: 'JetBrains Mono, monospace'
+            }}
+          >
+            10:41 AM
+          </span>
+        </div>
+
+        {/* SECOND USER MESSAGE (SLIDES IN AFTER CLICK) */}
         {isSendClicked && (
-          <div style={{ opacity: userMsgOpacity, transform: `translateY(${userMsgY}px)`, display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-            <div style={{ width: 32, height: 32, borderRadius: 8, background: '#E2E8F0', color: '#475569', fontSize: 10, fontFamily: 'JetBrains Mono, monospace', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              USR
+          <div
+            style={{
+              opacity: userMsgOpacity,
+              transform: `translateY(${userMsgY}px)`,
+              alignSelf: 'flex-start',
+              backgroundColor: '#202C33',
+              border: '1px solid #FF003C',
+              color: '#E9EDEF',
+              borderRadius: '12px 12px 12px 2px',
+              padding: '10px 14px',
+              fontSize: '13px',
+              maxWidth: '75%',
+              boxShadow: '0 4px 12px rgba(255,0,60,0.2)',
+              position: 'relative'
+            }}
+          >
+            <span>"{inputPrompt}"</span>
+            <span
+              style={{
+                display: 'inline-block',
+                marginLeft: '12px',
+                fontSize: '10px',
+                color: '#8696A0',
+                fontFamily: 'JetBrains Mono, monospace'
+              }}
+            >
+              10:42 AM
+            </span>
+          </div>
+        )}
+
+        {/* AI TYPING INDICATOR BUBBLE */}
+        {isAiTyping && (
+          <div
+            style={{
+              alignSelf: 'flex-end',
+              backgroundColor: '#005C4B',
+              color: '#E9EDEF',
+              borderRadius: '12px 12px 2px 12px',
+              padding: '10px 16px',
+              fontSize: '12px',
+              fontFamily: 'JetBrains Mono, monospace',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            <span>Actionpackd AI is typing</span>
+            <span style={{ fontSize: '14px', color: '#25D366' }}>• • •</span>
+          </div>
+        )}
+
+        {/* ACTIONPACKD AI OUTGOING WHATSAPP RESPONSE BUBBLE */}
+        {isAiResponded && (
+          <div
+            style={{
+              opacity: aiMsgOpacity,
+              transform: `translateY(${aiMsgY}px)`,
+              alignSelf: 'flex-end',
+              backgroundColor: '#005C4B',
+              color: '#E9EDEF',
+              borderRadius: '14px 14px 2px 14px',
+              padding: '14px 16px',
+              fontSize: '13px',
+              maxWidth: '82%',
+              boxShadow: '0 4px 14px rgba(0,0,0,0.3)',
+              border: '1px solid rgba(37,211,102,0.3)'
+            }}
+          >
+            {/* AGENT BADGE */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justify: 'space-between',
+                fontSize: '10px',
+                fontFamily: 'JetBrains Mono, monospace',
+                color: '#25D366',
+                fontWeight: 800,
+                borderBottom: '1px solid rgba(255,255,255,0.1)',
+                paddingBottom: '6px',
+                marginBottom: '8px'
+              }}
+            >
+              <span>⚡ ACTIONPACKD AI AGENT</span>
+              <span style={{ backgroundColor: '#25D366', color: '#0B141A', padding: '1px 6px', borderRadius: '999px', fontSize: '9px' }}>
+                0.38s LATENCY
+              </span>
             </div>
-            <div style={{ background: '#FFFFFF', border: '1px solid #FF003C', borderRadius: 14, padding: '10px 14px', fontSize: 13, fontFamily: 'JetBrains Mono, monospace', color: '#1E293B', boxShadow: '0 2px 8px rgba(255,0,60,0.1)', maxWidth: '85%' }}>
-              "{inputPrompt}"
+
+            <p style={{ margin: 0, lineHeight: 1.5 }}>
+              "Return request for <strong>Order #4821</strong> approved! 📦 Pre-paid return shipping label generated and refund of <strong>$149.00</strong> initialized to your payment method."
+            </p>
+
+            {/* QUICK ACTION BUTTONS */}
+            <div style={{ display: 'flex', gap: '8px', marginTop: '12px', flexWrap: 'wrap' }}>
+              <div
+                style={{
+                  backgroundColor: 'rgba(255,255,255,0.12)',
+                  border: '1px solid rgba(255,255,255,0.25)',
+                  padding: '6px 12px',
+                  borderRadius: '18px',
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  color: '#FFFFFF',
+                  cursor: 'pointer'
+                }}
+              >
+                📄 Download Return Label
+              </div>
+              <div
+                style={{
+                  backgroundColor: 'rgba(255,255,255,0.12)',
+                  border: '1px solid rgba(255,255,255,0.25)',
+                  padding: '6px 12px',
+                  borderRadius: '18px',
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  color: '#FFFFFF',
+                  cursor: 'pointer'
+                }}
+              >
+                🚚 Track FedEx ETA
+              </div>
+            </div>
+
+            {/* TIME & DOUBLE BLUE TICKS */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justify: 'flex-end',
+                gap: '4px',
+                fontSize: '10px',
+                color: '#8696A0',
+                fontFamily: 'JetBrains Mono, monospace',
+                marginTop: '8px'
+              }}
+            >
+              <span>10:42 AM</span>
+              <span style={{ color: '#53BDEB', fontWeight: 900 }}>✓✓</span>
             </div>
           </div>
         )}
 
-        {/* AI RESPONSE MSG CARD */}
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, flexDirection: 'row-reverse' }}>
-          <div style={{ width: 32, height: 32, borderRadius: 8, background: 'linear-gradient(135deg, #FF003C 0%, #7C3AED 100%)', color: '#FFFFFF', fontSize: 10, fontFamily: 'JetBrains Mono, monospace', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            AI
-          </div>
-          <div style={{ opacity: isSendClicked ? aiMsgOpacity : 1, transform: `translateY(${isSendClicked ? aiMsgY : 0}px)`, background: '#FFFFFF', border: '1px solid rgba(255, 0, 60, 0.3)', borderRadius: 16, padding: 16, maxWidth: '90%', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 10, fontFamily: 'JetBrains Mono, monospace', color: '#3B82F6', marginBottom: 6, borderBottom: '1px solid #F1F5F9', paddingBottom: 6 }}>
-              <span style={{ fontWeight: 800 }}>ACTIONPACKD AI AGENT</span>
-              <span style={{ background: '#F0FDF4', color: '#25D366', border: '1px solid rgba(37,211,102,0.4)', padding: '2px 8px', borderRadius: 999, fontWeight: 800 }}>META VERIFIED</span>
+        {/* AUTOMATED ATTACHMENT CARD */}
+        {isPdfVisible && (
+          <div
+            style={{
+              opacity: pdfOpacity,
+              alignSelf: 'flex-end',
+              backgroundColor: '#1F2C34',
+              border: '1px solid #25D366',
+              borderRadius: '12px',
+              padding: '10px 14px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              maxWidth: '360px',
+              boxShadow: '0 4px 12px rgba(37,211,102,0.2)'
+            }}
+          >
+            <div
+              style={{
+                width: '36px',
+                height: '36px',
+                borderRadius: '8px',
+                backgroundColor: '#FF003C',
+                color: '#FFFFFF',
+                display: 'flex',
+                alignItems: 'center',
+                justify: 'center',
+                fontSize: '18px',
+                fontWeight: 800
+              }}
+            >
+              📄
             </div>
-            <p style={{ fontSize: 13, color: '#334155', lineHeight: 1.5, margin: 0, fontFamily: 'Inter, sans-serif' }}>
-              {responseText}
-            </p>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 10, fontFamily: 'JetBrains Mono, monospace', color: '#94A3B8', marginTop: 10, pt: 6, borderTop: '1px solid #F1F5F9' }}>
-              <span>⚡ Latency: 0.38s</span>
-              <span>Confidence: 99.4%</span>
-              <span style={{ color: '#25D366', fontWeight: 800 }}>● Connected</span>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ color: '#E9EDEF', fontSize: '12px', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                PrePaid_Return_Label_4821.pdf
+              </div>
+              <div style={{ color: '#25D366', fontSize: '10px', fontFamily: 'JetBrains Mono, monospace' }}>
+                1.4 MB · Ready for print & dropoff
+              </div>
             </div>
+            <span style={{ color: '#53BDEB', fontSize: '11px', fontWeight: 900 }}>✓✓</span>
           </div>
-        </div>
-
+        )}
       </div>
 
-      {/* INPUT BAR WITH TYPING & ANIMATED SEND BUTTON */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, position: 'relative' }}>
-        <span style={{ color: '#FF003C', fontFamily: 'JetBrains Mono, monospace', fontWeight: 800, fontSize: 16 }}>{'>'}</span>
-        <div style={{ flex: 1, background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 12, padding: '10px 14px', fontSize: 12, fontFamily: 'JetBrains Mono, monospace', color: '#0F172A', display: 'flex', alignItems: 'center' }}>
+      {/* WHATSAPP BOTTOM INPUT BAR */}
+      <div
+        style={{
+          backgroundColor: '#202C33',
+          padding: '10px 16px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          borderTop: '1px solid #2A3942',
+          position: 'relative'
+        }}
+      >
+        <span style={{ color: '#8696A0', fontSize: '20px', cursor: 'pointer' }}>😊</span>
+        <span style={{ color: '#8696A0', fontSize: '20px', cursor: 'pointer' }}>📎</span>
+
+        {/* INPUT FIELD */}
+        <div
+          style={{
+            flex: 1,
+            backgroundColor: '#2A3942',
+            borderRadius: '8px',
+            padding: '10px 14px',
+            color: '#E9EDEF',
+            fontSize: '13px',
+            fontFamily: 'Inter, sans-serif',
+            display: 'flex',
+            alignItems: 'center'
+          }}
+        >
           {isSendClicked ? (
-            <span style={{ color: '#94A3B8' }}>Test live AI response (e.g. Can you process my return?)...</span>
+            <span style={{ color: '#8696A0' }}>Type a message...</span>
           ) : (
             <span>
               {currentTypedText}
-              <span style={{ color: '#FF003C', opacity: Math.sin(frame / 3) > 0 ? 1 : 0 }}>|</span>
+              <span style={{ color: '#25D366', opacity: Math.sin(frame / 3) > 0 ? 1 : 0 }}>|</span>
             </span>
           )}
         </div>
 
-        {/* SEND BUTTON */}
-        <div style={{ transform: `scale(${sendBtnScale})`, background: '#FF003C', color: '#FFFFFF', padding: '10px 20px', borderRadius: 12, fontSize: 12, fontWeight: 800, fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase', boxShadow: '0 4px 14px rgba(255, 0, 60, 0.35)', cursor: 'pointer' }}>
-          SEND
+        {/* WHATSAPP GREEN SEND BUTTON */}
+        <div
+          style={{
+            width: '42px',
+            height: '42px',
+            borderRadius: '50%',
+            backgroundColor: '#00A884',
+            color: '#FFFFFF',
+            display: 'flex',
+            alignItems: 'center',
+            justify: 'center',
+            cursor: 'pointer',
+            boxShadow: '0 2px 8px rgba(0,168,132,0.4)',
+            transform: `scale(${isSendClicked ? 1.1 : 1})`,
+            transition: 'transform 0.15s'
+          }}
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="#FFFFFF">
+            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+          </svg>
         </div>
       </div>
 
-      {/* ANIMATED MOUSE CURSOR MOVING TO SEND */}
-      {frame >= 100 && frame < 160 && (
+      {/* ANIMATED CURSOR MOVING TO SEND BUTTON */}
+      {loopFrame >= 75 && loopFrame < 125 && (
         <div style={{ position: 'absolute', left: cursorX, top: cursorY, zIndex: 100, pointerEvents: 'none' }}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="#FF003C" stroke="#FFFFFF" strokeWidth="2">
             <path d="M3 3l7 18 3-7 7-3L3 3z" />
           </svg>
         </div>
       )}
-
     </AbsoluteFill>
   )
 }

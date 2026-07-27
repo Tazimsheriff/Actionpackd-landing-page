@@ -2,6 +2,10 @@ import React, { useState, useEffect, useRef } from 'react'
 import { Player } from '@remotion/player'
 import { ActionpackdPromoVideo } from './ActionpackdPromoVideo'
 import { HeroConsoleVideo } from './HeroConsoleVideo'
+import { PartnersPage } from './PartnersPage'
+import { botTemplates } from './botTemplatesData'
+import { BotTemplatesSection } from './BotTemplatesSection'
+
 
 // ===================== SCROLL ANIMATION HOOK =====================
 const useInView = (options = {}) => {
@@ -443,11 +447,24 @@ const BeforeAfterComparisonSection = ({ onStartFree }) => {
 }
 
 export default function App() {
+  const [currentPage, setCurrentPage] = useState('home')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [modal, setModal] = useState({ open: false, title: '', body: '' })
   const [botModal, setBotModal] = useState({ open: false, template: null })
   const [botMessages, setBotMessages] = useState([])
   const [botInput, setBotInput] = useState('')
+
+  useEffect(() => {
+    const handleHash = () => {
+      if (window.location.hash === '#partners' || window.location.pathname === '/partners') {
+        setCurrentPage('partners')
+      }
+    }
+    handleHash()
+    window.addEventListener('hashchange', handleHash)
+    return () => window.removeEventListener('hashchange', handleHash)
+  }, [])
+
   
   // Interactive Calculator State
   const [monthlyVolume, setMonthlyVolume] = useState(25000)
@@ -457,73 +474,6 @@ export default function App() {
 
   const openModal = (title, body) => setModal({ open: true, title, body })
   const closeModal = () => setModal({ open: false, title: '', body: '' })
-
-  const botTemplates = {
-    'lead-gen': {
-      id: 'lead-gen',
-      name: 'Lead Qualification Bot',
-      avatar: '🎯',
-      welcome: "Hi! 👋 I'm your AI lead qualification assistant. What's your name and what service are you looking for today?",
-      responses: {
-        default: "Great! I can qualify this inquiry and sync it to your HubSpot/Salesforce CRM instantly. Would you like me to book a demo call with our sales director?",
-        budget: "Understood. What is your approximate monthly budget range? ($1k-$5k / $5k-$20k / $20k+)",
-        timeline: "Perfect. When are you looking to launch your AI agents? (ASAP / This month / Next quarter)"
-      }
-    },
-    'support': {
-      id: 'support',
-      name: 'Customer Support Bot',
-      avatar: '🎧',
-      welcome: "Hello! 👋 Welcome to Support. What issue can I resolve for you right now?",
-      responses: {
-        default: "I've checked our knowledge base and found a solution! I can walk you through step-by-step or issue an instant resolution.",
-        refund: "I can process returns directly via WhatsApp. Could you share your order ID?",
-        tracking: "Order tracking active! Please enter your tracking or order number."
-      }
-    },
-    'booking': {
-      id: 'booking',
-      name: 'Appointment Booking Bot',
-      avatar: '📅',
-      welcome: "Hi! 👋 I can schedule your consultation or appointment. What day works best?",
-      responses: {
-        default: "I have available slots tomorrow at 10:00 AM, 2:00 PM, and 4:30 PM. Which one would you prefer?",
-        confirm: "Confirmed! Calendar invite sent with a WhatsApp reminder 1 hour prior to the meeting."
-      }
-    },
-    'ecommerce': {
-      id: 'ecommerce',
-      name: 'E-Commerce Bot',
-      avatar: '🛒',
-      welcome: "Welcome to our store! 👋 Looking for product recommendations or order assistance?",
-      responses: {
-        default: "Here are top-rated items matching your query! I can also offer a 10% instant WhatsApp checkout code.",
-        track: "Your package is in transit! Estimated delivery: Tomorrow by 2:00 PM.",
-        cart: "I see items remaining in your cart. Would you like me to generate a 1-click WhatsApp checkout link?"
-      }
-    },
-    'faq': {
-      id: 'faq',
-      name: 'Knowledge Base FAQ Bot',
-      avatar: '❓',
-      welcome: "Hi! 👋 Ask me anything about our API, Meta verification, pricing, or SLAs.",
-      responses: {
-        default: "Actionpackd connects directly to Meta's Cloud API with official WhatsApp green badge support, 0.38s average response latency, and SOC2 compliance.",
-        pricing: "Plans start at $0 for Sandbox, $99/mo for Pro, and custom Enterprise SLAs with dedicated GPU nodes.",
-        integrations: "We support 200+ tools including Stripe, HubSpot, Salesforce, Twilio, Shopify, and Webhooks."
-      }
-    },
-    'feedback': {
-      id: 'feedback',
-      name: 'NPS & Survey Bot',
-      avatar: '⭐',
-      welcome: "Hi! 👋 On a scale of 1-10, how likely are you to recommend Actionpackd to a colleague?",
-      responses: {
-        default: "Thank you for the rating! What was the main reason for your score?",
-        followup: "We appreciate your feedback! A representative will reach out shortly."
-      }
-    }
-  }
 
   const tryBotTemplate = (id) => {
     const template = botTemplates[id]
@@ -622,20 +572,35 @@ export default function App() {
       {/* FLOATING PILL NAVBAR */}
       <header className="fixed top-4 left-4 right-4 max-w-6xl mx-auto z-50">
         <div className="floating-nav rounded-full px-4 sm:px-6 py-3 flex items-center justify-between">
-          <a href="#" className="flex items-center gap-3 group">
+          <button
+            onClick={() => { setCurrentPage('home'); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
+            className="flex items-center gap-3 group border-none bg-transparent cursor-pointer"
+          >
             <img src="/assets/logo_horizontal.png" alt="Actionpackd Logo" className="h-8 sm:h-9 w-auto object-contain group-hover:scale-105 transition-transform" />
-          </a>
+          </button>
 
           {/* NAV LINKS */}
           <nav className="hidden lg:flex items-center gap-1 text-xs font-semibold text-[#090A0F]">
-            <a href="#see-in-action" className="px-3.5 py-1.5 rounded-full hover:text-[#FF003C] hover:bg-slate-100/80 transition-colors">Interactive Demo</a>
-            <a href="#features" className="px-3.5 py-1.5 rounded-full hover:text-[#FF003C] hover:bg-slate-100/80 transition-colors">Features</a>
-            <a href="#bot-templates" className="px-3.5 py-1.5 rounded-full hover:text-[#FF003C] hover:bg-slate-100/80 transition-colors flex items-center gap-1.5">
+            <button onClick={() => setCurrentPage('home')} className={`px-3.5 py-1.5 rounded-full transition-colors ${currentPage === 'home' ? 'text-[#FF003C] font-bold' : 'hover:text-[#FF003C] hover:bg-slate-100/80'}`}>Home</button>
+            <a href="#see-in-action" onClick={() => setCurrentPage('home')} className="px-3.5 py-1.5 rounded-full hover:text-[#FF003C] hover:bg-slate-100/80 transition-colors">Interactive Demo</a>
+            <a href="#features" onClick={() => setCurrentPage('home')} className="px-3.5 py-1.5 rounded-full hover:text-[#FF003C] hover:bg-slate-100/80 transition-colors">Features</a>
+            <a href="#bot-templates" onClick={() => setCurrentPage('home')} className="px-3.5 py-1.5 rounded-full hover:text-[#FF003C] hover:bg-slate-100/80 transition-colors flex items-center gap-1.5">
               <span>Bot Templates</span>
               <span className="bg-[#FF003C] text-white text-[9px] px-1.5 py-0.2 rounded-full font-bold">LIVE</span>
             </a>
-            <a href="#pricing" className="px-3.5 py-1.5 rounded-full hover:text-[#FF003C] hover:bg-slate-100/80 transition-colors">Pricing</a>
-            <a href="#faq" className="px-3.5 py-1.5 rounded-full hover:text-[#FF003C] hover:bg-slate-100/80 transition-colors">FAQ</a>
+            <a href="#pricing" onClick={() => setCurrentPage('home')} className="px-3.5 py-1.5 rounded-full hover:text-[#FF003C] hover:bg-slate-100/80 transition-colors">Pricing</a>
+            <button
+              onClick={() => setCurrentPage('partners')}
+              className={`px-3.5 py-1.5 rounded-full transition-all flex items-center gap-1.5 ${
+                currentPage === 'partners'
+                  ? 'bg-[#090A0F] text-white font-bold shadow-md'
+                  : 'hover:text-[#FF003C] hover:bg-slate-100/80'
+              }`}
+            >
+              <span>Partners</span>
+              <span className="bg-[#FF003C] text-white text-[9px] px-1.5 py-0.2 rounded-full font-bold animate-pulse">30% EARN</span>
+            </button>
+            <a href="#faq" onClick={() => setCurrentPage('home')} className="px-3.5 py-1.5 rounded-full hover:text-[#FF003C] hover:bg-slate-100/80 transition-colors">FAQ</a>
           </nav>
 
           {/* META VERIFIED & CTA BUTTONS */}
@@ -660,23 +625,33 @@ export default function App() {
         {/* MOBILE MENU DROPDOWN */}
         {mobileMenuOpen && (
           <div className="mt-2 rounded-2xl bg-white border-2 border-[#090A0F] p-4 shadow-2xl lg:hidden text-xs font-semibold space-y-2 animate-slide-up">
-            <a href="#see-in-action" onClick={() => setMobileMenuOpen(false)} className="block p-2 text-[#090A0F] hover:bg-rose-50 rounded-lg">Interactive Demo</a>
-            <a href="#features" onClick={() => setMobileMenuOpen(false)} className="block p-2 text-[#090A0F] hover:bg-rose-50 rounded-lg">Features</a>
-            <a href="#bot-templates" onClick={() => setMobileMenuOpen(false)} className="block p-2 text-[#090A0F] hover:bg-rose-50 rounded-lg">Bot Templates</a>
-            <a href="#pricing" onClick={() => setMobileMenuOpen(false)} className="block p-2 text-[#090A0F] hover:bg-rose-50 rounded-lg">Pricing</a>
-            <a href="#faq" onClick={() => setMobileMenuOpen(false)} className="block p-2 text-[#090A0F] hover:bg-rose-50 rounded-lg">FAQ</a>
+            <button onClick={() => { setCurrentPage('home'); setMobileMenuOpen(false) }} className="block w-full text-left p-2 text-[#090A0F] hover:bg-rose-50 rounded-lg">Home</button>
+            <button onClick={() => { setCurrentPage('partners'); setMobileMenuOpen(false) }} className="block w-full text-left p-2 text-[#FF003C] font-bold hover:bg-rose-50 rounded-lg flex items-center justify-between">
+              <span>Partners & Affiliates</span>
+              <span className="bg-[#FF003C] text-white text-[9px] px-2 py-0.5 rounded-full font-bold">30% RECURRING</span>
+            </button>
+            <a href="#see-in-action" onClick={() => { setCurrentPage('home'); setMobileMenuOpen(false) }} className="block p-2 text-[#090A0F] hover:bg-rose-50 rounded-lg">Interactive Demo</a>
+            <a href="#features" onClick={() => { setCurrentPage('home'); setMobileMenuOpen(false) }} className="block p-2 text-[#090A0F] hover:bg-rose-50 rounded-lg">Features</a>
+            <a href="#bot-templates" onClick={() => { setCurrentPage('home'); setMobileMenuOpen(false) }} className="block p-2 text-[#090A0F] hover:bg-rose-50 rounded-lg">Bot Templates</a>
+            <a href="#pricing" onClick={() => { setCurrentPage('home'); setMobileMenuOpen(false) }} className="block p-2 text-[#090A0F] hover:bg-rose-50 rounded-lg">Pricing</a>
+            <a href="#faq" onClick={() => { setCurrentPage('home'); setMobileMenuOpen(false) }} className="block p-2 text-[#090A0F] hover:bg-rose-50 rounded-lg">FAQ</a>
           </div>
         )}
       </header>
 
-      {/* TOP BLACK & RED ANNOUNCEMENT BANNER */}
-      <div className="pt-24 pb-2 bg-[#090A0F] text-white border-b border-slate-800 text-center text-xs font-mono flex items-center justify-center gap-2">
-        <span className="px-2 py-0.5 bg-[#FF003C] text-white rounded-full font-bold text-[10px] uppercase flex items-center gap-1">
-          <CheckIcon color="#FFFFFF" size={12} /> META PARTNER
-        </span>
-        <span className="text-slate-300">WhatsApp Business API Cloud v20.0 Released</span>
-        <a href="#bot-templates" className="text-[#FF003C] font-bold underline hover:text-[#FF2A55] ml-1">Explore Templates →</a>
-      </div>
+      {currentPage === 'partners' ? (
+        <PartnersPage onBackToHome={() => { setCurrentPage('home'); window.scrollTo({ top: 0, behavior: 'smooth' }) }} />
+      ) : (
+        <>
+          {/* TOP BLACK & RED ANNOUNCEMENT BANNER */}
+          <div className="pt-24 pb-2 bg-[#090A0F] text-white border-b border-slate-800 text-center text-xs font-mono flex items-center justify-center gap-2">
+            <span className="px-2 py-0.5 bg-[#FF003C] text-white rounded-full font-bold text-[10px] uppercase flex items-center gap-1">
+              <CheckIcon color="#FFFFFF" size={12} /> META PARTNER
+            </span>
+            <span className="text-slate-300">WhatsApp Business API Cloud v20.0 Released</span>
+            <button onClick={() => setCurrentPage('partners')} className="text-[#FF003C] font-bold underline hover:text-[#FF2A55] ml-1">Explore Partner Program →</button>
+          </div>
+
 
       {/* HERO SECTION */}
       <section className="relative pt-12 pb-20 md:pt-20 md:pb-28 border-b border-slate-200 overflow-hidden z-10">
@@ -752,7 +727,9 @@ export default function App() {
                 compositionWidth={1280}
                 compositionHeight={760}
                 fps={30}
-                controls
+                controls={false}
+                clickToPlay={false}
+                doubleClickToFullscreen={false}
                 autoPlay
                 loop
                 style={{
@@ -784,7 +761,9 @@ export default function App() {
                 compositionWidth={1280}
                 compositionHeight={720}
                 fps={30}
-                controls
+                controls={false}
+                clickToPlay={false}
+                doubleClickToFullscreen={false}
                 autoPlay
                 loop
                 style={{
@@ -985,58 +964,8 @@ export default function App() {
       {/* MANYCHAT-STYLE: "BEFORE VS AFTER ACTIONPACKD" OVERLAPPING CARDS */}
       <BeforeAfterComparisonSection onStartFree={() => openModal('Start Free Sandbox', 'Deploy Actionpackd AI agents today.')} />
 
-      {/* INTERACTIVE PRE-BUILT BOT TEMPLATES (DARK OBSIDIAN SECTION) */}
-      <section id="bot-templates" className="py-24 border-b border-slate-800 bg-[#090A0F] text-white bg-grid-dark relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          
-          <AnimatedSection>
-            <div className="text-center mb-16">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#14161C] border border-[#FF003C]/40 mb-4 shadow-sm">
-                <CheckIcon color="#FF003C" size={16} />
-                <span className="text-[#FF003C] font-mono text-xs font-bold uppercase tracking-wider">
-                  Meta Verified Bot Templates
-                </span>
-              </div>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-outfit font-extrabold text-white tracking-tight">
-                Pre-built WhatsApp bots. <span className="gradient-text-red">Try live.</span>
-              </h2>
-              <p className="text-slate-400 text-sm font-sans mt-3 max-w-xl mx-auto">
-                Launch production-ready WhatsApp AI agents in seconds. Click "Try Bot Live" to open a live interactive chat simulator!
-              </p>
-            </div>
-          </AnimatedSection>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {Object.values(botTemplates).map((t, i) => (
-              <AnimatedSection key={t.id} delay={i * 0.08}>
-                <div className="bento-card-dark overflow-hidden flex flex-col justify-between h-full hover:border-[#FF003C] transition-all">
-                  <div className="h-2 bg-[#FF003C]"></div>
-                  <div className="p-7">
-                    <div className="flex items-center justify-between mb-5">
-                      <div className="w-12 h-12 rounded-2xl bg-[#14161C] flex items-center justify-center text-2xl border border-slate-800">
-                        {t.avatar}
-                      </div>
-                      <span className="px-2.5 py-1 text-[10px] font-mono bg-[#FF003C]/20 text-[#FF003C] border border-[#FF003C]/40 rounded-full uppercase font-bold flex items-center gap-1">
-                        <CheckIcon color="#FF003C" size={12} /> Meta Ready
-                      </span>
-                    </div>
-                    <h3 className="text-xl font-outfit font-bold text-white mb-2">{t.name}</h3>
-                    <p className="text-slate-400 text-sm leading-relaxed mb-6">{t.welcome}</p>
-                    <button
-                      onClick={() => tryBotTemplate(t.id)}
-                      className="btn-primary w-full py-3 rounded-xl font-outfit font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2"
-                    >
-                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38c1.45.79 3.08 1.21 4.79 1.21 5.46 0 9.91-4.45 9.91-9.91C22 6.45 17.5 2 12.04 2z"/></svg>
-                      Try Bot Live
-                    </button>
-                  </div>
-                </div>
-              </AnimatedSection>
-            ))}
-          </div>
-
-        </div>
-      </section>
+      {/* 18 REMOTION-ANIMATED BOT TEMPLATES MARKETPLACE */}
+      <BotTemplatesSection onTryBot={tryBotTemplate} />
 
       {/* META PARTNER HIGHLIGHT SECTION */}
       <section className="py-20 border-b border-slate-200 bg-white relative overflow-hidden">
@@ -1302,9 +1231,10 @@ export default function App() {
             <div>
               <h4 className="text-xs font-mono font-bold text-white uppercase tracking-wider mb-4">Resources</h4>
               <ul className="space-y-2 text-xs text-slate-400 font-sans">
-                <li><a href="#bot-templates" className="hover:text-white transition-colors">Bot Templates</a></li>
-                <li><a href="#faq" className="hover:text-white transition-colors">FAQ & Support</a></li>
-                <li><a href="#pricing" className="hover:text-white transition-colors">Pricing Tiers</a></li>
+                <li><button onClick={() => { setCurrentPage('partners'); window.scrollTo({ top: 0, behavior: 'smooth' }) }} className="hover:text-[#FF003C] transition-colors text-[#FF003C] font-bold">Affiliate & Partners (30% Earn)</button></li>
+                <li><a href="#bot-templates" onClick={() => setCurrentPage('home')} className="hover:text-white transition-colors">Bot Templates</a></li>
+                <li><a href="#faq" onClick={() => setCurrentPage('home')} className="hover:text-white transition-colors">FAQ & Support</a></li>
+                <li><a href="#pricing" onClick={() => setCurrentPage('home')} className="hover:text-white transition-colors">Pricing Tiers</a></li>
               </ul>
             </div>
 
@@ -1328,6 +1258,8 @@ export default function App() {
           </div>
         </div>
       </footer>
+      </>
+      )}
 
       {/* CTA MODAL */}
       {modal.open && (
@@ -1364,8 +1296,8 @@ export default function App() {
               <button onClick={closeBotModal} className="text-gray-400 hover:text-white">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/></svg>
               </button>
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#FF003C] to-[#090A0F] flex items-center justify-center text-[#FF003C] font-bold text-lg shadow-sm border border-[#FF003C]">
-                {botModal.template.avatar}
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#FF003C] to-[#090A0F] flex items-center justify-center text-white font-bold text-lg shadow-sm border border-[#FF003C]">
+                {botModal.template.icon || botModal.template.avatar || '🤖'}
               </div>
               <div className="flex-1">
                 <div className="text-white font-semibold text-sm">{botModal.template.name}</div>
