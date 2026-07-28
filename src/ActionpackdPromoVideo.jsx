@@ -18,18 +18,29 @@ const Scene1SelectTemplate = () => {
     : 1
 
   return (
-    <AbsoluteFill style={{ backgroundColor: '#0A0B0F', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#FFFFFF', fontFamily: 'Outfit, sans-serif', padding: 40 }}>
+    <AbsoluteFill style={{
+      backgroundColor: '#EFEAE2',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justify: 'center',
+      color: '#111B21',
+      fontFamily: 'Outfit, sans-serif',
+      padding: 40,
+      backgroundImage: 'radial-gradient(#CBD5E1 1.2px, transparent 1.2px)',
+      backgroundSize: '20px 20px'
+    }}>
       
-      {/* AMBIENT GLOW */}
-      <div style={{ position: 'absolute', width: 600, height: 600, borderRadius: '50%', background: 'radial-gradient(circle, rgba(255,0,60,0.25) 0%, rgba(124,58,237,0.1) 50%, transparent 70%)', filter: 'blur(80px)' }} />
+      {/* AMBIENT GREEN GLOW */}
+      <div style={{ position: 'absolute', width: 600, height: 600, borderRadius: '50%', background: 'radial-gradient(circle, rgba(37,211,102,0.2) 0%, rgba(0,168,132,0.1) 50%, transparent 70%)', filter: 'blur(80px)' }} />
 
       {/* HEADER */}
       <div style={{ opacity: titleOpacity, transform: `translateY(${titleY}px)`, textAlign: 'center', marginBottom: 30, zIndex: 10 }}>
-        <div style={{ background: 'rgba(255, 0, 60, 0.18)', border: '1px solid rgba(255, 0, 60, 0.5)', padding: '6px 16px', borderRadius: 999, color: '#FF2A55', fontSize: 13, fontFamily: 'JetBrains Mono, monospace', fontWeight: 700, letterSpacing: '0.1em', display: 'inline-block', marginBottom: 12 }}>
+        <div style={{ background: '#E8F5E9', border: '1px solid #25D366', padding: '6px 16px', borderRadius: 999, color: '#008069', fontSize: 13, fontFamily: 'JetBrains Mono, monospace', fontWeight: 800, letterSpacing: '0.1em', display: 'inline-block', marginBottom: 12 }}>
           STEP 01 · CHOOSE TEMPLATE
         </div>
-        <h2 style={{ fontSize: 44, fontWeight: 900, margin: 0 }}>
-          Select a Pre-Built <span style={{ color: '#FF003C' }}>WhatsApp Bot</span>
+        <h2 style={{ fontSize: 44, fontWeight: 900, margin: 0, color: '#111B21' }}>
+          Select a Pre-Built <span style={{ color: '#008069' }}>WhatsApp Bot</span>
         </h2>
       </div>
 
@@ -37,38 +48,38 @@ const Scene1SelectTemplate = () => {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20, width: 880, zIndex: 10 }}>
         
         {/* CARD 1 (CLICKED) */}
-        <div style={{ transform: `scale(${isClicked ? 1.05 : 1})`, background: isClicked ? 'linear-gradient(135deg, #1C1E26 0%, #14161C 100%)' : '#14161C', border: isClicked ? '2px solid #FF003C' : '1px solid rgba(255,255,255,0.1)', borderRadius: 20, padding: 24, boxShadow: isClicked ? '0 0 35px rgba(255, 0, 60, 0.4)' : 'none' }}>
+        <div style={{ transform: `scale(${isClicked ? 1.05 : 1})`, background: '#FFFFFF', border: isClicked ? '2.5px solid #25D366' : '1px solid #E2E8F0', borderRadius: 20, padding: 24, boxShadow: isClicked ? '0 10px 30px rgba(37, 211, 102, 0.3)' : '0 4px 12px rgba(0,0,0,0.05)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
             <span style={{ fontSize: 32 }}>🎯</span>
-            <span style={{ background: 'rgba(37,211,102,0.15)', color: '#25D366', padding: '4px 10px', borderRadius: 999, fontSize: 11, fontFamily: 'JetBrains Mono, monospace', fontWeight: 800 }}>READY</span>
+            <span style={{ background: '#E8F5E9', color: '#008069', padding: '4px 10px', borderRadius: 999, fontSize: 11, fontFamily: 'JetBrains Mono, monospace', fontWeight: 800 }}>READY ●</span>
           </div>
-          <h3 style={{ fontSize: 20, fontWeight: 800, margin: '0 0 8px 0' }}>Lead Qualification Bot</h3>
-          <p style={{ fontSize: 13, color: '#94A3B8', margin: '0 0 16px 0', lineHeight: 1.4 }}>Qualify leads 24/7 on WhatsApp & sync directly to CRM.</p>
-          <div style={{ background: isClicked ? '#FF003C' : '#222630', color: '#FFFFFF', textAlign: 'center', padding: '10px 0', borderRadius: 12, fontSize: 13, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          <h3 style={{ fontSize: 20, fontWeight: 800, margin: '0 0 8px 0', color: '#111B21' }}>Lead Qualification Bot</h3>
+          <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 16px 0', lineHeight: 1.4 }}>Qualify leads 24/7 on WhatsApp & sync directly to CRM.</p>
+          <div style={{ background: isClicked ? '#00A884' : '#F1F5F9', color: isClicked ? '#FFFFFF' : '#64748B', textAlign: 'center', padding: '10px 0', borderRadius: 12, fontSize: 13, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             {isClicked ? '✓ SELECTED' : 'Use Template'}
           </div>
         </div>
 
         {/* CARD 2 */}
-        <div style={{ background: '#14161C', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 20, padding: 24, opacity: 0.6 }}>
+        <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 20, padding: 24, opacity: 0.85, boxShadow: '0 4px 12px rgba(0,0,0,0.04)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
             <span style={{ fontSize: 32 }}>🎧</span>
-            <span style={{ background: 'rgba(255,255,255,0.1)', color: '#94A3B8', padding: '4px 10px', borderRadius: 999, fontSize: 11, fontFamily: 'JetBrains Mono, monospace' }}>READY</span>
+            <span style={{ background: '#F1F5F9', color: '#64748B', padding: '4px 10px', borderRadius: 999, fontSize: 11, fontFamily: 'JetBrains Mono, monospace' }}>READY</span>
           </div>
-          <h3 style={{ fontSize: 20, fontWeight: 800, margin: '0 0 8px 0' }}>Customer Support Bot</h3>
-          <p style={{ fontSize: 13, color: '#94A3B8', margin: '0 0 16px 0', lineHeight: 1.4 }}>Auto-resolve FAQs and order tracking inquiries.</p>
-          <div style={{ background: '#222630', color: '#94A3B8', textAlign: 'center', padding: '10px 0', borderRadius: 12, fontSize: 13, fontWeight: 800 }}>Use Template</div>
+          <h3 style={{ fontSize: 20, fontWeight: 800, margin: '0 0 8px 0', color: '#111B21' }}>Customer Support Bot</h3>
+          <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 16px 0', lineHeight: 1.4 }}>Auto-resolve FAQs and order tracking inquiries.</p>
+          <div style={{ background: '#F1F5F9', color: '#64748B', textAlign: 'center', padding: '10px 0', borderRadius: 12, fontSize: 13, fontWeight: 800 }}>Use Template</div>
         </div>
 
         {/* CARD 3 */}
-        <div style={{ background: '#14161C', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 20, padding: 24, opacity: 0.6 }}>
+        <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 20, padding: 24, opacity: 0.85, boxShadow: '0 4px 12px rgba(0,0,0,0.04)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
             <span style={{ fontSize: 32 }}>📅</span>
-            <span style={{ background: 'rgba(255,255,255,0.1)', color: '#94A3B8', padding: '4px 10px', borderRadius: 999, fontSize: 11, fontFamily: 'JetBrains Mono, monospace' }}>READY</span>
+            <span style={{ background: '#F1F5F9', color: '#64748B', padding: '4px 10px', borderRadius: 999, fontSize: 11, fontFamily: 'JetBrains Mono, monospace' }}>READY</span>
           </div>
-          <h3 style={{ fontSize: 20, fontWeight: 800, margin: '0 0 8px 0' }}>Appointment Booking</h3>
-          <p style={{ fontSize: 13, color: '#94A3B8', margin: '0 0 16px 0', lineHeight: 1.4 }}>Book calendar meetings via WhatsApp chat flows.</p>
-          <div style={{ background: '#222630', color: '#94A3B8', textAlign: 'center', padding: '10px 0', borderRadius: 12, fontSize: 13, fontWeight: 800 }}>Use Template</div>
+          <h3 style={{ fontSize: 20, fontWeight: 800, margin: '0 0 8px 0', color: '#111B21' }}>Appointment Booking</h3>
+          <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 16px 0', lineHeight: 1.4 }}>Book calendar meetings via WhatsApp chat flows.</p>
+          <div style={{ background: '#F1F5F9', color: '#64748B', textAlign: 'center', padding: '10px 0', borderRadius: 12, fontSize: 13, fontWeight: 800 }}>Use Template</div>
         </div>
 
       </div>
@@ -107,42 +118,53 @@ const Scene2ConnectWhatsApp = () => {
     : 0
 
   return (
-    <AbsoluteFill style={{ backgroundColor: '#0A0B0F', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#FFFFFF', fontFamily: 'Outfit, sans-serif', padding: 40 }}>
+    <AbsoluteFill style={{
+      backgroundColor: '#EFEAE2',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justify: 'center',
+      color: '#111B21',
+      fontFamily: 'Outfit, sans-serif',
+      padding: 40,
+      backgroundImage: 'radial-gradient(#CBD5E1 1.2px, transparent 1.2px)',
+      backgroundSize: '20px 20px'
+    }}>
       
-      <div style={{ position: 'absolute', width: 600, height: 600, borderRadius: '50%', background: 'radial-gradient(circle, rgba(37,211,102,0.3) 0%, rgba(255,0,60,0.15) 50%, transparent 70%)', filter: 'blur(80px)' }} />
+      <div style={{ position: 'absolute', width: 600, height: 600, borderRadius: '50%', background: 'radial-gradient(circle, rgba(37,211,102,0.25) 0%, rgba(0,168,132,0.15) 50%, transparent 70%)', filter: 'blur(80px)' }} />
 
       {/* HEADER */}
       <div style={{ textAlign: 'center', marginBottom: 24, zIndex: 10 }}>
-        <div style={{ background: 'rgba(37, 211, 102, 0.15)', border: '1px solid rgba(37, 211, 102, 0.5)', padding: '6px 16px', borderRadius: 999, color: '#25D366', fontSize: 13, fontFamily: 'JetBrains Mono, monospace', fontWeight: 700, letterSpacing: '0.1em', display: 'inline-block', marginBottom: 12 }}>
+        <div style={{ background: '#E8F5E9', border: '1px solid #25D366', padding: '6px 16px', borderRadius: 999, color: '#008069', fontSize: 13, fontFamily: 'JetBrains Mono, monospace', fontWeight: 800, letterSpacing: '0.1em', display: 'inline-block', marginBottom: 12 }}>
           STEP 02 · LINK WHATSAPP NUMBER
         </div>
-        <h2 style={{ fontSize: 44, fontWeight: 900, margin: 0 }}>
-          Connect <span style={{ color: '#25D366' }}>WhatsApp Business API</span>
+        <h2 style={{ fontSize: 44, fontWeight: 900, margin: 0, color: '#111B21' }}>
+          Connect <span style={{ color: '#008069' }}>WhatsApp Business API</span>
         </h2>
       </div>
 
-      {/* MODAL WINDOW */}
-      <div style={{ transform: `scale(${modalScale})`, width: 660, background: '#14161C', border: '1px solid rgba(37, 211, 102, 0.4)', borderRadius: 24, padding: 32, boxShadow: '0 20px 50px rgba(0,0,0,0.8), 0 0 40px rgba(37, 211, 102, 0.15)', zIndex: 10 }}>
+      {/* WHATSAPP LIGHT MODE MODAL WINDOW */}
+      <div style={{ transform: `scale(${modalScale})`, width: 660, background: '#FFFFFF', border: '2px solid #25D366', borderRadius: 24, padding: 32, boxShadow: '0 20px 50px rgba(0,0,0,0.08), 0 0 30px rgba(37, 211, 102, 0.2)', zIndex: 10 }}>
         
         <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 20 }}>
-          <div style={{ width: 48, height: 48, borderRadius: 14, background: '#25D366', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26 }}>
+          <div style={{ width: 48, height: 48, borderRadius: 14, background: '#25D366', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, boxShadow: '0 4px 12px rgba(37,211,102,0.3)' }}>
             💬
           </div>
           <div>
-            <div style={{ fontSize: 20, fontWeight: 800, color: '#FFFFFF' }}>Meta Cloud API Integration</div>
-            <div style={{ fontSize: 13, color: '#94A3B8', fontFamily: 'JetBrains Mono, monospace' }}>Actionpackd Official Business Partner</div>
+            <div style={{ fontSize: 20, fontWeight: 800, color: '#111B21' }}>Meta Cloud API Integration</div>
+            <div style={{ fontSize: 13, color: '#008069', fontFamily: 'JetBrains Mono, monospace', fontWeight: 700 }}>Actionpackd Official Business Partner</div>
           </div>
         </div>
 
         {/* INPUT FIELD */}
         <div style={{ marginBottom: 20 }}>
-          <label style={{ display: 'block', fontSize: 12, fontFamily: 'JetBrains Mono, monospace', color: '#94A3B8', marginBottom: 8, textTransform: 'uppercase', fontWeight: 700 }}>
+          <label style={{ display: 'block', fontSize: 12, fontFamily: 'JetBrains Mono, monospace', color: '#64748B', marginBottom: 8, textTransform: 'uppercase', fontWeight: 700 }}>
             WhatsApp Phone Number
           </label>
-          <div style={{ background: '#0A0B0F', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 14, padding: '14px 18px', fontSize: 20, fontFamily: 'JetBrains Mono, monospace', color: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span>{currentTyped}<span style={{ opacity: Math.sin(frame / 3) > 0 ? 1 : 0, color: '#25D366' }}>|</span></span>
+          <div style={{ background: '#F0F2F5', border: '1.5px solid #CBD5E1', borderRadius: 14, padding: '14px 18px', fontSize: 20, fontFamily: 'JetBrains Mono, monospace', color: '#111B21', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.05)' }}>
+            <span>{currentTyped}<span style={{ opacity: Math.sin(frame / 3) > 0 ? 1 : 0, color: '#008069', fontWeight: 800 }}>|</span></span>
             {isVerified && (
-              <span style={{ transform: `scale(${checkScale})`, background: '#25D366', color: '#FFFFFF', padding: '4px 14px', borderRadius: 999, fontSize: 12, fontWeight: 800 }}>
+              <span style={{ transform: `scale(${checkScale})`, background: '#25D366', color: '#FFFFFF', padding: '4px 14px', borderRadius: 999, fontSize: 12, fontWeight: 800, boxShadow: '0 2px 6px rgba(37,211,102,0.3)' }}>
                 ✓ VERIFIED
               </span>
             )}
@@ -151,17 +173,17 @@ const Scene2ConnectWhatsApp = () => {
 
         {/* VERIFICATION BADGE */}
         {isVerified ? (
-          <div style={{ background: 'rgba(37, 211, 102, 0.12)', border: '1px solid rgba(37, 211, 102, 0.4)', borderRadius: 14, padding: 16, display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ background: '#E8F5E9', border: '1.5px solid #25D366', borderRadius: 14, padding: 16, display: 'flex', alignItems: 'center', gap: 12 }}>
             <span style={{ fontSize: 24 }}>✅</span>
             <div>
-              <div style={{ fontSize: 15, fontWeight: 800, color: '#25D366' }}>Meta Business Verification Active</div>
-              <div style={{ fontSize: 13, color: '#CBD5E1' }}>WhatsApp Bot linked & ready for instant messaging.</div>
+              <div style={{ fontSize: 15, fontWeight: 800, color: '#008069' }}>Meta Business Verification Active</div>
+              <div style={{ fontSize: 13, color: '#334155' }}>WhatsApp Bot linked & ready for instant messaging.</div>
             </div>
           </div>
         ) : (
-          <div style={{ background: 'rgba(255, 255, 255, 0.04)', border: '1px border-dashed rgba(255, 255, 255, 0.15)', borderRadius: 14, padding: 16, display: 'flex', alignItems: 'center', gap: 12 }}>
-            <span style={{ fontSize: 20, color: '#94A3B8' }}>⏳</span>
-            <div style={{ fontSize: 13, color: '#94A3B8', fontFamily: 'JetBrains Mono, monospace' }}>Validating Meta Business credentials...</div>
+          <div style={{ background: '#F8FAFC', border: '1.5px dashed #CBD5E1', borderRadius: 14, padding: 16, display: 'flex', alignItems: 'center', gap: 12 }}>
+            <span style={{ fontSize: 20, color: '#64748B' }}>⏳</span>
+            <div style={{ fontSize: 13, color: '#64748B', fontFamily: 'JetBrains Mono, monospace', fontWeight: 700 }}>Validating Meta Business credentials...</div>
           </div>
         )}
 
@@ -195,63 +217,76 @@ const Scene3TestBot = () => {
   const msg2Y = interpolate(frame, [32, 45], [15, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' })
 
   return (
-    <AbsoluteFill style={{ backgroundColor: '#0A0B0F', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#FFFFFF', fontFamily: 'Outfit, sans-serif', padding: 40 }}>
+    <AbsoluteFill style={{
+      backgroundColor: '#EFEAE2',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justify: 'center',
+      color: '#111B21',
+      fontFamily: 'Outfit, sans-serif',
+      padding: 40,
+      backgroundImage: 'radial-gradient(#CBD5E1 1.2px, transparent 1.2px)',
+      backgroundSize: '20px 20px'
+    }}>
       
-      <div style={{ position: 'absolute', width: 650, height: 650, borderRadius: '50%', background: 'radial-gradient(circle, rgba(255,0,60,0.3) 0%, rgba(37,211,102,0.15) 50%, transparent 70%)', filter: 'blur(90px)' }} />
+      <div style={{ position: 'absolute', width: 650, height: 650, borderRadius: '50%', background: 'radial-gradient(circle, rgba(37,211,102,0.25) 0%, rgba(0,168,132,0.15) 50%, transparent 70%)', filter: 'blur(90px)' }} />
 
       {/* HEADER */}
       <div style={{ textAlign: 'center', marginBottom: 20, zIndex: 10 }}>
-        <div style={{ background: 'rgba(255, 0, 60, 0.18)', border: '1px solid rgba(255, 0, 60, 0.5)', padding: '6px 16px', borderRadius: 999, color: '#FF2A55', fontSize: 13, fontFamily: 'JetBrains Mono, monospace', fontWeight: 700, letterSpacing: '0.1em', display: 'inline-block', marginBottom: 12 }}>
+        <div style={{ background: '#E8F5E9', border: '1px solid #25D366', padding: '6px 16px', borderRadius: 999, color: '#008069', fontSize: 13, fontFamily: 'JetBrains Mono, monospace', fontWeight: 800, letterSpacing: '0.1em', display: 'inline-block', marginBottom: 12 }}>
           STEP 03 · LIVE AI BOT REPLIES
         </div>
-        <h2 style={{ fontSize: 44, fontWeight: 900, margin: 0 }}>
-          Your <span style={{ color: '#FF003C' }}>AI Bot</span> Replying Messages Live
+        <h2 style={{ fontSize: 44, fontWeight: 900, margin: 0, color: '#111B21' }}>
+          Your <span style={{ color: '#008069' }}>AI Bot</span> Replying Messages Live
         </h2>
       </div>
 
-      {/* WHATSAPP CHAT PHONE MOCKUP */}
-      <div style={{ transform: `scale(${chatScale})`, width: 700, background: '#111B21', border: '1px solid rgba(37, 211, 102, 0.5)', borderRadius: 24, overflow: 'hidden', boxShadow: '0 20px 50px rgba(0,0,0,0.9), 0 0 40px rgba(37, 211, 102, 0.2)', zIndex: 10 }}>
+      {/* WHATSAPP LIGHT MODE CHAT PHONE MOCKUP */}
+      <div style={{ transform: `scale(${chatScale})`, width: 700, background: '#EFEAE2', border: '2px solid #25D366', borderRadius: 24, overflow: 'hidden', boxShadow: '0 20px 50px rgba(0,0,0,0.12), 0 0 30px rgba(37, 211, 102, 0.2)', zIndex: 10 }}>
         
-        {/* WHATSAPP TOP BAR */}
-        <div style={{ background: '#1F2C34', padding: '14px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+        {/* WHATSAPP TOP BAR (LIGHT MODE) */}
+        <div style={{ background: '#F0F2F5', padding: '14px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #D1D7DB' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'linear-gradient(135deg, #FF003C 0%, #25D366 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, fontWeight: 800 }}>
-              🎯
+            <div style={{ width: 42, height: 42, borderRadius: '50%', background: '#FFFFFF', border: '2px solid #25D366', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 6px rgba(0,0,0,0.1)', overflow: 'hidden' }}>
+              <img src="/assets/logo_mascot.png" alt="Mascot" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%', display: 'block' }} />
             </div>
             <div>
-              <div style={{ fontSize: 16, fontWeight: 800, color: '#FFFFFF' }}>Lead Qualification Bot</div>
-              <div style={{ fontSize: 12, color: '#25D366', fontFamily: 'JetBrains Mono, monospace' }}>● online · Actionpackd AI</div>
+              <div style={{ fontSize: 16, fontWeight: 800, color: '#111B21' }}>Lead Qualification Bot</div>
+              <div style={{ fontSize: 12, color: '#008069', fontFamily: 'JetBrains Mono, monospace', fontWeight: 700 }}>● online · Actionpackd AI</div>
             </div>
           </div>
-          <div style={{ background: '#25D366', color: '#FFFFFF', padding: '4px 12px', borderRadius: 999, fontSize: 11, fontFamily: 'JetBrains Mono, monospace', fontWeight: 800 }}>
+          <div style={{ background: '#25D366', color: '#FFFFFF', padding: '4px 12px', borderRadius: 999, fontSize: 11, fontFamily: 'JetBrains Mono, monospace', fontWeight: 800, boxShadow: '0 2px 6px rgba(37,211,102,0.3)' }}>
             LIVE
           </div>
         </div>
 
-        {/* CHAT MESSAGES BODY */}
-        <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16, minHeight: 230, background: '#0B141A' }}>
+        {/* CHAT MESSAGES BODY (LIGHT MODE) */}
+        <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16, minHeight: 230, background: '#EFEAE2', backgroundImage: 'radial-gradient(#CBD5E1 1.2px, transparent 1.2px)', backgroundSize: '20px 20px' }}>
           
-          {/* USER MESSAGE */}
-          <div style={{ opacity: msg1Opacity, transform: `translateY(${msg1Y}px)`, alignSelf: 'flex-end', background: '#005C4B', color: '#FFFFFF', padding: '14px 18px', borderRadius: '14px 14px 2px 14px', maxWidth: '78%', fontSize: 15, fontFamily: 'Inter, sans-serif', boxShadow: '0 2px 6px rgba(0,0,0,0.3)' }}>
+          {/* USER MESSAGE (LEFT - PURE WHITE) */}
+          <div style={{ opacity: msg1Opacity, transform: `translateY(${msg1Y}px)`, alignSelf: 'flex-start', background: '#FFFFFF', color: '#111B21', padding: '14px 18px', borderRadius: '0px 14px 14px 14px', maxWidth: '78%', fontSize: 15, fontFamily: 'Inter, sans-serif', boxShadow: '0 1px 2px rgba(11,20,26,0.13)' }}>
             "Hi! I want to book a product demo for our team."
-            <span style={{ fontSize: 11, color: '#8696A0', marginLeft: 10 }}>10:42 AM ✓✓</span>
+            <span style={{ fontSize: 11, color: '#667781', marginLeft: 10, fontFamily: 'JetBrains Mono, monospace' }}>10:42 AM</span>
           </div>
 
           {/* BOT TYPING INDICATOR */}
           {isTyping && (
-            <div style={{ alignSelf: 'flex-start', background: '#202C33', color: '#25D366', padding: '12px 18px', borderRadius: '14px 14px 14px 2px', fontSize: 13, fontFamily: 'JetBrains Mono, monospace', fontWeight: 700 }}>
-              AI Bot is typing... ⚡ 0.38s
+            <div style={{ alignSelf: 'flex-end', background: '#D9FDD3', color: '#075E54', padding: '12px 18px', borderRadius: '14px 0px 14px 14px', fontSize: 13, fontFamily: 'JetBrains Mono, monospace', fontWeight: 700, boxShadow: '0 1px 2px rgba(0,0,0,0.1)' }}>
+              Actionpackd AI is typing... ⚡ 0.38s
             </div>
           )}
 
-          {/* BOT RESPONSE */}
+          {/* BOT RESPONSE (RIGHT - LIGHT GREEN #D9FDD3) */}
           {msg2Visible && (
-            <div style={{ opacity: msg2Opacity, transform: `translateY(${msg2Y}px)`, alignSelf: 'flex-start', background: '#202C33', color: '#FFFFFF', padding: '16px 20px', borderRadius: '14px 14px 14px 2px', maxWidth: '88%', fontSize: 15, fontFamily: 'Inter, sans-serif', borderLeft: '4px solid #FF003C', boxShadow: '0 4px 12px rgba(0,0,0,0.4)' }}>
-              <div style={{ fontSize: 11, fontFamily: 'JetBrains Mono, monospace', color: '#25D366', marginBottom: 6, fontWeight: 800 }}>
-                ACTIONPACKD AI AGENT · CONFIDENCE 99.4%
+            <div style={{ opacity: msg2Opacity, transform: `translateY(${msg2Y}px)`, alignSelf: 'flex-end', background: '#D9FDD3', color: '#111B21', padding: '16px 20px', borderRadius: '14px 0px 14px 14px', maxWidth: '88%', fontSize: 15, fontFamily: 'Inter, sans-serif', border: '1px solid #B4E6B0', boxShadow: '0 2px 8px rgba(11,20,26,0.12)' }}>
+              <div style={{ fontSize: 11, fontFamily: 'JetBrains Mono, monospace', color: '#008069', marginBottom: 6, fontWeight: 800 }}>
+                ⚡ ACTIONPACKD AI AGENT · CONFIDENCE 99.4%
               </div>
               "Great! I can qualify your team & schedule a demo call. What date & time works best for you?"
-              <div style={{ fontSize: 11, color: '#8696A0', marginTop: 6, textAlign: 'right' }}>10:42 AM</div>
+              <div style={{ fontSize: 11, color: '#667781', marginTop: 6, textAlign: 'right', fontFamily: 'JetBrains Mono, monospace' }}>
+                10:42 AM <span style={{ color: '#53BDEB', fontWeight: 900 }}>✓✓</span>
+              </div>
             </div>
           )}
 
@@ -275,25 +310,35 @@ const Scene4Outro = () => {
   })
 
   return (
-    <AbsoluteFill style={{ backgroundColor: '#0A0B0F', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#FFFFFF', fontFamily: 'Outfit, sans-serif' }}>
+    <AbsoluteFill style={{
+      backgroundColor: '#EFEAE2',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justify: 'center',
+      color: '#111B21',
+      fontFamily: 'Outfit, sans-serif',
+      backgroundImage: 'radial-gradient(#CBD5E1 1.2px, transparent 1.2px)',
+      backgroundSize: '20px 20px'
+    }}>
       
-      {/* BURSTING RED ENERGY */}
-      <div style={{ position: 'absolute', width: 750, height: 750, borderRadius: '50%', background: 'radial-gradient(circle, rgba(255,0,60,0.45) 0%, rgba(255,0,60,0.1) 50%, transparent 70%)', filter: 'blur(90px)', transform: `scale(${1 + Math.sin(frame / 8) * 0.15})` }} />
+      {/* BURSTING WHATSAPP GREEN ENERGY */}
+      <div style={{ position: 'absolute', width: 750, height: 750, borderRadius: '50%', background: 'radial-gradient(circle, rgba(37,211,102,0.3) 0%, rgba(0,168,132,0.1) 50%, transparent 70%)', filter: 'blur(90px)', transform: `scale(${1 + Math.sin(frame / 8) * 0.15})` }} />
 
       <div style={{ zIndex: 10, textAlign: 'center' }}>
-        <div style={{ background: 'rgba(255, 0, 60, 0.18)', border: '1px solid rgba(255, 0, 60, 0.5)', padding: '6px 16px', borderRadius: 999, color: '#FF2A55', fontSize: 13, fontFamily: 'JetBrains Mono, monospace', fontWeight: 700, letterSpacing: '0.1em', display: 'inline-block', marginBottom: 16 }}>
+        <div style={{ background: '#E8F5E9', border: '1px solid #25D366', padding: '6px 16px', borderRadius: 999, color: '#008069', fontSize: 13, fontFamily: 'JetBrains Mono, monospace', fontWeight: 800, letterSpacing: '0.1em', display: 'inline-block', marginBottom: 16 }}>
           ⚡ LAUNCH IN 60 SECONDS
         </div>
 
-        <h2 style={{ fontSize: 54, fontWeight: 900, letterSpacing: '-0.02em', margin: '0 0 16px 0' }}>
-          Build Your <span style={{ color: '#FF003C', textShadow: '0 0 30px rgba(255, 0, 60, 0.8)' }}>WhatsApp Bot</span> Today.
+        <h2 style={{ fontSize: 54, fontWeight: 900, letterSpacing: '-0.02em', margin: '0 0 16px 0', color: '#111B21' }}>
+          Build Your <span style={{ color: '#008069' }}>WhatsApp Bot</span> Today.
         </h2>
-        <p style={{ fontSize: 20, color: '#94A3B8', margin: '0 0 36px 0', fontFamily: 'Inter, sans-serif' }}>
+        <p style={{ fontSize: 20, color: '#64748B', margin: '0 0 36px 0', fontFamily: 'Inter, sans-serif' }}>
           Choose a template · Link Meta API · Start converting leads 24/7
         </p>
 
         <div style={{ transform: `scale(${buttonScale})`, display: 'inline-block' }}>
-          <div style={{ background: 'linear-gradient(135deg, #FF003C 0%, #E60036 50%, #B00028 100%)', padding: '20px 48px', borderRadius: 999, color: '#FFFFFF', fontSize: 22, fontWeight: 800, letterSpacing: '0.05em', textTransform: 'uppercase', boxShadow: '0 12px 35px rgba(255, 0, 60, 0.6)', border: '2px solid #FF2A55' }}>
+          <div style={{ background: 'linear-gradient(135deg, #00A884 0%, #008069 100%)', padding: '20px 48px', borderRadius: 999, color: '#FFFFFF', fontSize: 22, fontWeight: 800, letterSpacing: '0.05em', textTransform: 'uppercase', boxShadow: '0 12px 35px rgba(0, 168, 132, 0.4)', border: '2px solid #25D366' }}>
             BUILD YOUR WHATSAPP BOT FREE →
           </div>
         </div>
@@ -306,7 +351,7 @@ const Scene4Outro = () => {
 // ===================== MAIN COMPOSITION =====================
 export const ActionpackdPromoVideo = () => {
   return (
-    <AbsoluteFill style={{ backgroundColor: '#0A0B0F' }}>
+    <AbsoluteFill style={{ backgroundColor: '#EFEAE2' }}>
       <Sequence from={0} durationInFrames={75}>
         <Scene1SelectTemplate />
       </Sequence>
@@ -324,3 +369,4 @@ export const ActionpackdPromoVideo = () => {
 }
 
 export default ActionpackdPromoVideo
+

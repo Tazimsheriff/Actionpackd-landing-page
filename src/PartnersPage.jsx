@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Player } from '@remotion/player'
 import { PartnerProgramVideo } from './PartnerProgramVideo'
+import { createDubLink, getDubAnalytics, DUB_MCP_CONFIG_GUIDE } from './dubApi'
 
 
 // Custom intersection observer hook for smooth scroll animations
@@ -45,13 +46,55 @@ export function PartnersPage({ onBackToHome }) {
   const [selectedPlanPrice, setSelectedPlanPrice] = useState(99) // $99 Pro, $299 Agency, $999 Enterprise
   const [commissionRate, setCommissionRate] = useState(0.30) // 30% default
 
-  // Dashboard Simulator State
+  // Dashboard Simulator & Dub MCP Protocol State
   const [customHandle, setCustomHandle] = useState('alex-growth')
   const [copied, setCopied] = useState(false)
   const [simulatedClicks, setSimulatedClicks] = useState(1420)
   const [simulatedConversions, setSimulatedConversions] = useState(84)
   const [simulatedUnpaid, setSimulatedUnpaid] = useState(2494.80)
   const [liveToast, setLiveToast] = useState(null)
+
+  // Live Dub API Integration State
+  const [dubApiKey, setDubApiKey] = useState('')
+  const [createdDubLink, setCreatedDubLink] = useState(null)
+  const [isCreatingLink, setIsCreatingLink] = useState(false)
+  const [mcpGuideOpen, setMcpGuideOpen] = useState(false)
+
+  const handleCreateDubLink = async () => {
+    setIsCreatingLink(true)
+    try {
+      const result = await createDubLink({
+        apiKey: dubApiKey,
+        domain: 'act.pk',
+        key: customHandle || 'partner',
+        url: `https://actionpackd.com?ref=${customHandle || 'partner'}`
+      })
+      setCreatedDubLink(result)
+      setLiveToast(`✅ Dub API Link Created: ${result.shortUrl}`)
+      const newMcpLog = {
+        id: Date.now(),
+        time: new Date().toLocaleTimeString(),
+        agent: dubApiKey ? 'Dub REST API v1 (Live)' : 'Dub MCP Protocol Sandbox',
+        tool: 'dub_create_partner_link',
+        params: JSON.stringify({ domain: result.domain, key: result.key, destination: result.destination, shortUrl: result.shortUrl }),
+        status: '200 OK'
+      }
+      setMcpLogs(prev => [newMcpLog, ...prev.slice(0, 4)])
+      setTimeout(() => setLiveToast(null), 3500)
+    } catch (err) {
+      alert(`Dub API Error: ${err.message}`)
+    } finally {
+      setIsCreatingLink(false)
+    }
+  }
+
+  // Dub MCP Protocol Live Inspector State
+  const [activeSimTab, setActiveSimTab] = useState('analytics') // 'analytics' | 'mcp'
+  const [mcpLogs, setMcpLogs] = useState([
+    { id: 1, time: '07:11:02', agent: 'Claude 3.5 Sonnet', tool: 'dub_create_partner_link', params: '{"domain":"act.pk","key":"alex-growth","target":"https://actionpackd.com?ref=alex"}', status: '200 OK' },
+    { id: 2, time: '07:11:05', agent: 'ChatGPT-4o', tool: 'dub_track_conversion', params: '{"ref":"alex-growth","plan":"Pro","amount":99,"commission":29.70}', status: '200 OK' },
+    { id: 3, time: '07:11:12', agent: 'Antigravity Agent', tool: 'dub_get_analytics', params: '{"key":"alex-growth","clicks":1420,"conversions":84}', status: '200 OK' }
+  ])
 
   // Enterprise Concierge Migration Modal State
   const [enterpriseModalOpen, setEnterpriseModalOpen] = useState(false)
@@ -61,6 +104,16 @@ export function PartnersPage({ onBackToHome }) {
   const handleSimulateClick = () => {
     setSimulatedClicks(prev => prev + 1)
     setLiveToast(`⚡ Live Telemetry Event: Click captured via act.pk/${customHandle || 'partner'} (100% Attribution)`)
+    
+    const newMcpLog = {
+      id: Date.now(),
+      time: new Date().toLocaleTimeString(),
+      agent: 'LLM Web Browser Agent',
+      tool: 'dub_track_click',
+      params: JSON.stringify({ domain: 'act.pk', key: customHandle || 'partner', ipHash: '8b9c...e2', protocol: 'Dub-MCP-v1' }),
+      status: '200 OK'
+    }
+    setMcpLogs(prev => [newMcpLog, ...prev.slice(0, 4)])
     setTimeout(() => setLiveToast(null), 3000)
   }
 
@@ -69,6 +122,16 @@ export function PartnersPage({ onBackToHome }) {
     setSimulatedConversions(prev => prev + 1)
     setSimulatedUnpaid(prev => prev + 29.70)
     setLiveToast(`💰 Live Conversion Event: $99 Pro Plan Signup Tracked! +$29.70 Commission Auto-Credited.`)
+    
+    const newMcpLog = {
+      id: Date.now(),
+      time: new Date().toLocaleTimeString(),
+      agent: 'Stripe Webhook Agent (Dub MCP Protocol)',
+      tool: 'dub_track_conversion',
+      params: JSON.stringify({ ref: customHandle || 'partner', plan: 'Pro $99', commission: '$29.70 (30%)', status: 'Auto-Credited' }),
+      status: '200 OK'
+    }
+    setMcpLogs(prev => [newMcpLog, ...prev.slice(0, 4)])
     setTimeout(() => setLiveToast(null), 3500)
   }
 
@@ -287,6 +350,10 @@ export function PartnersPage({ onBackToHome }) {
 
   const partnerFaqs = [
     {
+      q: "What is the Dub MCP Protocol and how does it benefit partners?",
+      a: "The Dub Model Context Protocol (MCP) enables AI agents (Claude, ChatGPT, Cursor, Antigravity) to programmatically generate your act.pk partner short links, inspect real-time click & conversion telemetry, and credit commissions via standardized MCP tools (dub_create_partner_link, dub_get_analytics, dub_track_conversion)."
+    },
+    {
       q: "What is the commission rate and cookie attribution window?",
       a: "Actionpackd Partners earn 30% recurring monthly commission for up to 24 months on every paid subscription referred. Our first-party tracking links use a 60-day attribution window with cookie-less fallback."
     },
@@ -355,21 +422,21 @@ export function PartnersPage({ onBackToHome }) {
           <AnimatedSection delay={0}>
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-900 text-white border border-slate-800 text-xs font-mono mb-8 shadow-sm">
               <span className="w-2 h-2 rounded-full bg-[#FF003C] animate-pulse"></span>
-              <span className="font-semibold text-[#FF003C]">DUB.CO PARTNERS ARCHITECTURE</span>
-              <span className="text-slate-400">· Official Program</span>
+              <span className="font-semibold text-[#FF003C]">DUB MCP PROTOCOL INTEGRATED</span>
+              <span className="text-slate-400">· LLM & AI Agent Native</span>
             </div>
           </AnimatedSection>
 
           <AnimatedSection delay={0.1}>
             <h1 className="text-4xl sm:text-6xl lg:text-7xl font-outfit font-extrabold tracking-tight text-[#090A0F] leading-[1.08] max-w-4xl mx-auto mb-6">
               Grow your revenue with <br className="hidden sm:inline" />
-              <span className="gradient-text-red">Actionpackd Partnerships.</span>
+              <span className="gradient-text-red">Actionpackd Partnerships & Dub MCP.</span>
             </h1>
           </AnimatedSection>
 
           <AnimatedSection delay={0.2}>
             <p className="text-base sm:text-xl text-slate-600 max-w-2xl mx-auto font-sans leading-relaxed mb-8">
-              Actionpackd is the modern affiliate marketing platform & network for partnering with affiliates, creators, agencies, and developers.
+              Actionpackd is powered by the <strong>Dub Model Context Protocol (MCP)</strong> for automated AI agent link generation, 1st-party domain attribution, and 30% recurring lifetime payouts.
             </p>
           </AnimatedSection>
 
@@ -467,217 +534,209 @@ export function PartnersPage({ onBackToHome }) {
 
 
 
-      {/* CREATIVE CATEGORY LEADER MIGRATION SECTION */}
-      <section className="py-24 bg-[#090A0F] text-white border-b border-slate-800 relative overflow-hidden">
-        {/* Ambient Red Blur & Grid Mesh Background */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[550px] bg-[#FF003C]/10 rounded-full blur-[140px] pointer-events-none"></div>
-        <div className="absolute inset-0 bg-grid-dark opacity-35 pointer-events-none"></div>
-
+      {/* REDESIGNED PROOF & MIGRATIONS SECTION (TYPOGRAPHY-LED, ASYMMETRIC BENTO GRID) */}
+      <section className="py-28 bg-[#090A0F] text-white border-b border-slate-800 relative overflow-hidden">
+        
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           
+          {/* 1. TYPOGRAPHY-LED HERO STAT */}
           <AnimatedSection>
-            <div className="text-center max-w-3xl mx-auto mb-12">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#181A22] text-[#FF003C] font-mono text-xs font-bold uppercase tracking-widest border border-[#FF003C]/30 shadow-lg shadow-rose-500/10 mb-4">
-                <span className="w-2 h-2 rounded-full bg-[#FF003C] animate-pulse"></span>
-                <span>⚡ MIGRATION COMMAND CENTER · $14.2M+ MOVED</span>
+            <div className="mb-14">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="w-2 h-2 rounded-full bg-[#FF003C]"></span>
+                <span className="text-xs font-mono font-bold text-[#FF003C] uppercase tracking-widest">
+                  PROOF & MIGRATIONS
+                </span>
               </div>
-              <h2 className="text-3xl sm:text-5xl lg:text-6xl font-outfit font-extrabold tracking-tight text-white leading-tight">
-                Category leaders are moving to <br className="hidden sm:inline" />
-                <span className="gradient-text-red">Actionpackd.</span>
+              <h2 className="text-6xl sm:text-8xl lg:text-9xl font-outfit font-extrabold text-white tracking-tighter leading-none mb-6">
+                $14,284,900
               </h2>
-              <p className="mt-4 text-slate-400 text-sm sm:text-base font-sans max-w-2xl mx-auto leading-relaxed">
-                Over <strong className="text-white">$14.2M in monthly referral volume</strong> migrated seamlessly from Rewardful, PartnerStack, & FirstPromoter with zero link breakages, zero downtime, and 100% first-party attribution fidelity.
-              </p>
-            </div>
-
-            {/* LIVE METRICS DASHBOARD BANNER */}
-            <div className="bg-[#12141A]/90 border border-slate-800 backdrop-blur-xl rounded-2xl p-4 sm:p-6 mb-10 max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 text-center font-mono text-xs shadow-2xl">
-              <div className="p-3 bg-[#181A22] rounded-xl border border-slate-800">
-                <div className="text-slate-500 text-[10px] uppercase font-bold">MIGRATED VOLUME</div>
-                <div className="text-xl font-bold text-white mt-1">$14.28M <span className="text-xs font-normal text-[#FF003C]">/ mo</span></div>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pt-4 border-t border-slate-800/80">
+                <p className="text-slate-400 text-base sm:text-xl font-sans max-w-2xl leading-relaxed">
+                  Monthly referral volume migrated from Rewardful, PartnerStack, & FirstPromoter. <strong className="text-white">11 min avg cutover</strong>, 99.84% attribution fidelity, zero lost referral tokens.
+                </p>
+                <div className="flex items-center gap-3 shrink-0">
+                  <button
+                    onClick={() => setEnterpriseModalOpen(true)}
+                    className="btn-primary px-6 py-3.5 rounded-full font-outfit font-bold text-xs uppercase tracking-wider shadow-lg shadow-rose-500/20"
+                  >
+                    Schedule Free 1-Click Migration →
+                  </button>
+                </div>
               </div>
-              <div className="p-3 bg-[#181A22] rounded-xl border border-slate-800">
-                <div className="text-slate-500 text-[10px] uppercase font-bold">MIGRATION DOWNTIME</div>
-                <div className="text-xl font-bold text-green-400 mt-1">0.00ms</div>
-              </div>
-              <div className="p-3 bg-[#181A22] rounded-xl border border-slate-800">
-                <div className="text-slate-500 text-[10px] uppercase font-bold">AVG MIGRATION TIME</div>
-                <div className="text-xl font-bold text-white mt-1">&lt; 24 Hours</div>
-              </div>
-              <div className="p-3 bg-[#181A22] rounded-xl border border-[#FF003C]/40">
-                <div className="text-slate-500 text-[10px] uppercase font-bold">ATTRIBUTION ACCURACY</div>
-                <div className="text-xl font-bold text-[#FF003C] mt-1">99.8%</div>
-              </div>
-            </div>
-
-            {/* PLATFORM FILTER TABS */}
-            <div className="flex flex-wrap items-center justify-center gap-2.5 mb-10 font-mono text-xs">
-              {[
-                { id: 'all', label: 'All Platforms ($14.2M)' },
-                { id: 'rewardful', label: 'Rewardful Migrations' },
-                { id: 'partnerstack', label: 'PartnerStack Migrations' },
-                { id: 'firstpromoter', label: 'FirstPromoter Migrations' },
-                { id: 'topteams', label: 'Native Actionpackd Teams' }
-              ].map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setMigrationFilter(tab.id)}
-                  className={`px-4 py-2 rounded-full border transition-all duration-200 ${
-                    migrationFilter === tab.id
-                      ? 'bg-[#FF003C] border-[#FF003C] text-white font-bold shadow-lg shadow-rose-500/25 scale-105'
-                      : 'bg-[#181A22] border-slate-800 text-slate-400 hover:text-white hover:border-slate-700'
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
             </div>
           </AnimatedSection>
 
-          {/* GRID OF REALISTIC ENTERPRISE MIGRATION CARDS */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {migratedPlatforms
-              .filter(item => migrationFilter === 'all' || item.id === migrationFilter)
-              .map((item, idx) => (
-                <AnimatedSection key={item.id} delay={idx * 0.08}>
-                  <div
-                    className={`rounded-3xl p-6 flex flex-col justify-between h-full transition-all duration-300 hover:shadow-2xl hover:-translate-y-1.5 group relative overflow-hidden ${
-                      item.highlight
-                        ? 'bg-gradient-to-b from-[#181B26] via-[#12141C] to-[#0F1117] border-2 border-[#FF003C]/70 shadow-xl shadow-rose-500/10'
-                        : 'bg-[#12141C]/90 backdrop-blur-md border border-slate-800/80 hover:border-slate-700 shadow-lg'
-                    }`}
-                  >
-                    {/* Highlight Pill for Featured Migration */}
-                    {item.highlight && (
-                      <div className="absolute top-0 right-0 bg-[#FF003C] text-white text-[9px] font-mono font-bold uppercase tracking-widest px-3 py-1 rounded-bl-xl shadow-sm">
-                        FEATURED MIGRATION
+          {/* 2. ASYMMETRIC BENTO GRID */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-12">
+            
+            {/* LARGE FEATURED MIGRATION CARD (Spans 7 cols) */}
+            <AnimatedSection className="lg:col-span-7">
+              <div className="bg-[#0E1017] border border-slate-800 rounded-3xl p-8 sm:p-10 h-full flex flex-col justify-between hover:border-slate-700 transition-all">
+                
+                <div>
+                  <div className="flex items-center justify-between mb-8 pb-6 border-b border-slate-800/80">
+                    <div className="flex items-center gap-3">
+                      {/* MONOCHROME LOGO THAT LIGHTS UP ON HOVER */}
+                      <div className="w-10 h-10 rounded-xl bg-[#141620] border border-slate-700 flex items-center justify-center font-outfit font-extrabold text-lg text-white">
+                        🐝
                       </div>
-                    )}
-
-                    <div>
-                      {/* CARD HEADER */}
-                      <div className="flex items-center justify-between mb-3 pt-1">
-                        <span className="text-xl">{item.fromLogo}</span>
-                        <span className="text-[11px] font-mono font-semibold text-slate-300 bg-[#1A1D27] px-2.5 py-1 rounded-full border border-slate-700/60">
-                          {item.volume}
-                        </span>
-                      </div>
-
-                      {/* TITLE */}
-                      <h3 className="text-base font-outfit font-extrabold text-white tracking-tight mb-1">
-                        {item.text}
-                      </h3>
-
-                      {/* SAVINGS BADGE */}
-                      <div className="text-xs font-sans text-emerald-400 font-semibold mb-5 flex items-center gap-1.5">
-                        <svg className="w-3.5 h-3.5 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
-                        </svg>
-                        <span>{item.savings}</span>
-                      </div>
-
-                      {/* COMPANIES / BRANDS LIST */}
-                      <div className="space-y-2.5">
-                        {item.companies.map((comp, cIdx) => (
-                          <div
-                            key={cIdx}
-                            onClick={() => comp.caseStudy && setCaseStudyModal({ open: true, company: comp })}
-                            className={`p-3 rounded-2xl border transition-all duration-200 flex items-center justify-between group/company ${
-                              comp.caseStudy
-                                ? 'bg-[#1A1D27] border-slate-700/60 hover:border-[#FF003C]/80 hover:bg-[#212533] cursor-pointer shadow-sm'
-                                : 'bg-[#151720] border-slate-800/80 text-slate-400 cursor-default'
-                            }`}
-                          >
-                            <div className="flex items-center gap-3 min-w-0">
-                              <div
-                                className="w-8 h-8 rounded-xl flex items-center justify-center text-sm font-bold shadow-md shrink-0 border border-white/10"
-                                style={{ backgroundColor: comp.accent || '#FF003C', color: comp.textColor || '#FFFFFF' }}
-                              >
-                                {comp.logoIcon || comp.name[0]}
-                              </div>
-                              <div className="min-w-0">
-                                <div className="font-outfit font-extrabold text-sm text-white truncate group-hover/company:text-[#FF003C] transition-colors">
-                                  {comp.name}
-                                </div>
-                                <div className="text-[10px] font-sans text-slate-400 truncate">
-                                  {comp.tagline}
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* CASE STUDY LINK OR VERIFIED CHECK */}
-                            {comp.caseStudy ? (
-                              <div className="shrink-0 text-[11px] font-sans font-semibold text-slate-300 bg-slate-800/90 border border-slate-700 px-2.5 py-1 rounded-lg group-hover/company:border-[#FF003C] group-hover/company:text-[#FF003C] transition-all flex items-center gap-1">
-                                <span>Case Study</span>
-                                <span className="text-[10px]">→</span>
-                              </div>
-                            ) : (
-                              <span className="text-emerald-400 text-xs font-bold shrink-0">✓</span>
-                            )}
-                          </div>
-                        ))}
+                      <div>
+                        <div className="font-outfit font-extrabold text-lg text-white">Beehiiv</div>
+                        <div className="text-[11px] font-mono text-slate-500">Newsletter Growth Platform</div>
                       </div>
                     </div>
-
-                    {/* CARD FOOTER MIGRATION STATUS */}
-                    <div className="mt-6 pt-4 border-t border-slate-800/80 flex items-center justify-between text-xs font-sans text-slate-400">
-                      <div className="flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                        <span className="text-emerald-400 font-semibold">100% Migrated</span>
-                      </div>
-                      <span className="text-slate-400 font-medium">{item.timeframe}</span>
-                    </div>
-
+                    <span className="text-[11px] font-mono font-semibold text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+                      Switched from Rewardful
+                    </span>
                   </div>
-                </AnimatedSection>
-              ))}
-          </div>
 
-          {/* INTERACTIVE COMPARISON TABLE CALLOUT */}
-          <div className="mt-16 bg-[#12141A] border-2 border-slate-800 rounded-3xl p-6 sm:p-10 shadow-2xl relative overflow-hidden">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-6 border-b border-slate-800 pb-6 mb-6">
-              <div>
-                <div className="text-[#FF003C] font-mono text-xs font-bold uppercase tracking-wider mb-1">
-                  ⚡ WHY 400+ HIGH-GROWTH SAAS TEAMS SWITCHED
+                  <blockquote className="text-lg sm:text-xl font-sans text-slate-200 leading-relaxed italic mb-8">
+                    "We moved 42,180 creator referral links overnight without missing a single payout cycle. Ad-blocker dropoff disappeared instantly when we switched to custom short links."
+                  </blockquote>
                 </div>
-                <h3 className="text-2xl font-outfit font-extrabold text-white">
-                  Actionpackd Partners vs. Legacy Platforms
-                </h3>
-              </div>
-              <button
-                onClick={() => setEnterpriseModalOpen(true)}
-                className="btn-primary px-6 py-3 rounded-xl font-outfit font-bold text-xs uppercase tracking-wider shrink-0 shadow-lg shadow-rose-500/20"
-              >
-                Schedule Free 1-Click Migration →
-              </button>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 font-mono text-xs">
-              <div className="p-4 bg-[#181A22] rounded-2xl border border-slate-800">
-                <div className="text-slate-400 uppercase text-[10px] font-bold mb-2">1ST-PARTY LINK ATTRIBUTION</div>
-                <div className="text-white font-bold text-sm mb-1">Custom Short Link Domains</div>
-                <p className="text-slate-400 text-[11px] leading-relaxed">
-                  Legacy platforms use 3rd-party query params (<code className="text-[#FF003C]">?aff=123</code>) blocked by Brave & Safari. Actionpackd uses clean custom CNAME links (<code className="text-[#FF003C]">act.pk/brand</code>) with 99.8% capture.
-                </p>
-              </div>
+                <div>
+                  {/* SPECIFIC IMPERFECT REAL NUMBERS */}
+                  <div className="grid grid-cols-3 gap-4 pt-6 border-t border-slate-800/80 mb-6 font-mono">
+                    <div>
+                      <div className="text-slate-500 text-[10px] uppercase font-bold">CREATORS MOVED</div>
+                      <div className="text-xl font-extrabold text-white mt-1">42,180</div>
+                    </div>
+                    <div>
+                      <div className="text-slate-500 text-[10px] uppercase font-bold">TOTAL CUTOVER</div>
+                      <div className="text-xl font-extrabold text-white mt-1">14h 22m</div>
+                    </div>
+                    <div>
+                      <div className="text-slate-500 text-[10px] uppercase font-bold">ANNUAL SAVINGS</div>
+                      <div className="text-xl font-extrabold text-emerald-400 mt-1">$42,350</div>
+                    </div>
+                  </div>
 
-              <div className="p-4 bg-[#181A22] rounded-2xl border border-slate-800">
-                <div className="text-slate-400 uppercase text-[10px] font-bold mb-2">GLOBAL PAYOUT AUTOMATION</div>
-                <div className="text-white font-bold text-sm mb-1">Instant Stripe Connect & SWIFT</div>
-                <p className="text-slate-400 text-[11px] leading-relaxed">
-                  No manual PayPal CSV exports or delayed monthly wires. Automated payouts disburse on the 1st of every month in 120+ currencies with zero fee markups.
-                </p>
-              </div>
+                  {/* TEXT LINK WITH ARROW (NOT PILL BUTTON) */}
+                  <button
+                    onClick={() => {
+                      const comp = migratedPlatforms[0]?.companies[0]
+                      if (comp) setCaseStudyModal({ open: true, company: comp })
+                    }}
+                    className="inline-flex items-center gap-2 text-[#FF003C] hover:text-white font-mono text-xs font-bold transition-colors group"
+                  >
+                    <span>Read Beehiiv Migration Breakdown</span>
+                    <span className="group-hover:translate-x-1 transition-transform">→</span>
+                  </button>
+                </div>
 
-              <div className="p-4 bg-[#181A22] rounded-2xl border border-[#FF003C]/40">
-                <div className="text-slate-400 uppercase text-[10px] font-bold mb-2">WHITE-GLOVE MIGRATION</div>
-                <div className="text-[#FF003C] font-bold text-sm mb-1">Zero Broken Affiliate Links</div>
-                <p className="text-slate-400 text-[11px] leading-relaxed">
-                  Our dedicated migration team transfers your existing affiliate databases, referral URLs, custom commission tiers, and historical tracking without taking down your portal for even a single second.
-                </p>
               </div>
-            </div>
+            </AnimatedSection>
+
+            {/* SECONDARY SUPPORTING CARD - PLATFORM METRICS (Spans 5 cols) */}
+            <AnimatedSection className="lg:col-span-5">
+              <div className="bg-[#0E1017] border border-slate-800 rounded-3xl p-8 h-full flex flex-col justify-between hover:border-slate-700 transition-all">
+                
+                <div>
+                  <div className="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider mb-4">
+                    PLATFORM VOLUME BREAKDOWN
+                  </div>
+                  
+                  <div className="space-y-4 font-mono text-xs">
+                    <div className="p-4 bg-[#141620] rounded-2xl border border-slate-800/80">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-white font-bold">Rewardful Migrations</span>
+                        <span className="text-emerald-400 font-bold">$5.84M / mo</span>
+                      </div>
+                      <div className="text-[11px] text-slate-400 flex items-center justify-between pt-2 border-t border-slate-800/60 mt-2">
+                        <span>184 Teams Transferred</span>
+                        <span className="text-slate-300">Saved $42,350/yr avg</span>
+                      </div>
+                    </div>
+
+                    <div className="p-4 bg-[#141620] rounded-2xl border border-slate-800/80">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-white font-bold">PartnerStack Migrations</span>
+                        <span className="text-emerald-400 font-bold">$4.92M / mo</span>
+                      </div>
+                      <div className="text-[11px] text-slate-400 flex items-center justify-between pt-2 border-t border-slate-800/60 mt-2">
+                        <span>112 Teams Transferred</span>
+                        <span className="text-slate-300">Saved $85,120/yr avg</span>
+                      </div>
+                    </div>
+
+                    <div className="p-4 bg-[#141620] rounded-2xl border border-slate-800/80">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-white font-bold">FirstPromoter Migrations</span>
+                        <span className="text-emerald-400 font-bold">$2.81M / mo</span>
+                      </div>
+                      <div className="text-[11px] text-slate-400 flex items-center justify-between pt-2 border-t border-slate-800/60 mt-2">
+                        <span>94 Teams Transferred</span>
+                        <span className="text-slate-300">Saved $24,800/yr avg</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-6 border-t border-slate-800/80 mt-6 flex items-center justify-between text-xs font-mono">
+                  <span className="text-slate-500">First-Party Attribution:</span>
+                  <span className="text-white font-bold">99.84% Capture Fidelity</span>
+                </div>
+
+              </div>
+            </AnimatedSection>
+
           </div>
+
+          {/* 3. SUBTLE MONOCHROME LOGO TICKER / MARQUEE (COLOR ON HOVER) */}
+          <AnimatedSection>
+            <div className="bg-[#0E1017] border border-slate-800 rounded-3xl p-6 relative overflow-hidden">
+              <div className="text-[11px] font-mono text-slate-500 uppercase font-bold tracking-wider mb-4 px-2">
+                // CATEGORY LEADERS POWERED BY ACTIONPACKD PARTNERS (HOVER TO REVEAL BRAND COLOR)
+              </div>
+              
+              <div className="overflow-hidden py-2">
+                <div className="animate-marquee flex items-center gap-12 shrink-0">
+                  {[
+                    { name: 'Beehiiv', category: 'Newsletter' },
+                    { name: 'Kick', category: 'Streaming' },
+                    { name: 'Framer', category: 'Design' },
+                    { name: 'Superhuman', category: 'Email' },
+                    { name: 'Chatbase', category: 'AI Chat' },
+                    { name: 'Tella', category: 'Video' },
+                    { name: 'Privy', category: 'E-commerce' },
+                    { name: 'Polymarket', category: 'Web3' },
+                    { name: 'Granola', category: 'AI Notes' },
+                    { name: 'Wispr Flow', category: 'Voice' },
+                    { name: 'Beehiiv', category: 'Newsletter' },
+                    { name: 'Kick', category: 'Streaming' },
+                    { name: 'Framer', category: 'Design' },
+                    { name: 'Superhuman', category: 'Email' },
+                    { name: 'Chatbase', category: 'AI Chat' },
+                    { name: 'Tella', category: 'Video' }
+                  ].map((brand, bIdx) => (
+                    <div
+                      key={bIdx}
+                      onClick={() => {
+                        const allComps = migratedPlatforms.flatMap(p => p.companies)
+                        const matched = allComps.find(c => c.name.toLowerCase() === brand.name.toLowerCase())
+                        if (matched && matched.caseStudy) setCaseStudyModal({ open: true, company: matched })
+                      }}
+                      className="flex items-center gap-3 shrink-0 grayscale opacity-45 hover:grayscale-0 hover:opacity-100 transition-all duration-300 cursor-pointer group"
+                    >
+                      <div className="w-8 h-8 rounded-lg bg-[#141620] border border-slate-700/80 group-hover:border-slate-500 flex items-center justify-center font-outfit font-extrabold text-xs text-white">
+                        {brand.name[0]}
+                      </div>
+                      <div>
+                        <div className="font-outfit font-extrabold text-sm text-white group-hover:text-[#FF003C] transition-colors">
+                          {brand.name}
+                        </div>
+                        <div className="text-[10px] font-mono text-slate-500">
+                          {brand.category}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </AnimatedSection>
 
         </div>
       </section>
@@ -790,7 +849,7 @@ export function PartnersPage({ onBackToHome }) {
             </div>
           </AnimatedSection>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             
             {/* FEATURE 1 */}
             <AnimatedSection delay={0.05}>
@@ -860,6 +919,35 @@ export function PartnersPage({ onBackToHome }) {
                     <span className="text-[#FF003C] font-bold">120+ Worldwide</span>
                   </div>
                   <div className="text-[10px] text-slate-500">Zero payout transaction fees</div>
+                </div>
+              </div>
+            </AnimatedSection>
+
+            {/* FEATURE 4 - DUB MCP PROTOCOL */}
+            <AnimatedSection delay={0.2}>
+              <div className="bento-card-dark p-8 h-full flex flex-col justify-between bg-gradient-to-br from-[#12141C] via-[#181A24] to-[#0F1117] border-2 border-[#FF003C]/70 shadow-xl shadow-rose-500/10">
+                <div>
+                  <div className="w-12 h-12 rounded-2xl bg-[#FF003C] text-white font-mono font-bold text-lg flex items-center justify-center mb-6 shadow-md">
+                    ⚡
+                  </div>
+                  <div className="text-[10px] font-mono font-bold text-[#FF003C] uppercase tracking-widest mb-1">
+                    MODEL CONTEXT PROTOCOL
+                  </div>
+                  <h3 className="text-xl font-outfit font-extrabold text-white mb-3">
+                    Dub MCP Protocol Integration
+                  </h3>
+                  <p className="text-slate-300 text-sm leading-relaxed mb-6">
+                    Expose partner endpoints directly to AI Agents (Claude, ChatGPT, Cursor, Antigravity) via Dub Model Context Protocol standard tools.
+                  </p>
+                </div>
+                <div className="bg-[#090A0F] border border-slate-800 rounded-xl p-3 font-mono text-[11px] text-slate-300">
+                  <div className="flex items-center justify-between mb-1 text-[#FF003C] font-bold">
+                    <span>Dub MCP Tools:</span>
+                    <span className="bg-[#FF003C]/20 text-[#FF003C] text-[9px] px-2 py-0.5 rounded border border-[#FF003C]/30">v1.2 ACTIVE</span>
+                  </div>
+                  <div className="text-slate-400 text-[10px] font-mono truncate mt-1">
+                    <span className="text-green-400">✓</span> <code>dub_create_partner_link</code>
+                  </div>
                 </div>
               </div>
             </AnimatedSection>
@@ -1004,28 +1092,107 @@ export function PartnersPage({ onBackToHome }) {
             {/* DASHBOARD BODY */}
             <div className="p-6 sm:p-8 space-y-8">
               
-              {/* LINK CREATOR BAR */}
-              <div className="bg-[#181A22] border border-slate-800 rounded-2xl p-4 sm:p-6">
-                <label className="block text-xs font-mono text-slate-400 uppercase font-bold mb-2">
-                  GENERATE CUSTOM REFERRAL SHORT LINK:
-                </label>
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <div className="flex-1 flex items-center bg-[#090A0F] border border-slate-700 rounded-xl px-4 py-3 font-mono text-xs">
-                    <span className="text-slate-500 select-none">https://act.pk/</span>
-                    <input
-                      type="text"
-                      value={customHandle}
-                      onChange={(e) => setCustomHandle(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
-                      className="bg-transparent text-[#FF003C] font-bold focus:outline-none flex-1 ml-0.5"
-                    />
+              {/* LINK CREATOR & DUB API BAR */}
+              <div className="bg-[#181A22] border border-slate-800 rounded-2xl p-4 sm:p-6 space-y-4">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+                  <div>
+                    <div className="text-xs font-mono font-bold text-white flex items-center gap-2">
+                      <span className="text-[#FF003C]">⚡ DUB API SHORT LINK CREATOR & MCP ENGINE</span>
+                    </div>
+                    <div className="text-[11px] text-slate-400 font-mono mt-0.5">
+                      Powered by official Dub API (api.dub.co) for 1st-party referral tracking.
+                    </div>
                   </div>
+
                   <button
-                    onClick={handleCopyLink}
-                    className="btn-primary px-6 py-3 rounded-xl font-outfit font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2"
+                    onClick={() => setMcpGuideOpen(true)}
+                    className="px-3.5 py-1.5 rounded-xl bg-[#12141A] hover:bg-[#1c1f29] border border-[#FF003C]/50 text-[#FF003C] font-mono text-[11px] font-bold flex items-center gap-1.5 transition-all shadow-sm"
                   >
-                    <span>{copied ? '✓ COPIED LINK!' : 'COPY SHORT LINK'}</span>
+                    <span>📖 How to add Dub MCP Protocol?</span>
+                    <span className="bg-[#FF003C] text-white text-[9px] px-1.5 py-0.2 rounded font-mono font-bold">GUIDE</span>
                   </button>
                 </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
+                  {/* OPTIONAL DUB API KEY INPUT */}
+                  <div className="sm:col-span-4">
+                    <label className="block text-[10px] font-mono text-slate-400 uppercase font-bold mb-1">
+                      DUB API KEY (OPTIONAL FOR LIVE API):
+                    </label>
+                    <input
+                      type="password"
+                      placeholder="dub_..."
+                      value={dubApiKey}
+                      onChange={(e) => setDubApiKey(e.target.value)}
+                      className="w-full bg-[#090A0F] border border-slate-700 rounded-xl px-3 py-2.5 font-mono text-xs text-white placeholder-slate-600 focus:outline-none focus:border-[#FF003C]"
+                    />
+                  </div>
+
+                  {/* CUSTOM HANDLE INPUT */}
+                  <div className="sm:col-span-4">
+                    <label className="block text-[10px] font-mono text-slate-400 uppercase font-bold mb-1">
+                      CUSTOM SHORT HANDLE / SLUG:
+                    </label>
+                    <div className="flex items-center bg-[#090A0F] border border-slate-700 rounded-xl px-3 py-2.5 font-mono text-xs">
+                      <span className="text-slate-500 select-none">act.pk/</span>
+                      <input
+                        type="text"
+                        value={customHandle}
+                        onChange={(e) => setCustomHandle(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+                        className="bg-transparent text-[#FF003C] font-bold focus:outline-none flex-1 ml-0.5"
+                      />
+                    </div>
+                  </div>
+
+                  {/* ACTION BUTTONS */}
+                  <div className="sm:col-span-4 flex items-end gap-2">
+                    <button
+                      onClick={handleCreateDubLink}
+                      disabled={isCreatingLink}
+                      className="btn-primary flex-1 py-2.5 px-3 rounded-xl font-outfit font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-md"
+                    >
+                      {isCreatingLink ? 'Creating...' : '⚡ Create Dub Link'}
+                    </button>
+                    <button
+                      onClick={handleCopyLink}
+                      className="btn-black py-2.5 px-3 rounded-xl font-outfit font-bold text-xs uppercase tracking-wider border border-slate-700 shrink-0"
+                    >
+                      {copied ? '✓ Copied' : 'Copy Link'}
+                    </button>
+                  </div>
+                </div>
+
+                {/* CREATED DUB LINK API PAYLOAD DISPLAY CARD */}
+                {createdDubLink && (
+                  <div className="p-4 bg-[#090A0F] border border-green-500/40 rounded-xl text-xs font-mono animate-slide-up flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="bg-green-500/20 text-green-400 border border-green-500/30 px-2 py-0.5 rounded text-[10px] font-bold">
+                          {createdDubLink.isLiveApi ? 'DUB REST API v1 SUCCESS' : 'DUB SANDBOX SUCCESS'}
+                        </span>
+                        <span className="text-white font-bold">{createdDubLink.shortUrl}</span>
+                      </div>
+                      <div className="text-[11px] text-slate-400">
+                        Target: <span className="text-slate-300">{createdDubLink.destination}</span>
+                      </div>
+                      <div className="text-[10px] text-slate-500">
+                        Link ID: <code>{createdDubLink.id}</code> · 1st-Party Attribution Enabled
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 shrink-0">
+                      <img src={createdDubLink.qrCode} alt="Dub QR Code" className="w-14 h-14 rounded-lg bg-white p-1 border border-slate-700" />
+                      <a
+                        href={createdDubLink.shortUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="px-3 py-1.5 bg-[#FF003C] text-white rounded-lg text-[11px] font-bold hover:bg-[#FF2A55] transition-colors"
+                      >
+                        Test Short Link ↗
+                      </a>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* LIVE TEST SIMULATION CONTROLS */}
@@ -1059,60 +1226,141 @@ export function PartnersPage({ onBackToHome }) {
                 </div>
               )}
 
-              {/* ANALYTICS CARDS */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 font-mono">
-                <div className="bg-[#14161C] border border-slate-800 rounded-xl p-4">
-                  <div className="text-slate-400 text-[10px] uppercase">TOTAL CLICKS</div>
-                  <div className="text-2xl font-bold text-white mt-1">{simulatedClicks.toLocaleString()}</div>
+              {/* TAB SELECTOR FOR DASHBOARD VS MCP STREAM */}
+              <div className="flex items-center justify-between border-b border-slate-800 pb-3 font-mono text-xs">
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setActiveSimTab('analytics')}
+                    className={`px-4 py-2 rounded-xl font-bold transition-all ${
+                      activeSimTab === 'analytics'
+                        ? 'bg-[#FF003C] text-white shadow-md'
+                        : 'bg-[#181A22] text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    📊 Partner Analytics & Telemetry
+                  </button>
+                  <button
+                    onClick={() => setActiveSimTab('mcp')}
+                    className={`px-4 py-2 rounded-xl font-bold transition-all flex items-center gap-2 ${
+                      activeSimTab === 'mcp'
+                        ? 'bg-[#FF003C] text-white shadow-md'
+                        : 'bg-[#181A22] text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+                    <span>⚡ Dub MCP Protocol Console</span>
+                    <span className="bg-[#090A0F] text-[#FF003C] text-[9px] px-1.5 py-0.5 rounded border border-[#FF003C]/30">v1.2</span>
+                  </button>
                 </div>
-                <div className="bg-[#14161C] border border-slate-800 rounded-xl p-4">
-                  <div className="text-slate-400 text-[10px] uppercase">PAID CONVERSIONS</div>
-                  <div className="text-2xl font-bold text-green-400 mt-1">{simulatedConversions} Signups</div>
-                </div>
-                <div className="bg-[#14161C] border border-slate-800 rounded-xl p-4">
-                  <div className="text-slate-400 text-[10px] uppercase">CONVERSION RATE</div>
-                  <div className="text-2xl font-bold text-white mt-1">{((simulatedConversions / simulatedClicks) * 100).toFixed(2)}%</div>
-                </div>
-                <div className="bg-[#14161C] border border-[#FF003C]/40 rounded-xl p-4">
-                  <div className="text-slate-400 text-[10px] uppercase">UNPAID COMMISSION</div>
-                  <div className="text-2xl font-bold text-[#FF003C] mt-1">${simulatedUnpaid.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-                </div>
+                <span className="text-slate-500 text-[11px] hidden sm:inline">Dub MCP Protocol standard v1.2</span>
               </div>
 
-              {/* RECENT REFERRALS TABLE MOCKUP */}
-              <div className="bg-[#14161C] border border-slate-800 rounded-2xl p-4 font-mono text-xs overflow-x-auto">
-                <div className="text-slate-400 text-[10px] uppercase font-bold mb-3">RECENT REFERRED ACCOUNTS</div>
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="border-b border-slate-800 text-slate-500">
-                      <th className="pb-2">ACCOUNT</th>
-                      <th className="pb-2">PLAN</th>
-                      <th className="pb-2">STATUS</th>
-                      <th className="pb-2 text-right">COMMISSION / MO</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-800/60 text-slate-300">
-                    <tr>
-                      <td className="py-2.5 font-bold text-white">Acme Corp (Ref: {customHandle})</td>
-                      <td>Pro ($99)</td>
-                      <td><span className="text-green-400 font-bold">Active ●</span></td>
-                      <td className="text-right text-[#FF003C] font-bold">$29.70</td>
-                    </tr>
-                    <tr>
-                      <td className="py-2.5 font-bold text-white">Vortex Studio</td>
-                      <td>Agency ($299)</td>
-                      <td><span className="text-green-400 font-bold">Active ●</span></td>
-                      <td className="text-right text-[#FF003C] font-bold">$89.70</td>
-                    </tr>
-                    <tr>
-                      <td className="py-2.5 font-bold text-white">Nexus Global</td>
-                      <td>Enterprise ($999)</td>
-                      <td><span className="text-green-400 font-bold">Active ●</span></td>
-                      <td className="text-right text-[#FF003C] font-bold">$299.70</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+              {activeSimTab === 'analytics' ? (
+                <>
+                  {/* ANALYTICS CARDS */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 font-mono">
+                    <div className="bg-[#14161C] border border-slate-800 rounded-xl p-4">
+                      <div className="text-slate-400 text-[10px] uppercase">TOTAL CLICKS</div>
+                      <div className="text-2xl font-bold text-white mt-1">{simulatedClicks.toLocaleString()}</div>
+                    </div>
+                    <div className="bg-[#14161C] border border-slate-800 rounded-xl p-4">
+                      <div className="text-slate-400 text-[10px] uppercase">PAID CONVERSIONS</div>
+                      <div className="text-2xl font-bold text-green-400 mt-1">{simulatedConversions} Signups</div>
+                    </div>
+                    <div className="bg-[#14161C] border border-slate-800 rounded-xl p-4">
+                      <div className="text-slate-400 text-[10px] uppercase">CONVERSION RATE</div>
+                      <div className="text-2xl font-bold text-white mt-1">{((simulatedConversions / simulatedClicks) * 100).toFixed(2)}%</div>
+                    </div>
+                    <div className="bg-[#14161C] border border-[#FF003C]/40 rounded-xl p-4">
+                      <div className="text-slate-400 text-[10px] uppercase">UNPAID COMMISSION</div>
+                      <div className="text-2xl font-bold text-[#FF003C] mt-1">${simulatedUnpaid.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                    </div>
+                  </div>
+
+                  {/* RECENT REFERRALS TABLE MOCKUP */}
+                  <div className="bg-[#14161C] border border-slate-800 rounded-2xl p-4 font-mono text-xs overflow-x-auto">
+                    <div className="text-slate-400 text-[10px] uppercase font-bold mb-3">RECENT REFERRED ACCOUNTS</div>
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr className="border-b border-slate-800 text-slate-500">
+                          <th className="pb-2">ACCOUNT</th>
+                          <th className="pb-2">PLAN</th>
+                          <th className="pb-2">STATUS</th>
+                          <th className="pb-2 text-right">COMMISSION / MO</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-800/60 text-slate-300">
+                        <tr>
+                          <td className="py-2.5 font-bold text-white">Acme Corp (Ref: {customHandle})</td>
+                          <td>Pro ($99)</td>
+                          <td><span className="text-green-400 font-bold">Active ●</span></td>
+                          <td className="text-right text-[#FF003C] font-bold">$29.70</td>
+                        </tr>
+                        <tr>
+                          <td className="py-2.5 font-bold text-white">Vortex Studio</td>
+                          <td>Agency ($299)</td>
+                          <td><span className="text-green-400 font-bold">Active ●</span></td>
+                          <td className="text-right text-[#FF003C] font-bold">$89.70</td>
+                        </tr>
+                        <tr>
+                          <td className="py-2.5 font-bold text-white">Nexus Global</td>
+                          <td>Enterprise ($999)</td>
+                          <td><span className="text-green-400 font-bold">Active ●</span></td>
+                          <td className="text-right text-[#FF003C] font-bold">$299.70</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </>
+              ) : (
+                /* DUB MCP PROTOCOL LIVE INSPECTOR */
+                <div className="space-y-4 font-mono text-xs">
+                  
+                  {/* MCP PROTOCOL DEFINITION SUMMARY */}
+                  <div className="p-4 bg-[#14161C] border border-slate-800 rounded-2xl grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="p-3 bg-[#181A22] rounded-xl border border-slate-800">
+                      <div className="text-[10px] text-slate-500 uppercase font-bold">MCP SERVER PROTOCOL</div>
+                      <div className="text-white font-bold text-xs mt-1">Dub Model Context Protocol v1.2</div>
+                    </div>
+                    <div className="p-3 bg-[#181A22] rounded-xl border border-slate-800">
+                      <div className="text-[10px] text-slate-500 uppercase font-bold">MCP COMPATIBLE AGENTS</div>
+                      <div className="text-green-400 font-bold text-xs mt-1">Claude, ChatGPT, Cursor, Antigravity</div>
+                    </div>
+                    <div className="p-3 bg-[#181A22] rounded-xl border border-[#FF003C]/40">
+                      <div className="text-[10px] text-slate-500 uppercase font-bold">REGISTERED MCP TOOLS</div>
+                      <div className="text-[#FF003C] font-bold text-xs mt-1">3 Active Tools Registered</div>
+                    </div>
+                  </div>
+
+                  {/* MCP JSON-RPC 2.0 LIVE LOG STREAM */}
+                  <div className="bg-[#14161C] border border-slate-800 rounded-2xl p-4 overflow-x-auto">
+                    <div className="flex items-center justify-between border-b border-slate-800 pb-2 mb-3">
+                      <span className="text-slate-400 text-[10px] uppercase font-bold">⚡ LIVE DUB MCP JSON-RPC LOG STREAM</span>
+                      <span className="text-green-400 text-[10px] font-bold">● CONNECTED TO DUB MCP SERVER</span>
+                    </div>
+
+                    <div className="space-y-2.5">
+                      {mcpLogs.map(log => (
+                        <div key={log.id} className="p-3 bg-[#090A0F] border border-slate-800 rounded-xl space-y-1">
+                          <div className="flex items-center justify-between text-[11px]">
+                            <div className="flex items-center gap-2">
+                              <span className="text-slate-500">[{log.time}]</span>
+                              <span className="text-[#FF003C] font-bold">{log.agent}</span>
+                              <span className="text-slate-400">→</span>
+                              <code className="text-white font-bold bg-[#181A22] px-2 py-0.5 rounded border border-slate-800">{log.tool}</code>
+                            </div>
+                            <span className="text-green-400 font-bold text-[10px] bg-green-500/10 px-2 py-0.5 rounded border border-green-500/20">{log.status}</span>
+                          </div>
+                          <div className="text-[10px] text-slate-400 font-mono bg-[#14161C] p-2 rounded overflow-x-auto">
+                            <code>{log.params}</code>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                </div>
+              )}
 
             </div>
 
@@ -1510,6 +1758,102 @@ export function PartnersPage({ onBackToHome }) {
         </div>
       )}
 
+      {/* DUB MCP PROTOCOL SETUP & CONFIGURATION GUIDE MODAL */}
+      {mcpGuideOpen && (
+        <div
+          className="fixed inset-0 bg-[#090A0F]/85 backdrop-blur-md z-50 flex items-center justify-center p-4"
+          onClick={(e) => e.target === e.currentTarget && setMcpGuideOpen(false)}
+        >
+          <div className="bg-[#12141A] border-2 border-[#FF003C] rounded-3xl p-6 sm:p-8 max-w-2xl w-full shadow-2xl animate-slide-up text-white relative overflow-hidden font-mono max-h-[90vh] overflow-y-auto">
+            
+            <button
+              onClick={() => setMcpGuideOpen(false)}
+              className="absolute top-6 right-6 text-slate-400 hover:text-white font-mono text-xl"
+            >
+              ✕
+            </button>
+
+            <div className="flex items-center gap-3 border-b border-slate-800 pb-4 mb-6">
+              <div className="w-10 h-10 rounded-xl bg-[#FF003C] text-white font-bold text-lg flex items-center justify-center shadow-lg shrink-0">
+                ⚡
+              </div>
+              <div>
+                <h3 className="font-outfit font-extrabold text-xl text-white">How to add Dub MCP Protocol</h3>
+                <div className="text-[10px] text-green-400 font-bold uppercase">Official Step-by-Step AI Agent Integration</div>
+              </div>
+            </div>
+
+            <div className="space-y-6 text-xs font-sans">
+              
+              {/* EXPLANATION BADGE */}
+              <div className="p-4 bg-[#181A22] border border-[#FF003C]/30 rounded-2xl">
+                <div className="font-mono font-bold text-[#FF003C] text-xs uppercase mb-1">🤔 Do I need to add the MCP Protocol?</div>
+                <p className="text-slate-300 leading-relaxed text-xs">
+                  <strong>Yes!</strong> If you want AI Assistants (like <strong>Cursor, Claude Desktop, Antigravity, or ChatGPT</strong>) to automatically create custom referral links (<code className="text-[#FF003C]">act.pk/yourname</code>), inspect real-time click analytics, and credit 30% recurring commissions via LLM tool calls.
+                </p>
+              </div>
+
+              {/* STEP BY STEP GUIDE */}
+              <div className="space-y-4 font-mono">
+                <div className="text-xs font-bold text-white uppercase tracking-wider">
+                  📋 3 STEPS TO INSTALL DUB MCP SERVER:
+                </div>
+
+                <div className="space-y-3">
+                  <div className="p-3.5 bg-[#090A0F] border border-slate-800 rounded-xl space-y-1">
+                    <div className="text-[#FF003C] font-bold text-xs">Step 1: Get your Dub API Key</div>
+                    <p className="text-slate-400 text-[11px] font-sans">
+                      Go to <a href="https://dub.co" target="_blank" rel="noreferrer" className="text-white underline">dub.co</a> → Workspace Settings → API Keys → Click "Create API Key" with <code className="text-white">links:write</code> permissions.
+                    </p>
+                  </div>
+
+                  <div className="p-3.5 bg-[#090A0F] border border-slate-800 rounded-xl space-y-2">
+                    <div className="text-[#FF003C] font-bold text-xs">Step 2: Add Dub MCP snippet to your AI settings file</div>
+                    <p className="text-slate-400 text-[11px] font-sans">
+                      Copy the JSON snippet below into your AI editor config file (e.g., <code className="text-white">.cursor/mcp.json</code> or <code className="text-white">claude_desktop_config.json</code>):
+                    </p>
+                    <pre className="p-3 bg-[#14161C] border border-slate-700/80 rounded-lg text-[10px] text-emerald-400 overflow-x-auto">
+                      <code>{DUB_MCP_CONFIG_GUIDE.mcpJsonSnippet}</code>
+                    </pre>
+                  </div>
+
+                  <div className="p-3.5 bg-[#090A0F] border border-slate-800 rounded-xl space-y-1">
+                    <div className="text-[#FF003C] font-bold text-xs">Step 3: Ask your AI Agent to execute Dub MCP tools</div>
+                    <p className="text-slate-400 text-[11px] font-sans">
+                      Prompt your AI: <em>"Create an act.pk short link for my referral campaign"</em> and watch it execute <code className="text-white">dub_create_partner_link</code> automatically!
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* REGISTERED MCP TOOLS LIST */}
+              <div className="pt-4 border-t border-slate-800">
+                <div className="font-mono text-xs font-bold text-white mb-3">🛠️ REGISTERED DUB MCP TOOLS:</div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono text-[10px]">
+                  {DUB_MCP_CONFIG_GUIDE.tools.map((t, idx) => (
+                    <div key={idx} className="p-3 bg-[#181A22] border border-slate-800 rounded-xl space-y-1">
+                      <div className="text-[#FF003C] font-bold">{t.name}</div>
+                      <div className="text-slate-400 font-sans text-[10px]">{t.description}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="pt-2 flex justify-end">
+                <button
+                  onClick={() => setMcpGuideOpen(false)}
+                  className="btn-primary px-6 py-2.5 rounded-xl font-outfit font-bold text-xs uppercase tracking-wider"
+                >
+                  Got It! Close Guide
+                </button>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   )
 }
+

@@ -137,7 +137,9 @@ const TurnCommentsToSalesSection = ({ onStartFree }) => {
               
               {/* PHONE MOCKUP HEADER */}
               <div className="flex items-center gap-3 pb-3 border-b border-slate-800 mb-4">
-                <img src="/assets/logo_mascot.png" alt="Mascot" className="w-8 h-8 rounded-full bg-white p-0.5 object-contain" />
+                <div className="w-8 h-8 rounded-full bg-white border border-slate-700 flex items-center justify-center overflow-hidden shrink-0">
+                  <img src="/assets/logo_mascot.png" alt="Mascot" className="w-full h-full object-cover rounded-full block" />
+                </div>
                 <div>
                   <div className="text-xs font-bold text-white font-mono">actionpackd.bot</div>
                   <div className="text-[10px] text-[#25D366] font-mono">● Auto-DM Active</div>
@@ -1286,30 +1288,30 @@ export default function App() {
         </div>
       )}
 
-      {/* WHATSAPP BOT TEMPLATE SIMULATOR MODAL */}
+      {/* WHATSAPP BOT TEMPLATE SIMULATOR MODAL (LIGHT MODE) */}
       {botModal.open && botModal.template && (
-        <div className="fixed inset-0 bg-[#090A0F]/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={(e) => e.target === e.currentTarget && closeBotModal()}>
-          <div className="bg-[#EFEAE2] border-2 border-[#FF003C] rounded-3xl max-w-md w-full shadow-2xl overflow-hidden animate-slide-up">
+        <div className="fixed inset-0 bg-[#090A0F]/75 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={(e) => e.target === e.currentTarget && closeBotModal()}>
+          <div className="bg-[#EFEAE2] border-2 border-[#25D366] rounded-3xl max-w-md w-full shadow-2xl overflow-hidden animate-slide-up">
             
-            {/* WHATSAPP APP BAR */}
-            <div className="bg-[#1F2C34] p-4 flex items-center gap-3">
-              <button onClick={closeBotModal} className="text-gray-400 hover:text-white">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            {/* WHATSAPP APP BAR (LIGHT MODE) */}
+            <div className="bg-[#F0F2F5] p-3.5 border-b border-[#D1D7DB] flex items-center gap-3">
+              <button onClick={closeBotModal} className="text-[#54656F] hover:text-[#111B21] transition-colors">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
               </button>
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#FF003C] to-[#090A0F] flex items-center justify-center text-white font-bold text-lg shadow-sm border border-[#FF003C]">
-                {botModal.template.icon || botModal.template.avatar || '🤖'}
+              <div className="w-10 h-10 rounded-full bg-white border-2 border-[#25D366] flex items-center justify-center overflow-hidden shrink-0 shadow-sm">
+                <img src="/assets/logo_mascot.png" alt="Mascot" className="w-full h-full object-cover rounded-full block" />
               </div>
               <div className="flex-1">
-                <div className="text-white font-semibold text-sm">{botModal.template.name}</div>
-                <div className="text-[#FF003C] text-xs flex items-center gap-1 font-mono font-bold">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#FF003C] animate-pulse"></span>online · Meta Verified
+                <div className="text-[#111B21] font-extrabold text-sm font-outfit">{botModal.template.name}</div>
+                <div className="text-[#008069] text-xs flex items-center gap-1 font-mono font-bold">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#25D366] animate-pulse"></span>online · Meta Verified API
                 </div>
               </div>
-              <CheckIcon color="#FF003C" size={20} />
+              <CheckIcon color="#008069" size={20} />
             </div>
 
             {/* CHAT BUBBLES */}
-            <div className="p-4 min-h-[320px] max-h-[400px] overflow-y-auto flex flex-col gap-2.5">
+            <div className="p-4 min-h-[320px] max-h-[400px] overflow-y-auto flex flex-col gap-3 bg-[#EFEAE2] bg-grid-light">
               {botMessages.map((msg, i) => (
                 <div key={i} className={`wa-bubble ${msg.type === 'bot' ? 'wa-bubble-bot' : 'wa-bubble-user'} animate-slide-up`}>
                   {msg.text}
@@ -1319,20 +1321,20 @@ export default function App() {
             </div>
 
             {/* CHAT INPUT BAR */}
-            <div className="p-3 bg-[#1F2C34] flex items-center gap-2">
+            <div className="p-3 bg-[#F0F2F5] border-t border-[#D1D7DB] flex items-center gap-2">
               <input
                 value={botInput}
                 onChange={(e) => setBotInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && sendBotMessage()}
                 type="text"
                 placeholder="Type a test message to the AI bot..."
-                className="flex-1 bg-[#2A3942] text-white text-xs rounded-full px-4 py-2.5 border-none focus:outline-none placeholder-gray-400 font-sans"
+                className="flex-1 bg-white text-[#111B21] text-xs rounded-full px-4 py-2.5 border border-slate-200 focus:outline-none focus:border-[#008069] placeholder-slate-400 font-sans shadow-sm"
               />
               <button
                 onClick={sendBotMessage}
-                className="w-10 h-10 rounded-full bg-[#FF003C] flex items-center justify-center hover:bg-[#E60036] transition-colors shrink-0 shadow-sm"
+                className="w-10 h-10 rounded-full bg-[#00A884] flex items-center justify-center hover:bg-[#008069] transition-colors shrink-0 shadow-md"
               >
-                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>
+                <svg className="w-5 h-5 text-white translate-x-0.5 ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
               </button>
             </div>
 
